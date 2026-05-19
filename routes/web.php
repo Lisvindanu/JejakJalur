@@ -1,5 +1,73 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DestinasiController as AdminDestinasiController;
+use App\Http\Controllers\Admin\KotaController;
+use App\Http\Controllers\Admin\StasiunController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\OAuthController;
+use App\Http\Controllers\DestinasiController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\UlasanController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('home');
+// Publik
+Route::get('/', [HomeController::class, 'tampilkan'])->name('home');
+
+Route::prefix('destinasi')->name('destinasi.')->group(function () {
+    Route::get('/', [DestinasiController::class, 'indeks'])->name('indeks');
+    Route::get('/{destinasi:id}', [DestinasiController::class, 'detail'])->name('detail');
+});
+
+// Auth
+Route::middleware('guest')->group(function () {
+    Route::get('/masuk', [AuthController::class, 'tampilkanFormulirLogin'])->name('login');
+    Route::post('/masuk', [AuthController::class, 'prosesLogin'])->name('login.proses');
+    Route::get('/daftar', [AuthController::class, 'tampilkanFormulirDaftar'])->name('daftar');
+    Route::post('/daftar', [AuthController::class, 'prosesDaftar'])->name('daftar.proses');
+
+    Route::get('/oauth/{provider}', [OAuthController::class, 'arahkanKeProvider'])->name('oauth.redirect');
+    Route::get('/oauth/{provider}/callback', [OAuthController::class, 'tanganiCallback'])->name('oauth.callback');
+});
+
+Route::post('/keluar', [AuthController::class, 'logout'])->name('keluar')->middleware('auth');
+
+// Ulasan (pengguna terautentikasi)
+Route::middleware('auth')->prefix('destinasi/{destinasi}/ulasan')->name('ulasan.')->group(function () {
+    Route::post('/', [UlasanController::class, 'simpan'])->name('simpan');
+    Route::patch('/{ulasan}', [UlasanController::class, 'perbarui'])->name('perbarui');
+    Route::delete('/{ulasan}', [UlasanController::class, 'hapus'])->name('hapus');
+});
+
+// Admin
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [DashboardController::class, 'tampilkan'])->name('dashboard');
+
+    Route::prefix('kota')->name('kota.')->group(function () {
+        Route::get('/', [KotaController::class, 'indeks'])->name('indeks');
+        Route::get('/buat', [KotaController::class, 'buat'])->name('buat');
+        Route::post('/', [KotaController::class, 'simpan'])->name('simpan');
+        Route::get('/{kota}/edit', [KotaController::class, 'edit'])->name('edit');
+        Route::patch('/{kota}', [KotaController::class, 'perbarui'])->name('perbarui');
+        Route::delete('/{kota}', [KotaController::class, 'hapus'])->name('hapus');
+    });
+
+    Route::prefix('stasiun')->name('stasiun.')->group(function () {
+        Route::get('/', [StasiunController::class, 'indeks'])->name('indeks');
+        Route::get('/buat', [StasiunController::class, 'buat'])->name('buat');
+        Route::post('/', [StasiunController::class, 'simpan'])->name('simpan');
+        Route::get('/{stasiun}/edit', [StasiunController::class, 'edit'])->name('edit');
+        Route::patch('/{stasiun}', [StasiunController::class, 'perbarui'])->name('perbarui');
+        Route::delete('/{stasiun}', [StasiunController::class, 'hapus'])->name('hapus');
+    });
+
+    Route::prefix('destinasi')->name('destinasi.')->group(function () {
+        Route::get('/', [AdminDestinasiController::class, 'indeks'])->name('indeks');
+        Route::get('/buat', [AdminDestinasiController::class, 'buat'])->name('buat');
+        Route::post('/', [AdminDestinasiController::class, 'simpan'])->name('simpan');
+        Route::get('/{destinasi}/edit', [AdminDestinasiController::class, 'edit'])->name('edit');
+        Route::patch('/{destinasi}', [AdminDestinasiController::class, 'perbarui'])->name('perbarui');
+        Route::delete('/{destinasi}', [AdminDestinasiController::class, 'hapus'])->name('hapus');
+        Route::patch('/{destinasi}/verifikasi', [AdminDestinasiController::class, 'verifikasi'])->name('verifikasi');
+    });
+});

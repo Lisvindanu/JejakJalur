@@ -22,8 +22,7 @@ jobs:
             set -e
             cd /var/www/jejakjalur-staging
             git fetch origin
-            git checkout dev
-            git pull origin dev
+            git reset --hard origin/dev
             composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
             npm ci
             npm run build
@@ -51,8 +50,7 @@ jobs:
             set -e
             cd /var/www/jejakjalur-prod
             git fetch origin
-            git checkout main
-            git pull origin main
+            git reset --hard origin/main
             composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
             npm ci
             npm run build

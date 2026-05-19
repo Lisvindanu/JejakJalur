@@ -15,6 +15,10 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if (! $request->user()?->is_admin) {
+            abort(403, 'Akses ditolak. Hanya admin yang diizinkan.');
+        }
+
         return $next($request);
     }
 }
