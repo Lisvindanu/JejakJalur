@@ -6,8 +6,11 @@ use App\Http\Controllers\Admin\KotaController;
 use App\Http\Controllers\Admin\StasiunController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\OAuthController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\DestinasiController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProfilController;
+use App\Http\Controllers\RuteController;
 use App\Http\Controllers\UlasanController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +22,12 @@ Route::prefix('destinasi')->name('destinasi.')->group(function () {
     Route::get('/{destinasi:id}', [DestinasiController::class, 'detail'])->name('detail');
 });
 
+// Rute
+Route::prefix('rute')->name('rute.')->group(function () {
+    Route::get('/', [RuteController::class, 'tampilkan'])->name('tampilkan');
+    Route::get('/cari-stasiun', [RuteController::class, 'cariStasiun'])->name('cariStasiun');
+});
+
 // Auth
 Route::middleware('guest')->group(function () {
     Route::get('/masuk', [AuthController::class, 'tampilkanFormulirLogin'])->name('login');
@@ -28,9 +37,23 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/oauth/{provider}', [OAuthController::class, 'arahkanKeProvider'])->name('oauth.redirect');
     Route::get('/oauth/{provider}/callback', [OAuthController::class, 'tanganiCallback'])->name('oauth.callback');
+
+    // Lupa & reset password
+    Route::get('/lupa-password', [PasswordResetController::class, 'tampilkanFormulirLupaPassword'])->name('password.request');
+    Route::post('/lupa-password', [PasswordResetController::class, 'kirimTautanReset'])->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'tampilkanFormulirResetPassword'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'prosesResetPassword'])->name('password.update');
 });
 
 Route::post('/keluar', [AuthController::class, 'logout'])->name('keluar')->middleware('auth');
+
+// Profil pengguna
+Route::middleware('auth')->prefix('profil')->name('profil.')->group(function () {
+    Route::get('/', [ProfilController::class, 'tampilkan'])->name('tampilkan');
+    Route::get('/edit', [ProfilController::class, 'edit'])->name('edit');
+    Route::patch('/', [ProfilController::class, 'perbarui'])->name('perbarui');
+    Route::delete('/', [ProfilController::class, 'hapus'])->name('hapus');
+});
 
 // Ulasan (pengguna terautentikasi)
 Route::middleware('auth')->prefix('destinasi/{destinasi}/ulasan')->name('ulasan.')->group(function () {
