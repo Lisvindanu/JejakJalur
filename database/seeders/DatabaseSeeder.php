@@ -15,7 +15,9 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             KotaSeeder::class,
             StasiunSeeder::class,
+            KoneksiStasiunSeeder::class,
             DestinasiSeeder::class,
+            UlasanSeeder::class,
         ]);
     }
 }
