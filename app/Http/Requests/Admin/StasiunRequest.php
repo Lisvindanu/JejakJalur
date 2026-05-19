@@ -15,6 +15,8 @@ class StasiunRequest extends FormRequest
             'kota_id' => ['required', 'uuid', 'exists:kota,id'],
             'nama' => ['required', 'string', 'max:100', Rule::unique('stasiun', 'nama')->ignore($stasiunYangDiedit)],
             'kode_stasiun' => ['required', 'string', 'max:10'],
+            'lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'lng' => ['nullable', 'numeric', 'between:-180,180'],
         ];
     }
 
