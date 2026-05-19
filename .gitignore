@@ -29,7 +29,6 @@ yarn-error.log
 /.agents
 /.claude
 /.gemini
-/.github
 .DS_Store
 opencode.json
 AGENTS.md
