@@ -6,13 +6,14 @@ use App\Models\Destinasi;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Storage;
 
 class DestinasiService
 {
     private const JUMLAH_PER_HALAMAN = 12;
 
     private const DIREKTORI_FOTO = 'destinasi';
+
+    public function __construct(private FotoService $fotoService) {}
 
     public function daftarDestinasiTerfilter(array $filter): LengthAwarePaginator
     {
@@ -57,17 +58,16 @@ class DestinasiService
     public function buatDestinasi(array $data, ?UploadedFile $foto = null): Destinasi
     {
         if ($foto) {
-            $data['foto'] = $foto->store(self::DIREKTORI_FOTO, 'public');
+            $data['foto'] = $this->fotoService->simpan($foto, self::DIREKTORI_FOTO);
         }
 
         return Destinasi::create($data);
     }
 
-    public function perbaruiDestinasi(Destinasi $destinasi, array $data, ?UploadedFile $fotoBarу = null): Destinasi
+    public function perbaruiDestinasi(Destinasi $destinasi, array $data, ?UploadedFile $fotoBaru = null): Destinasi
     {
-        if ($fotoBarу) {
-            $this->hapusFotoLama($destinasi->foto);
-            $data['foto'] = $fotoBarу->store(self::DIREKTORI_FOTO, 'public');
+        if ($fotoBaru) {
+            $data['foto'] = $this->fotoService->simpan($fotoBaru, self::DIREKTORI_FOTO);
         }
 
         $destinasi->update($data);
@@ -77,14 +77,7 @@ class DestinasiService
 
     public function hapusDestinasi(Destinasi $destinasi): void
     {
-        $this->hapusFotoLama($destinasi->foto);
+        // Tidak hapus file dari R2 — content-addressed storage, bisa dipakai destinasi lain
         $destinasi->delete();
-    }
-
-    private function hapusFotoLama(?string $pathFoto): void
-    {
-        if ($pathFoto && Storage::disk('public')->exists($pathFoto)) {
-            Storage::disk('public')->delete($pathFoto);
-        }
     }
 }
