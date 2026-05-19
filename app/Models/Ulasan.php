@@ -7,7 +7,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Ulasan extends Model
 {
+    protected $table = 'ulasan';
+
     protected $keyType = 'string';
+
     public $incrementing = false;
 
     protected $fillable = [

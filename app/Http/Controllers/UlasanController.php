@@ -15,9 +15,9 @@ class UlasanController extends Controller
     public function simpan(UlasanRequest $request, Destinasi $destinasi): RedirectResponse
     {
         $this->ulasanService->buatUlasan(
+            data: $request->validated(),
             pengguna: $request->user(),
             destinasi: $destinasi,
-            data: $request->validated(),
         );
 
         return back()->with('sukses', 'Ulasan berhasil ditambahkan.');
@@ -25,16 +25,14 @@ class UlasanController extends Controller
 
     public function perbarui(UlasanRequest $request, Ulasan $ulasan): RedirectResponse
     {
-        $this->ulasanService->pastikanPemilikUlasan($request->user(), $ulasan);
-        $this->ulasanService->perbaruiUlasan($ulasan, $request->validated());
+        $this->ulasanService->perbaruiUlasan($ulasan, $request->validated(), $request->user());
 
         return back()->with('sukses', 'Ulasan berhasil diperbarui.');
     }
 
     public function hapus(Ulasan $ulasan): RedirectResponse
     {
-        $this->ulasanService->pastikanPemilikUlasan(request()->user(), $ulasan);
-        $this->ulasanService->hapusUlasan($ulasan);
+        $this->ulasanService->hapusUlasan($ulasan, request()->user());
 
         return back()->with('sukses', 'Ulasan berhasil dihapus.');
     }

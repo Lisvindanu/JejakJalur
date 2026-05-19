@@ -10,7 +10,8 @@ class UlasanRequest extends FormRequest
     {
         return [
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
-            'komentar' => ['nullable', 'string', 'max:1000'],
+            'judul' => ['nullable', 'string', 'max:100'],
+            'konten' => ['required', 'string', 'max:1000'],
         ];
     }
 
@@ -20,7 +21,8 @@ class UlasanRequest extends FormRequest
             'rating.required' => 'Rating wajib diisi.',
             'rating.min' => 'Rating minimal 1.',
             'rating.max' => 'Rating maksimal 5.',
-            'komentar.max' => 'Komentar maksimal 1000 karakter.',
+            'konten.required' => 'Komentar wajib diisi.',
+            'konten.max' => 'Komentar maksimal 1000 karakter.',
         ];
     }
 }

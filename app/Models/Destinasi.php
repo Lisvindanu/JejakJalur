@@ -9,7 +9,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Destinasi extends Model
 {
+    protected $table = 'destinasi';
+
     protected $keyType = 'string';
+
     public $incrementing = false;
 
     protected $fillable = [
@@ -19,7 +22,7 @@ class Destinasi extends Model
 
     protected $casts = [
         'is_verified' => 'boolean',
-        'rating'      => 'decimal:2',
+        'rating' => 'decimal:2',
     ];
 
     public function stasiun(): BelongsTo
