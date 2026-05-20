@@ -63,6 +63,16 @@ export type Ulasan = {
     };
 };
 
+export type StasiunRute = {
+    id: string;
+    nama: string;
+    kode_stasiun: string;
+    lat?: string | null;
+    lng?: string | null;
+    destinasi_count?: number;
+    kota: { id: string; nama: string };
+};
+
 export type PaginatedData<T> = {
     data: T[];
     current_page: number;

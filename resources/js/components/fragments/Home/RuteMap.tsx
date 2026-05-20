@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from '@inertiajs/react';
 import 'leaflet/dist/leaflet.css';
 import { IconTrain, IconX } from '@tabler/icons-react';
-import type { Kota, Stasiun } from '@/types';
+import type { Kota, Stasiun, StasiunRute } from '@/types';
 
 interface Props {
     semuaKota: Kota[];
+    route?: StasiunRute[] | null;
 }
 
 interface SelectedStation {
@@ -32,7 +33,7 @@ const WARNA_KOTA = [
     '#0f766e',
 ];
 
-export default function RuteMap({ semuaKota }: Props) {
+export default function RuteMap({ semuaKota, route }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mapRef = useRef<any>(null);
@@ -42,6 +43,8 @@ export default function RuteMap({ semuaKota }: Props) {
     >([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const selectedMarkerRef = useRef<any>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const routePolylineRef = useRef<any>(null);
     const [selected, setSelected] = useState<SelectedStation | null>(null);
 
     useEffect(() => {
@@ -181,6 +184,67 @@ export default function RuteMap({ semuaKota }: Props) {
             }
         };
     }, [semuaKota]);
+
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!map) return;
+
+        import('leaflet').then((mod) => {
+            const L = mod.default ?? mod;
+
+            if (routePolylineRef.current) {
+                routePolylineRef.current.remove();
+                routePolylineRef.current = null;
+            }
+
+            if (!route || route.length === 0) {
+                markersRef.current.forEach(({ marker, orig }) =>
+                    marker.setStyle(orig),
+                );
+                return;
+            }
+
+            const routeIds = new Set(route.map((s) => s.id));
+
+            markersRef.current.forEach(({ marker, orig, stasiun }) => {
+                if (routeIds.has(stasiun.id)) {
+                    marker.setStyle({
+                        ...orig,
+                        radius: orig.radius + 3,
+                        opacity: 1,
+                        fillOpacity: 1,
+                    });
+                    marker.bringToFront();
+                } else {
+                    marker.setStyle({
+                        ...orig,
+                        opacity: 0.12,
+                        fillOpacity: 0.08,
+                    });
+                }
+            });
+
+            const coords = route
+                .filter((s) => s.lat && s.lng)
+                .map(
+                    (s) =>
+                        [parseFloat(s.lat!), parseFloat(s.lng!)] as [
+                            number,
+                            number,
+                        ],
+                );
+
+            if (coords.length >= 2) {
+                const polyline = L.polyline(coords, {
+                    color: '#047857',
+                    weight: 4,
+                    opacity: 0.8,
+                }).addTo(map);
+                routePolylineRef.current = polyline;
+                map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+            }
+        });
+    }, [route]);
 
     function handleClose() {
         if (selectedMarkerRef.current) {
