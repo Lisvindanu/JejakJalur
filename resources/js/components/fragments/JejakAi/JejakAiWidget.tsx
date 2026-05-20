@@ -109,17 +109,43 @@ function UsageBar({ usage }: { usage: Usage }) {
     );
 }
 
+const STORAGE_KEY = 'jejak_ai_history';
+
+function loadHistory(): Message[] {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? (JSON.parse(raw) as Message[]) : [];
+    } catch {
+        return [];
+    }
+}
+
+function saveHistory(msgs: Message[]) {
+    try {
+        // Keep last 20 messages to avoid bloat
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(msgs.slice(-20)),
+        );
+    } catch {}
+}
+
 /* ─── Main Widget ─── */
 export default function JejakAiWidget() {
     const { auth } = usePage<SharedProps>().props;
     const [open, setOpen] = useState(false);
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [messages, setMessages] = useState<Message[]>(() => loadHistory());
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [usage, setUsage] = useState<Usage | null>(null);
     const [limitReached, setLimitReached] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+
+    /* Persist messages to localStorage */
+    useEffect(() => {
+        saveHistory(messages);
+    }, [messages]);
 
     /* Load status on mount */
     useEffect(() => {
@@ -226,7 +252,7 @@ export default function JejakAiWidget() {
         }
     };
 
-    /* Greeting on first open */
+    /* Greeting on first open (only if no saved history) */
     useEffect(() => {
         if (open && messages.length === 0) {
             const name = auth?.user?.name?.split(' ')[0] ?? null;
