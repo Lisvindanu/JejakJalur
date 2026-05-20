@@ -2,6 +2,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import Button from '@/components/elements/Button';
 import Input from '@/components/elements/Input';
 import PublicLayout from '@/components/layouts/PublicLayout';
+import { MOCK_PENGGUNA } from '@/lib/mock-data';
 
 interface Pengguna {
     id: number;
@@ -10,10 +11,11 @@ interface Pengguna {
 }
 
 interface Props {
-    pengguna: Pengguna;
+    pengguna?: Pengguna;
 }
 
-export default function Edit({ pengguna }: Props) {
+export default function Edit({ pengguna: penggunaProp }: Props) {
+    const pengguna = penggunaProp ?? MOCK_PENGGUNA;
     const { data, setData, patch, errors, processing } = useForm({
         nama: pengguna.name,
         email: pengguna.email,

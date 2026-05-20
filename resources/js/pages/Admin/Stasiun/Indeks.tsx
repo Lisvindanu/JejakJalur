@@ -3,6 +3,7 @@ import Button from '@/components/elements/Button';
 import DataTable from '@/components/fragments/Admin/DataTable';
 import ConfirmModal from '@/components/fragments/Admin/ConfirmModal';
 import { useConfirm } from '@/hooks/useConfirm';
+import { MOCK_STASIUN } from '@/lib/mock-data';
 import { Head, Link, router } from '@inertiajs/react';
 import { IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
 
@@ -15,10 +16,11 @@ interface StasiunRow {
 }
 
 interface Props {
-    stasiun: StasiunRow[];
+    stasiun?: StasiunRow[];
 }
 
-export default function StasiunIndeks({ stasiun }: Props) {
+export default function StasiunIndeks({ stasiun: stasiunProp }: Props) {
+    const stasiun = (stasiunProp ?? MOCK_STASIUN) as StasiunRow[];
     const { isOpen, confirm, handleConfirm, handleCancel } = useConfirm();
 
     const columns = [

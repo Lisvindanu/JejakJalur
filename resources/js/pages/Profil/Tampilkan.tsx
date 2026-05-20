@@ -6,6 +6,7 @@ import Modal from '@/components/elements/Modal';
 import PublicLayout from '@/components/layouts/PublicLayout';
 import { useConfirm } from '@/hooks/useConfirm';
 import { formatTanggal } from '@/lib/utils';
+import { MOCK_PENGGUNA } from '@/lib/mock-data';
 
 interface Pengguna {
     id: number;
@@ -16,10 +17,11 @@ interface Pengguna {
 }
 
 interface Props {
-    pengguna: Pengguna;
+    pengguna?: Pengguna;
 }
 
-export default function Tampilkan({ pengguna }: Props) {
+export default function Tampilkan({ pengguna: penggunaProp }: Props) {
+    const pengguna = penggunaProp ?? MOCK_PENGGUNA;
     const { isOpen, confirm, handleConfirm, handleCancel } = useConfirm();
 
     function handleDelete() {

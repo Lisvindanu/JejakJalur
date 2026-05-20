@@ -4,12 +4,13 @@ import DataTable from '@/components/fragments/Admin/DataTable';
 import ConfirmModal from '@/components/fragments/Admin/ConfirmModal';
 import type { Kota } from '@/types';
 import { useConfirm } from '@/hooks/useConfirm';
+import { MOCK_KOTA } from '@/lib/mock-data';
 import { Head, Link } from '@inertiajs/react';
 import { router } from '@inertiajs/react';
 import { IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
 
 interface Props {
-    kota: Kota[];
+    kota?: Kota[];
 }
 
 type KotaRow = {
@@ -20,7 +21,8 @@ type KotaRow = {
     [key: string]: unknown;
 };
 
-export default function KotaIndeks({ kota }: Props) {
+export default function KotaIndeks({ kota: kotaProp }: Props) {
+    const kota = kotaProp ?? MOCK_KOTA;
     const { isOpen, confirm, handleConfirm, handleCancel } = useConfirm();
 
     const rows: KotaRow[] = kota.map((k) => ({

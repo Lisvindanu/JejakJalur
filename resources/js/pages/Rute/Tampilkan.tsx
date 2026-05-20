@@ -3,12 +3,14 @@ import { IconTrain } from '@tabler/icons-react';
 import PublicLayout from '@/components/layouts/PublicLayout';
 import SubwayMap from '@/components/fragments/Home/SubwayMap';
 import type { Kota } from '@/types';
+import { MOCK_KOTA } from '@/lib/mock-data';
 
 interface Props {
-    semuaKota: Kota[];
+    semuaKota?: Kota[];
 }
 
-export default function Tampilkan({ semuaKota }: Props) {
+export default function Tampilkan({ semuaKota: kotaProp }: Props) {
+    const semuaKota = kotaProp ?? MOCK_KOTA;
     const totalStasiun = semuaKota.reduce(
         (sum, k) => sum + k.stasiun.length,
         0,

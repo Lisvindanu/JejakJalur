@@ -5,12 +5,13 @@ import TextArea from '@/components/elements/TextArea';
 import Select from '@/components/elements/Select';
 import FormCard from '@/components/fragments/Admin/FormCard';
 import type { Destinasi } from '@/types';
+import { MOCK_STASIUN } from '@/lib/mock-data';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { IconArrowLeft, IconPhoto } from '@tabler/icons-react';
 
 interface Props {
     destinasi?: Destinasi;
-    semuaStasiun: Array<{ id: string; nama: string; kota: { nama: string } }>;
+    semuaStasiun?: Array<{ id: string; nama: string; kota: { nama: string } }>;
 }
 
 const kategoriOptions = [
@@ -19,7 +20,8 @@ const kategoriOptions = [
     { value: 'UMKM', label: 'UMKM' },
 ];
 
-export default function DestinasiFormulir({ destinasi, semuaStasiun }: Props) {
+export default function DestinasiFormulir({ destinasi, semuaStasiun: stasiunProp }: Props) {
+    const semuaStasiun = (stasiunProp ?? MOCK_STASIUN) as Array<{ id: string; nama: string; kota: { nama: string } }>;
     const isEdit = !!destinasi;
 
     const { data, setData, post, processing, errors } = useForm<{

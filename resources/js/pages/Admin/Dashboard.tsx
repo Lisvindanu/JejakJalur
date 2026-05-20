@@ -7,9 +7,10 @@ import {
     IconUsers,
 } from '@tabler/icons-react';
 import { Head, Link } from '@inertiajs/react';
+import { MOCK_STATISTIK } from '@/lib/mock-data';
 
 interface Props {
-    statistik: {
+    statistik?: {
         jumlah_kota: number;
         jumlah_stasiun: number;
         jumlah_destinasi: number;
@@ -18,7 +19,8 @@ interface Props {
     };
 }
 
-export default function Dashboard({ statistik }: Props) {
+export default function Dashboard({ statistik: stat }: Props) {
+    const statistik = stat ?? MOCK_STATISTIK;
     return (
         <AdminLayout title="Dashboard">
             <Head title="Dashboard — Admin JejakJalur" />
