@@ -17,6 +17,8 @@ class DestinasiRequest extends FormRequest
             'deskripsi' => ['required', 'string', 'max:2000'],
             'alamat' => ['required', 'string', 'max:255'],
             'kategori' => ['required', 'string', Rule::in(['Wisata', 'Kuliner', 'UMKM'])],
+            'lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'lng' => ['nullable', 'numeric', 'between:-180,180'],
             'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'is_verified' => ['boolean'],
         ];
