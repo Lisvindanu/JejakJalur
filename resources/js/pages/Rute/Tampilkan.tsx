@@ -8,8 +8,9 @@ import {
 } from '@tabler/icons-react';
 import PublicLayout from '@/components/layouts/PublicLayout';
 import RuteMap from '@/components/fragments/Home/RuteMap';
+import PerencanaRute from '@/components/fragments/Rute/PerencanaRute';
 import Modal from '@/components/elements/Modal';
-import type { Kota, Stasiun } from '@/types';
+import type { Kota, Stasiun, StasiunRute } from '@/types';
 import { MOCK_KOTA } from '@/lib/mock-data';
 import { indeks as destinasiIndeks } from '@/routes/destinasi';
 
@@ -23,6 +24,7 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
         (sum, k) => sum + k.stasiun.length,
         0,
     );
+    const [ruteAktif, setRuteAktif] = useState<StasiunRute[] | null>(null);
     const [kotaAktif, setKotaAktif] = useState<Kota | null>(null);
     const [tampilSemua, setTampilSemua] = useState(false);
     const [shownKota, setShownKota] = useState(10);
@@ -81,8 +83,15 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
 
             {/* Interactive Leaflet map */}
             <div className="border-b border-stone-100 bg-white px-[max(24px,calc(50%-576px))] py-8">
-                <RuteMap semuaKota={semuaKota} />
+                <RuteMap semuaKota={semuaKota} route={ruteAktif} />
             </div>
+
+            {/* Trip planner */}
+            <PerencanaRute
+                semuaKota={semuaKota}
+                onRuteFound={setRuteAktif}
+                onRuteClear={() => setRuteAktif(null)}
+            />
 
             {/* City directory */}
             <div className="px-[max(24px,calc(50%-576px))] py-10">
