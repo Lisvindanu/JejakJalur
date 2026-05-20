@@ -37,8 +37,21 @@ class JejakAiService
 
         $messages = [['role' => 'system', 'content' => $systemPrompt]];
 
+        // Ollama requires strict user/assistant alternation starting with user.
+        // Filter history: skip leading assistant messages, then enforce alternation.
+        $expectedRole = 'user';
         foreach ($history as $msg) {
-            $messages[] = ['role' => $msg['role'], 'content' => $msg['content']];
+            $role = $msg['role'] ?? '';
+            if ($role === $expectedRole && in_array($role, ['user', 'assistant'], true)) {
+                $messages[] = ['role' => $role, 'content' => $msg['content']];
+                $expectedRole = $role === 'user' ? 'assistant' : 'user';
+            }
+        }
+
+        // If last injected history was 'user', we'd end up with user+user which is invalid.
+        // Ensure last message before the new user input is 'assistant' (or history is empty).
+        if ($expectedRole === 'user' && count($messages) > 1) {
+            array_pop($messages);
         }
 
         $messages[] = ['role' => 'user', 'content' => $userMessage];
