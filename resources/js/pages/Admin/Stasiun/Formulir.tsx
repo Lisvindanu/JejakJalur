@@ -24,6 +24,8 @@ export default function StasiunFormulir({
         nama: stasiun?.nama ?? '',
         kode_stasiun: stasiun?.kode_stasiun ?? '',
         kota_id: stasiun?.kota?.id ?? '',
+        lat: stasiun?.lat != null ? String(stasiun.lat) : '',
+        lng: stasiun?.lng != null ? String(stasiun.lng) : '',
     });
 
     function handleSubmit(e: React.FormEvent) {
@@ -113,6 +115,26 @@ export default function StasiunFormulir({
                             placeholder="Pilih kota..."
                             error={errors.kota_id}
                         />
+                        <div className="grid grid-cols-2 gap-4">
+                            <Input
+                                label="Latitude"
+                                value={data.lat}
+                                onChange={(e) => setData('lat', e.target.value)}
+                                error={errors.lat}
+                                placeholder="cth. -7.7956"
+                                type="number"
+                                step="any"
+                            />
+                            <Input
+                                label="Longitude"
+                                value={data.lng}
+                                onChange={(e) => setData('lng', e.target.value)}
+                                error={errors.lng}
+                                placeholder="cth. 110.3695"
+                                type="number"
+                                step="any"
+                            />
+                        </div>
                     </FormCard>
                 </form>
             </div>
