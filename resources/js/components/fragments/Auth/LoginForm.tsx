@@ -69,13 +69,13 @@ export default function LoginForm() {
                 <hr className="flex-1 border-stone-200" />
             </div>
 
-            <Link
+            <a
                 href="/oauth/google"
                 className="flex w-full items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white py-2 text-sm font-medium text-stone-700 no-underline transition-colors hover:bg-stone-50"
             >
                 <IconBrandGoogle size={18} />
                 Masuk dengan Google
-            </Link>
+            </a>
 
             <p className="text-center text-sm text-stone-500">
                 Belum punya akun?{' '}
