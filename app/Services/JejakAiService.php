@@ -85,13 +85,8 @@ class JejakAiService
                     return $response->json('message.content') ?? 'Maaf, tidak ada respons dari AI.';
                 }
 
-                \Log::warning('JejakAI: non-success response', [
-                    'status' => $response->status(),
-                    'body' => substr($response->body(), 0, 300),
-                ]);
                 $attempts++;
             } catch (\Exception $e) {
-                \Log::error('JejakAI: exception', ['msg' => $e->getMessage()]);
                 $this->rotateKey();
                 $attempts++;
             }
