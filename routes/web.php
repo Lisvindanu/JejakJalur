@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\AiSessionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DestinasiController as AdminDestinasiController;
 use App\Http\Controllers\Admin\KotaController;
+use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\StasiunController;
+use App\Http\Controllers\Admin\UlasanController as AdminUlasanController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -99,5 +102,23 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::patch('/{destinasi}', [AdminDestinasiController::class, 'perbarui'])->name('perbarui');
         Route::delete('/{destinasi}', [AdminDestinasiController::class, 'hapus'])->name('hapus');
         Route::patch('/{destinasi}/verifikasi', [AdminDestinasiController::class, 'verifikasi'])->name('verifikasi');
+    });
+
+    Route::prefix('pengguna')->name('pengguna.')->group(function () {
+        Route::get('/', [PenggunaController::class, 'indeks'])->name('indeks');
+        Route::patch('/{pengguna}/toggle-admin', [PenggunaController::class, 'toggleAdmin'])->name('toggle-admin');
+        Route::patch('/{id}/pulihkan', [PenggunaController::class, 'pulihkan'])->name('pulihkan');
+        Route::delete('/{pengguna}', [PenggunaController::class, 'hapus'])->name('hapus');
+    });
+
+    Route::prefix('ulasan')->name('ulasan.')->group(function () {
+        Route::get('/', [AdminUlasanController::class, 'indeks'])->name('indeks');
+        Route::delete('/{ulasan}', [AdminUlasanController::class, 'hapus'])->name('hapus');
+    });
+
+    Route::prefix('ai-session')->name('ai-session.')->group(function () {
+        Route::get('/', [AiSessionController::class, 'indeks'])->name('indeks');
+        Route::patch('/{aiSession}/reset', [AiSessionController::class, 'reset'])->name('reset');
+        Route::delete('/{aiSession}', [AiSessionController::class, 'hapus'])->name('hapus');
     });
 });
