@@ -977,6 +977,330 @@ class DestinasiSeeder extends Seeder
                 ],
             ],
 
+            // Jakarta Utara – Stasiun Jakarta Kota (Kota Tua)
+            'JAKK' => [
+                [
+                    'nama' => 'Museum Fatahillah (Museum Sejarah Jakarta)',
+                    'deskripsi' => 'Museum ikonik di jantung Kota Tua Jakarta yang menempati gedung Balai Kota VOC abad ke-17. Koleksinya meliputi furnitur kolonial, prasasti, meriam Si Jagur, dan sel penjara bawah tanah yang legendaris.',
+                    'alamat' => 'Jl. Taman Fatahillah No.1, Pinangsia, Tamansari, Jakarta Barat',
+                    'kategori' => 'Wisata',
+                    'is_verified' => true,
+                    'rating' => 4.5,
+                ],
+                [
+                    'nama' => 'Museum Bank Indonesia',
+                    'deskripsi' => 'Museum perbankan bertaraf internasional di dalam gedung De Javasche Bank berarsitektur neo-renaisans. Menampilkan sejarah uang dan perbankan Indonesia dari masa VOC hingga era modern dengan teknologi interaktif terkini.',
+                    'alamat' => 'Jl. Pintu Besar Utara No.3, Pinangsia, Tamansari, Jakarta Barat',
+                    'kategori' => 'Wisata',
+                    'is_verified' => true,
+                    'rating' => 4.6,
+                ],
+                [
+                    'nama' => 'Cafe Batavia',
+                    'deskripsi' => 'Restoran ikonik bergaya kolonial Belanda yang berdiri sejak 1993 di gedung bersejarah abad ke-19 menghadap Taman Fatahillah. Menyajikan perpaduan masakan Indonesia dan Western dengan suasana antik yang memukau.',
+                    'alamat' => 'Jl. Taman Fatahillah No.14, Pinangsia, Kota Tua, Jakarta Barat',
+                    'kategori' => 'Kuliner',
+                    'is_verified' => true,
+                    'rating' => 4.3,
+                ],
+                [
+                    'nama' => 'Kawasan Pecinan Glodok',
+                    'deskripsi' => 'Chinatown tertua di Jakarta dengan deretan ruko bersejarah, klenteng, dan pasar tradisional yang hidup. Pusat kuliner Tionghoa-Jakarta dengan berbagai makanan autentik seperti bakmi, dimsum, dan kue-kue tradisional.',
+                    'alamat' => 'Glodok, Tamansari, Jakarta Barat',
+                    'kategori' => 'Wisata',
+                    'is_verified' => true,
+                    'rating' => 4.2,
+                ],
+                [
+                    'nama' => 'Pasar Glodok Elektronik',
+                    'deskripsi' => 'Surga elektronik terbesar di Jakarta dengan ratusan kios menjual komponen elektronik, gadget, aksesori komputer, dan barang-barang teknologi dengan harga grosir. Pusat belanja elektronik yang sudah beroperasi sejak era 1970-an.',
+                    'alamat' => 'Jl. Hayam Wuruk, Glodok, Tamansari, Jakarta Barat',
+                    'kategori' => 'UMKM',
+                    'is_verified' => true,
+                    'rating' => 4.1,
+                ],
+            ],
+
+            // Jakarta Barat – Stasiun Duri (akses ke Tamansari & Glodok)
+            'DU' => [
+                [
+                    'nama' => 'Taman Sari Water Castle',
+                    'deskripsi' => 'Bekas taman kerajaan Keraton Yogyakarta cabang Batavia abad ke-18. Kompleks istana air dengan kolam pemandian, terowongan bawah tanah, masjid bawah tanah, dan menara sumur gumuling yang menjadi daya tarik utama wisatawan.',
+                    'alamat' => 'Jl. Taman Sari No.1, Tamansari, Kota Tua, Jakarta Barat',
+                    'kategori' => 'Wisata',
+                    'is_verified' => true,
+                    'rating' => 4.3,
+                ],
+                [
+                    'nama' => 'Bakmi Gang Kelinci',
+                    'deskripsi' => 'Bakmi legendaris Jakarta yang sudah berdiri sejak 1957 di gang sempit kawasan Pecinan. Bakmi ayam dengan kuah kaldu bening dan pangsit goreng renyah menjadi sajian yang selalu dipadati pengunjung dari berbagai penjuru Jakarta.',
+                    'alamat' => 'Gang Kelinci No.1, Pasar Baru, Jakarta Pusat',
+                    'kategori' => 'Kuliner',
+                    'is_verified' => true,
+                    'rating' => 4.4,
+                ],
+                [
+                    'nama' => 'Pusat Grosir Tanah Abang',
+                    'deskripsi' => 'Pasar tekstil dan fashion terbesar di Asia Tenggara dengan lebih dari 15.000 kios. Menawarkan berbagai produk fashion, kain batik, aksesoris, dan perlengkapan busana dengan harga grosir yang sangat terjangkau.',
+                    'alamat' => 'Jl. KH. Wahid Hasyim, Tanah Abang, Jakarta Pusat',
+                    'kategori' => 'UMKM',
+                    'is_verified' => true,
+                    'rating' => 4.0,
+                ],
+            ],
+
+            // Jakarta Barat – Stasiun Grogol
+            'GGL' => [
+                [
+                    'nama' => 'Taman Anggrek Indonesia Permai',
+                    'deskripsi' => 'Salah satu pusat perbelanjaan terbesar di Jakarta Barat dengan konsep taman anggrek. Memiliki ratusan tenant fashion, kuliner, dan hiburan, serta roof garden dengan koleksi tanaman anggrek yang indah.',
+                    'alamat' => 'Jl. Letjen S. Parman Kav. 21, Tanjung Duren Selatan, Jakarta Barat',
+                    'kategori' => 'UMKM',
+                    'is_verified' => true,
+                    'rating' => 4.2,
+                ],
+                [
+                    'nama' => 'Es Krim Ragusa',
+                    'deskripsi' => 'Es krim Italia legendaris Jakarta sejak 1932 dengan resep original yang tidak pernah berubah. Disajikan di kedai bergaya colonial vintage, Es Krim Ragusa menawarkan cita rasa nostalgia dengan varian klasik seperti es krim durian dan stracciatella.',
+                    'alamat' => 'Jl. Veteran I No.10, Gambir, Jakarta Pusat',
+                    'kategori' => 'Kuliner',
+                    'is_verified' => true,
+                    'rating' => 4.5,
+                ],
+            ],
+
+            // Jakarta Selatan – Stasiun Manggarai
+            'MRI' => [
+                [
+                    'nama' => 'Pasar Santa',
+                    'deskripsi' => 'Pasar retro yang bertransformasi menjadi pusat komunitas kreatif Jakarta Selatan. Dipenuhi kedai kopi artisan, distro indie, toko vinyl, kuliner unik, dan berbagai produk UMKM lokal yang menjadikannya destinasi wajib kawula muda Jakarta.',
+                    'alamat' => 'Jl. Wolter Monginsidi No.99, Kebayoran Baru, Jakarta Selatan',
+                    'kategori' => 'UMKM',
+                    'is_verified' => true,
+                    'rating' => 4.4,
+                ],
+                [
+                    'nama' => 'Sate Padang Ajo Ramon',
+                    'deskripsi' => 'Sate Padang autentik dengan kuah kari kuning kental yang kaya rempah. Sate daging sapi yang empuk dengan bumbu khas Minang yang pedas dan harum menjadikannya salah satu sate terenak di Jakarta Selatan.',
+                    'alamat' => 'Jl. Bukit Duri, Tebet, Jakarta Selatan',
+                    'kategori' => 'Kuliner',
+                    'is_verified' => true,
+                    'rating' => 4.3,
+                ],
+                [
+                    'nama' => 'Taman Langsat',
+                    'deskripsi' => 'Taman kota hijau dan asri di Kebayoran Baru yang menjadi oasis di tengah hiruk pikuk Jakarta Selatan. Area favorit warga untuk jogging, piknik, dan bersantai dengan koleksi pepohonan rindang dan fasilitas olahraga yang memadai.',
+                    'alamat' => 'Jl. Barito II, Kramat Pela, Kebayoran Baru, Jakarta Selatan',
+                    'kategori' => 'Wisata',
+                    'is_verified' => true,
+                    'rating' => 4.2,
+                ],
+            ],
+
+            // Jakarta Selatan – Stasiun Kebayoran
+            'KBY' => [
+                [
+                    'nama' => 'Blok M Square',
+                    'deskripsi' => 'Pusat perbelanjaan underground ikonik Blok M yang menggabungkan konsep mall modern dengan bazaar tradisional. Dikenal sebagai surga belanja fashion murah, aksesoris, dan berbagai produk lokal dengan harga terjangkau.',
+                    'alamat' => 'Jl. Bulungan No.76, Kramat Pela, Kebayoran Baru, Jakarta Selatan',
+                    'kategori' => 'UMKM',
+                    'is_verified' => true,
+                    'rating' => 4.1,
+                ],
+                [
+                    'nama' => 'Warung Bu Kris',
+                    'deskripsi' => 'Warung makan legendaris Jawa Timur di Jakarta Selatan yang terkenal dengan ayam penyet dan sambal terasi ekstra pedasnya. Dikenal luas oleh pekerja kantoran dan mahasiswa dengan porsi besar dan cita rasa autentik.',
+                    'alamat' => 'Jl. Radio Dalam, Gandaria Utara, Kebayoran Baru, Jakarta Selatan',
+                    'kategori' => 'Kuliner',
+                    'is_verified' => true,
+                    'rating' => 4.3,
+                ],
+            ],
+
+            // Bekasi – Stasiun Bekasi
+            'BKS' => [
+                [
+                    'nama' => 'Grand Galaxy Park Bekasi',
+                    'deskripsi' => 'Mall premium terbesar di Bekasi dengan konsep taman kota yang hijau dan asri. Memiliki food court megah, bioskop, area bermain anak, serta ratusan tenant fashion dan lifestyle internasional maupun lokal.',
+                    'alamat' => 'Jl. Boulevard Ahmad Yani, Harapan Indah, Bekasi',
+                    'kategori' => 'UMKM',
+                    'is_verified' => true,
+                    'rating' => 4.3,
+                ],
+                [
+                    'nama' => 'Soto Betawi H. Hasan Bekasi',
+                    'deskripsi' => 'Soto Betawi legendaris Bekasi dengan kuah santan kental kecoklatan yang gurih dan kaya rempah. Daging sapi yang empuk, kentang goreng, dan emping membuat sajian ini selalu ramai antrian setiap hari.',
+                    'alamat' => 'Jl. Ir. H. Juanda No.5, Bekasi Timur, Kota Bekasi',
+                    'kategori' => 'Kuliner',
+                    'is_verified' => true,
+                    'rating' => 4.4,
+                ],
+                [
+                    'nama' => 'Alun-Alun Kota Bekasi',
+                    'deskripsi' => 'Ruang terbuka hijau di pusat Kota Bekasi yang menjadi titik kumpul warga. Dilengkapi area jogging, pertunjukan seni, dan jajanan kaki lima dengan berbagai kuliner lokal khas Bekasi yang ramai di sore dan malam hari.',
+                    'alamat' => 'Jl. IR. H. Juanda, Margahayu, Bekasi Timur, Kota Bekasi',
+                    'kategori' => 'Wisata',
+                    'is_verified' => true,
+                    'rating' => 4.0,
+                ],
+            ],
+
+            // Depok – Stasiun UI (Universitas Indonesia)
+            'UI' => [
+                [
+                    'nama' => 'Danau Kenanga UI',
+                    'deskripsi' => 'Danau buatan nan indah di dalam kampus Universitas Indonesia yang dikelilingi hutan tropis hijau. Spot foto favorit warga Depok dengan perahu dayung, pohon-pohon besar berusia puluhan tahun, dan suasana alam yang menenangkan.',
+                    'alamat' => 'Kampus UI, Pondok Cina, Beji, Depok',
+                    'kategori' => 'Wisata',
+                    'is_verified' => true,
+                    'rating' => 4.5,
+                ],
+                [
+                    'nama' => 'Mie Ayam Bangka 99 Margonda',
+                    'deskripsi' => 'Mie ayam khas Bangka dengan pangsit kulit tipis dan topping ayam jamur yang melimpah. Kuah kaldu yang gurih dan bumbu khas Bangka menjadikannya salah satu kuliner favorit mahasiswa UI dan warga Depok.',
+                    'alamat' => 'Jl. Margonda Raya No.99, Pondok Cina, Depok',
+                    'kategori' => 'Kuliner',
+                    'is_verified' => true,
+                    'rating' => 4.2,
+                ],
+                [
+                    'nama' => 'Detos (Depok Town Square)',
+                    'deskripsi' => 'Pusat perbelanjaan terbesar di Depok dengan konsep one-stop shopping. Menggabungkan fashion, elektronik, kuliner, dan hiburan dalam satu kompleks yang mudah diakses dari Stasiun UI, menjadi favorit mahasiswa dan keluarga.',
+                    'alamat' => 'Jl. Margonda Raya No.1, Kemiri Muka, Beji, Depok',
+                    'kategori' => 'UMKM',
+                    'is_verified' => true,
+                    'rating' => 4.1,
+                ],
+            ],
+
+            // Tangerang – Stasiun Tangerang
+            'TNG' => [
+                [
+                    'nama' => 'Pasar Lama Tangerang',
+                    'deskripsi' => 'Kawasan heritage pecinan tertua di Tangerang yang menjadi pusat kuliner dan wisata budaya Tionghoa-Betawi. Deretan ruko bersejarah, vihara tua, dan berbagai kuliner autentik seperti laksa Tangerang dan ketan serimpi tersaji di sini.',
+                    'alamat' => 'Jl. Kisamaun, Sukasari, Tangerang',
+                    'kategori' => 'Wisata',
+                    'is_verified' => true,
+                    'rating' => 4.5,
+                ],
+                [
+                    'nama' => 'Benteng Heritage Museum',
+                    'deskripsi' => 'Museum sejarah Tangerang yang menempati bangunan Benteng VOC abad ke-18. Koleksinya mencakup artefak sejarah Tangerang, dokumen kolonial, dan benda-benda peninggalan komunitas Tionghoa yang menetap sejak abad ke-17.',
+                    'alamat' => 'Jl. Benteng Makasar No.1, Sukasari, Tangerang',
+                    'kategori' => 'Wisata',
+                    'is_verified' => true,
+                    'rating' => 4.4,
+                ],
+                [
+                    'nama' => 'Laksa Tangerang Encim Gerot',
+                    'deskripsi' => 'Laksa khas Tangerang dengan kuah santan kuning kental, bihun, tahu, telur, dan daun kemangi. Berbeda dari laksa Bogor, laksa Tangerang memiliki cita rasa yang lebih ringan dengan bumbu khas peranakan Betawi-Tionghoa.',
+                    'alamat' => 'Jl. Perintis Kemerdekaan, Sukasari, Tangerang',
+                    'kategori' => 'Kuliner',
+                    'is_verified' => true,
+                    'rating' => 4.3,
+                ],
+                [
+                    'nama' => 'Pusat Oleh-Oleh Khas Tangerang',
+                    'deskripsi' => 'Toko oleh-oleh terpercaya yang menjual berbagai produk khas Tangerang seperti dodol, kue gipang beras ketan, rengginang, dan berbagai camilan tradisional Betawi-Tionghoa yang dikemas modern sebagai buah tangan.',
+                    'alamat' => 'Jl. Daan Mogot No.77, Sukasari, Tangerang',
+                    'kategori' => 'UMKM',
+                    'is_verified' => true,
+                    'rating' => 4.2,
+                ],
+            ],
+
+            // Klaten – Stasiun Klaten (akses ke Prambanan & Ratu Boko)
+            'KT' => [
+                [
+                    'nama' => 'Candi Plaosan',
+                    'deskripsi' => 'Kompleks candi Buddha abad ke-9 yang dibangun oleh Rakai Pikatan sebagai hadiah untuk permaisuri Pramodhawardhani. Terdiri dari dua candi utama dengan relief Buddha yang indah di antara lanskap sawah hijau khas Jawa Tengah.',
+                    'alamat' => 'Bugisan, Prambanan, Klaten, Jawa Tengah',
+                    'kategori' => 'Wisata',
+                    'is_verified' => true,
+                    'rating' => 4.5,
+                ],
+                [
+                    'nama' => 'Candi Prambanan (Gerbang Klaten)',
+                    'deskripsi' => 'Candi Hindu terbesar di Indonesia dan salah satu Situs Warisan Dunia UNESCO. Kompleks 240 candi dengan Candi Siwa setinggi 47 meter sebagai mahkotanya. Dapat diakses dari Stasiun Klaten dalam 15 menit berkendara.',
+                    'alamat' => 'Jl. Raya Solo - Yogyakarta No.16, Prambanan, Klaten',
+                    'kategori' => 'Wisata',
+                    'is_verified' => true,
+                    'rating' => 4.8,
+                ],
+                [
+                    'nama' => 'Warung Soto Klaten Pak Marto',
+                    'deskripsi' => 'Soto ayam khas Klaten dengan kuah bening segar yang kaya rempah kunyit dan sereh. Menggunakan ayam kampung pilihan, disajikan dengan nasi putih, krupuk, dan sambal tomat segar. Sarapan favorit warga Klaten sejak tiga generasi.',
+                    'alamat' => 'Jl. Pemuda No.45, Klaten Tengah, Klaten',
+                    'kategori' => 'Kuliner',
+                    'is_verified' => true,
+                    'rating' => 4.3,
+                ],
+                [
+                    'nama' => 'Batik Bayat Klaten',
+                    'deskripsi' => 'Sentra batik tulis khas Klaten dari Desa Bayat yang sudah terkenal sejak ratusan tahun. Motif-motifnya merupakan perpaduan unik antara gaya Yogyakarta dan Solo dengan warna-warna alam yang khas, dijual langsung dari pengrajin lokal.',
+                    'alamat' => 'Desa Bayat, Bayat, Klaten, Jawa Tengah',
+                    'kategori' => 'UMKM',
+                    'is_verified' => true,
+                    'rating' => 4.4,
+                ],
+            ],
+
+            // Sleman – Stasiun Maguwo (akses ke Prambanan dari sisi Sleman)
+            'MGW' => [
+                [
+                    'nama' => 'Candi Prambanan',
+                    'deskripsi' => 'Mahakarya arsitektur Hindu abad ke-9 yang menjadi Situs Warisan Dunia UNESCO. Komplek 240 candi dengan Trimurti (Siwa, Wisnu, Brahma) sebagai pusat. Pertunjukan Sendratari Ramayana di pelataran terbuka setiap bulan purnama.',
+                    'alamat' => 'Jl. Raya Solo - Yogyakarta No.16, Prambanan, Sleman',
+                    'kategori' => 'Wisata',
+                    'is_verified' => true,
+                    'rating' => 4.8,
+                ],
+                [
+                    'nama' => 'Candi Ratu Boko',
+                    'deskripsi' => 'Situs istana purbakala abad ke-8 di atas bukit dengan pemandangan Candi Prambanan dan Gunung Merapi yang spektakuler. Gerbang Agung, kolam pemandian, dan pendopo berundak menjadikan sunset di sini sebagai yang terbaik di Yogyakarta.',
+                    'alamat' => 'Jl. Ratu Boko, Bokoharjo, Prambanan, Sleman',
+                    'kategori' => 'Wisata',
+                    'is_verified' => true,
+                    'rating' => 4.7,
+                ],
+                [
+                    'nama' => 'Restoran Bale Raos',
+                    'deskripsi' => 'Restoran eksklusif yang menyajikan masakan keraton Yogyakarta — menu autentik yang dulunya hanya tersaji di meja makan Sultan. Berlokasi di dalam komplek Keraton, menawarkan pengalaman makan dalam suasana budaya Jawa yang agung.',
+                    'alamat' => 'Jl. Magangan Kulon No.1, Keraton, Yogyakarta',
+                    'kategori' => 'Kuliner',
+                    'is_verified' => true,
+                    'rating' => 4.6,
+                ],
+            ],
+
+            // Bantul – Stasiun Rewulu
+            'RWL' => [
+                [
+                    'nama' => 'Pantai Parangtritis',
+                    'deskripsi' => 'Pantai paling terkenal di Yogyakarta dengan pasir hitam vulkanik dan ombak besar Samudra Hindia. Legenda Nyi Roro Kidul membuat pantai ini semakin mistis. Tersedia wisata delman, sandboarding di gumuk pasir, dan sunset yang menakjubkan.',
+                    'alamat' => 'Parangtritis, Kretek, Bantul, Daerah Istimewa Yogyakarta',
+                    'kategori' => 'Wisata',
+                    'is_verified' => true,
+                    'rating' => 4.6,
+                ],
+                [
+                    'nama' => 'Gumuk Pasir Parangkusumo',
+                    'deskripsi' => 'Fenomena alam unik berupa padang pasir mini satu-satunya di Asia Tenggara yang terbentuk dari endapan abu vulkanik Gunung Merapi. Cocok untuk sandboarding, foto kreatif, dan menikmati lanskap yang terasa bukan seperti Indonesia.',
+                    'alamat' => 'Parangkusumo, Kretek, Bantul, Daerah Istimewa Yogyakarta',
+                    'kategori' => 'Wisata',
+                    'is_verified' => true,
+                    'rating' => 4.5,
+                ],
+                [
+                    'nama' => 'Bakpia Pathok 25 Bantul',
+                    'deskripsi' => 'Produsen bakpia legendaris yang sudah ada sejak 1948. Bakpia dengan isian kacang hijau, coklat, dan keju dengan kulit tipis renyah menjadi oleh-oleh wajib Yogyakarta yang paling dicari wisatawan.',
+                    'alamat' => 'Jl. AIP II KS Tubun, Bantul, DIY',
+                    'kategori' => 'UMKM',
+                    'is_verified' => true,
+                    'rating' => 4.5,
+                ],
+            ],
+
             'SBI' => [
                 [
                     'nama' => 'Tugu Pahlawan',
