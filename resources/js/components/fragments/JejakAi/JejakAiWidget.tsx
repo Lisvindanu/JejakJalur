@@ -1,13 +1,21 @@
 import { usePage } from '@inertiajs/react';
-import { IconRobot, IconSend, IconTrain, IconX } from '@tabler/icons-react';
+import { IconArrowRight, IconMap, IconMapPin, IconRobot, IconSend, IconTrain, IconX } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { SharedProps } from '@/types';
 
 /* ─── Types ─── */
+interface AiLink {
+    type: 'rute' | 'destinasi' | 'kota';
+    id?: string;
+    nama: string;
+    url: string;
+}
+
 interface Message {
     role: 'user' | 'assistant';
     content: string;
+    links?: AiLink[];
 }
 
 interface Usage {
@@ -58,6 +66,38 @@ function TypingDots() {
     );
 }
 
+/* ─── Action chips for links returned by AI ─── */
+function ActionChips({ links }: { links: AiLink[] }) {
+    if (!links.length) return null;
+    return (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+            {links.map((link, i) => {
+                const isRute = link.type === 'rute';
+                return (
+                    <a
+                        key={i}
+                        href={link.url}
+                        className={cn(
+                            'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+                            isRute
+                                ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50',
+                        )}
+                    >
+                        {isRute ? (
+                            <IconMap size={12} />
+                        ) : (
+                            <IconMapPin size={12} />
+                        )}
+                        {link.nama}
+                        <IconArrowRight size={11} className="opacity-50" />
+                    </a>
+                );
+            })}
+        </div>
+    );
+}
+
 /* ─── Message bubble ─── */
 function MessageBubble({ msg }: { msg: Message }) {
     const isUser = msg.role === 'user';
@@ -68,20 +108,25 @@ function MessageBubble({ msg }: { msg: Message }) {
                     <IconRobot size={15} className="text-emerald-700" />
                 </div>
             )}
-            <div
-                className={cn(
-                    'max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
-                    isUser
-                        ? 'rounded-tr-sm bg-emerald-700 text-white'
-                        : 'rounded-tl-sm bg-stone-100 text-stone-800',
+            <div className="max-w-[80%]">
+                <div
+                    className={cn(
+                        'rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
+                        isUser
+                            ? 'rounded-tr-sm bg-emerald-700 text-white'
+                            : 'rounded-tl-sm bg-stone-100 text-stone-800',
+                    )}
+                >
+                    {msg.content.split('\n').map((line, i) => (
+                        <span key={i}>
+                            {line}
+                            {i < msg.content.split('\n').length - 1 && <br />}
+                        </span>
+                    ))}
+                </div>
+                {!isUser && msg.links && msg.links.length > 0 && (
+                    <ActionChips links={msg.links} />
                 )}
-            >
-                {msg.content.split('\n').map((line, i) => (
-                    <span key={i}>
-                        {line}
-                        {i < msg.content.split('\n').length - 1 && <br />}
-                    </span>
-                ))}
             </div>
         </div>
     );
@@ -141,15 +186,17 @@ export default function JejakAiWidget() {
 
     /* Load status + history on mount */
     useEffect(() => {
-        apiGet<Usage & { history?: { role: string; content: string }[] | null }>(
-            '/ai/status',
-        ).then((data) => {
-            setUsage(data);
-            // Logged-in: use DB history; guest: localStorage already loaded via useState init
-            if (data.history) {
-                setMessages(data.history as Message[]);
-            }
-        }).catch(() => null);
+        apiGet<
+            Usage & { history?: { role: string; content: string }[] | null }
+        >('/ai/status')
+            .then((data) => {
+                setUsage(data);
+                // Logged-in: use DB history; guest: localStorage already loaded via useState init
+                if (data.history) {
+                    setMessages(data.history as Message[]);
+                }
+            })
+            .catch(() => null);
     }, []);
 
     /* Persist messages to localStorage (guests only — logged-in uses DB) */
@@ -186,6 +233,7 @@ export default function JejakAiWidget() {
         try {
             const data = await apiPost<{
                 reply?: string;
+                links?: AiLink[];
                 error?: string;
                 retry?: boolean;
                 limit_reached?: boolean;
@@ -223,7 +271,7 @@ export default function JejakAiWidget() {
             } else if (data.reply) {
                 setMessages((prev) => [
                     ...prev,
-                    { role: 'assistant', content: data.reply! },
+                    { role: 'assistant', content: data.reply!, links: data.links },
                 ]);
                 if (data.usage) {
                     setUsage((prev) =>
