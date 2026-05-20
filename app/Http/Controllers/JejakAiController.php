@@ -59,6 +59,7 @@ class JejakAiController extends Controller
 
         return response()->json([
             'reply' => $reply,
+            'links' => $this->aiService->extractLinks($reply, $request->input('message')),
             'usage' => ['count' => $session->message_count, 'limit' => $limit],
         ]);
     }

@@ -95,8 +95,64 @@ class JejakAiService
         throw new \RuntimeException('Jejak AI sedang tidak tersedia.');
     }
 
+    private function isRouteQuery(string $query): bool
+    {
+        $routeWords = ['rute', 'jalur', 'semua kota', 'kota apa', 'kota mana', 'terhubung', 'jaringan', 'kota saja', 'kota-kota'];
+
+        $lower = strtolower($query);
+        foreach ($routeWords as $word) {
+            if (str_contains($lower, $word)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function allKotaKnowledge(): string
+    {
+        return Cache::remember('jejak_ai_all_kota', 3600, function () {
+            $kotas = Kota::with('stasiun')->orderBy('nama')->get();
+            $list = $kotas->map(function ($k) {
+                $stasiuns = $k->stasiun
+                    ->map(fn ($s) => "  · {$s->nama} [{$s->kode_stasiun}]")
+                    ->join("\n");
+
+                return "- {$k->nama}:\n{$stasiuns}";
+            })->join("\n");
+
+            return "SEMUA KOTA DAN STASIUN DI JARINGAN KERETA JEJAKJALUR:\n{$list}";
+        });
+    }
+
+    /**
+     * @return array<int, array{type: string, id?: string, nama: string, url: string}>
+     */
+    public function extractLinks(string $reply, string $query): array
+    {
+        $links = [];
+
+        if ($this->isRouteQuery($query)) {
+            $links[] = ['type' => 'rute', 'nama' => 'Lihat Peta Rute', 'url' => '/rute'];
+        }
+
+        // Find destinasi mentioned in reply
+        $destinasis = Destinasi::select('id', 'nama')->get();
+        foreach ($destinasis as $d) {
+            if (mb_stripos($reply, $d->nama) !== false) {
+                $links[] = ['type' => 'destinasi', 'id' => $d->id, 'nama' => $d->nama, 'url' => "/destinasi/{$d->id}"];
+            }
+        }
+
+        return $links;
+    }
+
     private function buildKnowledge(string $query): string
     {
+        if ($this->isRouteQuery($query)) {
+            return $this->allKotaKnowledge();
+        }
+
         // Extract keywords from query
         $keywords = $this->extractKeywords($query);
 
