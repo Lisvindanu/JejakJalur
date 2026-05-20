@@ -24,6 +24,16 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.96) translateY(8px); }
+    to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
 @keyframes swipeHint {
     0%, 100% { transform: translateX(-50%) translateX(0px);   opacity: 0.85; }
     25%       { transform: translateX(-50%) translateX(-5px);  opacity: 1; }

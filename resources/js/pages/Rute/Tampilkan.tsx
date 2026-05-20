@@ -25,8 +25,11 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
     );
     const [kotaAktif, setKotaAktif] = useState<Kota | null>(null);
     const [tampilSemua, setTampilSemua] = useState(false);
+    const [shownKota, setShownKota] = useState(10);
+    const [newKotaFrom, setNewKotaFrom] = useState<number | null>(null);
 
     const LIMIT = 5;
+    const KOTA_STEP = 10;
 
     function tutupModal() {
         setKotaAktif(null);
@@ -93,21 +96,47 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
                     </span>
                 </div>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                    {semuaKota.map((kota) => (
-                        <button
-                            key={kota.id}
-                            onClick={() => setKotaAktif(kota)}
-                            className="group flex flex-col gap-1 rounded-xl border border-stone-200 bg-white px-4 py-3 text-left transition-all hover:border-emerald-200 hover:bg-emerald-50 hover:shadow-sm"
-                        >
-                            <span className="text-sm font-semibold text-stone-800 group-hover:text-emerald-800">
-                                {kota.nama}
-                            </span>
-                            <span className="text-xs text-stone-400 group-hover:text-emerald-600">
-                                {kota.stasiun.length} stasiun
-                            </span>
-                        </button>
-                    ))}
+                    {semuaKota.slice(0, shownKota).map((kota, i) => {
+                        const isNew = newKotaFrom !== null && i >= newKotaFrom;
+                        return (
+                            <button
+                                key={kota.id}
+                                onClick={() => setKotaAktif(kota)}
+                                className={`group flex flex-col gap-1 rounded-xl border border-stone-200 bg-white px-4 py-3 text-left transition-all hover:border-emerald-200 hover:bg-emerald-50 hover:shadow-sm ${isNew ? 'animate-[fadeUp_0.28s_ease_both]' : ''}`}
+                                style={
+                                    isNew
+                                        ? {
+                                              animationDelay: `${(i - newKotaFrom!) * 30}ms`,
+                                          }
+                                        : undefined
+                                }
+                            >
+                                <span className="text-sm font-semibold text-stone-800 group-hover:text-emerald-800">
+                                    {kota.nama}
+                                </span>
+                                <span className="text-xs text-stone-400 group-hover:text-emerald-600">
+                                    {kota.stasiun.length} stasiun
+                                </span>
+                                <span className="text-xs text-stone-300 group-hover:text-emerald-500">
+                                    {kota.destinasi_count ?? 0} destinasi
+                                </span>
+                            </button>
+                        );
+                    })}
                 </div>
+
+                {shownKota < semuaKota.length && (
+                    <button
+                        onClick={() => {
+                            setNewKotaFrom(shownKota);
+                            setShownKota((s) => s + KOTA_STEP);
+                        }}
+                        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-stone-200 py-3 text-sm font-medium text-stone-500 transition-colors hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+                    >
+                        <IconChevronDown size={15} />+
+                        {semuaKota.length - shownKota} kota lainnya
+                    </button>
+                )}
             </div>
 
             {/* Modal stasiun per kota */}
@@ -145,6 +174,12 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
                                             </p>
                                             <p className="font-mono text-xs text-stone-400">
                                                 {s.kode_stasiun}
+                                                {s.destinasi_count != null && (
+                                                    <span className="ml-2 font-sans text-stone-300 not-italic">
+                                                        · {s.destinasi_count}{' '}
+                                                        destinasi
+                                                    </span>
+                                                )}
                                             </p>
                                         </div>
                                     </div>
