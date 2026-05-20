@@ -6,10 +6,13 @@ use App\Models\Destinasi;
 use App\Models\Kota;
 use App\Models\Stasiun;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class JejakAiService
 {
+    private readonly EmbeddingService $embeddingService;
+
     private array $apiKeys = [];
 
     private int $currentKeyIndex = 0;
@@ -18,8 +21,10 @@ class JejakAiService
 
     private string $model = 'gemma3:4b';
 
-    public function __construct()
+    public function __construct(EmbeddingService $embeddingService)
     {
+        $this->embeddingService = $embeddingService;
+
         foreach (['key_1', 'key_2', 'key_3', 'key_4', 'key_5'] as $k) {
             $key = config("services.ollama.{$k}");
             if ($key) {
@@ -49,8 +54,9 @@ class JejakAiService
         }
 
         // If last injected history was 'user', we'd end up with user+user which is invalid.
-        // Ensure last message before the new user input is 'assistant' (or history is empty).
-        if ($expectedRole === 'user' && count($messages) > 1) {
+        // After processing a 'user' message, expectedRole flips to 'assistant'.
+        // So: expectedRole === 'assistant' means the last processed was 'user' → must pop it.
+        if ($expectedRole === 'assistant' && count($messages) > 1) {
             array_pop($messages);
         }
 
@@ -97,7 +103,12 @@ class JejakAiService
 
     private function isRouteQuery(string $query): bool
     {
-        $routeWords = ['rute', 'jalur', 'semua kota', 'kota apa', 'kota mana', 'terhubung', 'jaringan', 'kota saja', 'kota-kota'];
+        $routeWords = [
+            'rute', 'jalur', 'semua kota', 'kota apa', 'kota mana', 'terhubung', 'jaringan', 'kota saja', 'kota-kota',
+            'mau ke', 'pergi ke', 'perjalanan', 'naik kereta', 'berangkat', 'dari bandung', 'ke bandung',
+            'dari jakarta', 'ke jakarta', 'dari surabaya', 'ke surabaya', 'dari yogyakarta', 'ke yogyakarta',
+            'turun di', 'transit', 'keberangkatan', 'peta',
+        ];
 
         $lower = strtolower($query);
         foreach ($routeWords as $word) {
@@ -109,20 +120,19 @@ class JejakAiService
         return false;
     }
 
-    private function allKotaKnowledge(): string
+    private function vectorSearch(string $query, string $table, int $limit): array
     {
-        return Cache::remember('jejak_ai_all_kota', 3600, function () {
-            $kotas = Kota::with('stasiun')->orderBy('nama')->get();
-            $list = $kotas->map(function ($k) {
-                $stasiuns = $k->stasiun
-                    ->map(fn ($s) => "  · {$s->nama} [{$s->kode_stasiun}]")
-                    ->join("\n");
+        $vec = $this->embeddingService->embed($query);
+        if (! $vec) {
+            return [];
+        }
 
-                return "- {$k->nama}:\n{$stasiuns}";
-            })->join("\n");
+        $vecLiteral = $this->embeddingService->toSql($vec);
 
-            return "SEMUA KOTA DAN STASIUN DI JARINGAN KERETA JEJAKJALUR:\n{$list}";
-        });
+        return DB::select(
+            "SELECT id FROM {$table} WHERE embedding IS NOT NULL ORDER BY embedding <=> ?::vector LIMIT ?",
+            [$vecLiteral, $limit]
+        );
     }
 
     /**
@@ -149,11 +159,70 @@ class JejakAiService
 
     private function buildKnowledge(string $query): string
     {
-        if ($this->isRouteQuery($query)) {
-            return $this->allKotaKnowledge();
+        // Try vector similarity search first
+        $parts = $this->vectorKnowledge($query);
+        if (! empty($parts)) {
+            return implode("\n\n", $parts);
         }
 
-        // Extract keywords from query
+        // Fallback: keyword search
+        return $this->keywordKnowledge($query);
+    }
+
+    private function vectorKnowledge(string $query): array
+    {
+        $parts = [];
+
+        // Search kota
+        $kotaRows = $this->vectorSearch($query, 'kota', 5);
+        if (! empty($kotaRows)) {
+            $kotaIds = array_column($kotaRows, 'id');
+            $kotas = Kota::whereIn('id', $kotaIds)->get();
+            $stasiunDiKota = Stasiun::whereIn('kota_id', $kotaIds)->get()->groupBy('kota_id');
+
+            $kotaList = $kotas->map(function ($k) use ($stasiunDiKota) {
+                $list = ($stasiunDiKota[$k->id] ?? collect())
+                    ->map(fn ($s) => "  · {$s->nama} [{$s->kode_stasiun}]")
+                    ->join("\n");
+
+                return "- {$k->nama}:\n{$list}";
+            })->join("\n");
+
+            $parts[] = "KOTA DAN STASIUN YANG RELEVAN:\n{$kotaList}";
+        }
+
+        // Search stasiun
+        $stasiunRows = $this->vectorSearch($query, 'stasiun', 8);
+        if (! empty($stasiunRows)) {
+            $ids = array_column($stasiunRows, 'id');
+            $stasiuns = Stasiun::with('kota')->whereIn('id', $ids)
+                ->when(! empty($kotaIds ?? []), fn ($q) => $q->whereNotIn('kota_id', $kotaIds ?? []))
+                ->get();
+
+            if ($stasiuns->isNotEmpty()) {
+                $list = $stasiuns->map(fn ($s) => "- Stasiun {$s->nama} [{$s->kode_stasiun}] di {$s->kota->nama}")->join("\n");
+                $parts[] = "STASIUN LAIN YANG RELEVAN:\n{$list}";
+            }
+        }
+
+        // Search destinasi
+        $destRows = $this->vectorSearch($query, 'destinasi', 6);
+        if (! empty($destRows)) {
+            $ids = array_column($destRows, 'id');
+            $destinasis = Destinasi::with('stasiun.kota')->whereIn('id', $ids)->get();
+            $destList = $destinasis->map(function ($d) {
+                $loc = $d->stasiun ? "dekat Stasiun {$d->stasiun->nama}, {$d->stasiun->kota->nama}" : '';
+
+                return "- {$d->nama} [{$d->kategori}] {$loc}: {$d->deskripsi}";
+            })->join("\n");
+            $parts[] = "DESTINASI YANG RELEVAN:\n{$destList}";
+        }
+
+        return $parts;
+    }
+
+    private function keywordKnowledge(string $query): string
+    {
         $keywords = $this->extractKeywords($query);
 
         if (empty($keywords)) {
@@ -162,7 +231,6 @@ class JejakAiService
 
         $parts = [];
 
-        // Search kota
         $kotas = Kota::where(function ($q) use ($keywords) {
             foreach ($keywords as $kw) {
                 $q->orWhere('nama', 'ILIKE', "%{$kw}%");
@@ -184,7 +252,6 @@ class JejakAiService
             $parts[] = "STASIUN DI KOTA YANG RELEVAN:\n{$kotaList}";
         }
 
-        // Search stasiun by keyword (name/code) — skip if already covered via kota
         $coveredKotaIds = $kotas->pluck('id');
         $stasiuns = Stasiun::with('kota')
             ->where(function ($q) use ($keywords) {
@@ -197,11 +264,10 @@ class JejakAiService
             ->limit(10)->get();
 
         if ($stasiuns->isNotEmpty()) {
-            $stasiunList = $stasiuns->map(fn ($s) => "- Stasiun {$s->nama} [{$s->kode_stasiun}] di {$s->kota->nama}")->join("\n");
-            $parts[] = "STASIUN LAIN YANG RELEVAN:\n{$stasiunList}";
+            $list = $stasiuns->map(fn ($s) => "- Stasiun {$s->nama} [{$s->kode_stasiun}] di {$s->kota->nama}")->join("\n");
+            $parts[] = "STASIUN LAIN YANG RELEVAN:\n{$list}";
         }
 
-        // Search destinasi
         $destinasiList = Destinasi::with('stasiun.kota')
             ->where(function ($q) use ($keywords) {
                 foreach ($keywords as $kw) {

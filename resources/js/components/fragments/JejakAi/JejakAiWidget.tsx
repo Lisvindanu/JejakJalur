@@ -1,5 +1,13 @@
 import { usePage } from '@inertiajs/react';
-import { IconArrowRight, IconMap, IconMapPin, IconRobot, IconSend, IconTrain, IconX } from '@tabler/icons-react';
+import {
+    IconArrowRight,
+    IconMap,
+    IconMapPin,
+    IconRobot,
+    IconSend,
+    IconTrain,
+    IconX,
+} from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { SharedProps } from '@/types';
@@ -187,7 +195,7 @@ export default function JejakAiWidget() {
     /* Load status + history on mount */
     useEffect(() => {
         apiGet<
-            Usage & { history?: { role: string; content: string }[] | null }
+            Usage & { history?: { role: string; content: string; links?: AiLink[] }[] | null }
         >('/ai/status')
             .then((data) => {
                 setUsage(data);
@@ -271,7 +279,11 @@ export default function JejakAiWidget() {
             } else if (data.reply) {
                 setMessages((prev) => [
                     ...prev,
-                    { role: 'assistant', content: data.reply!, links: data.links },
+                    {
+                        role: 'assistant',
+                        content: data.reply!,
+                        links: data.links,
+                    },
                 ]);
                 if (data.usage) {
                     setUsage((prev) =>

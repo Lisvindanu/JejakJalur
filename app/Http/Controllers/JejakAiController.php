@@ -44,11 +44,14 @@ class JejakAiController extends Controller
 
         $session->increment('message_count');
 
+        $message = $request->input('message');
+        $links = $this->aiService->extractLinks($reply, $message);
+
         // Persist history to DB (only for logged-in users; guests use localStorage)
         if ($user) {
             $incoming = array_values(array_slice($request->input('history', []), -18));
-            $incoming[] = ['role' => 'user', 'content' => $request->input('message')];
-            $incoming[] = ['role' => 'assistant', 'content' => $reply];
+            $incoming[] = ['role' => 'user', 'content' => $message];
+            $incoming[] = ['role' => 'assistant', 'content' => $reply, 'links' => $links];
             $session->update([
                 'last_message_at' => now(),
                 'history' => array_slice($incoming, -20),
@@ -59,7 +62,7 @@ class JejakAiController extends Controller
 
         return response()->json([
             'reply' => $reply,
-            'links' => $this->aiService->extractLinks($reply, $request->input('message')),
+            'links' => $links,
             'usage' => ['count' => $session->message_count, 'limit' => $limit],
         ]);
     }
