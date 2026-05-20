@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { IconTrain } from '@tabler/icons-react';
 import PublicLayout from '@/components/layouts/PublicLayout';
-import RuteMap from '@/components/fragments/Home/RuteMap';
+import SubwayMap from '@/components/fragments/Home/SubwayMap';
 import type { Kota } from '@/types';
 import { MOCK_KOTA } from '@/lib/mock-data';
 
@@ -53,9 +53,9 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
                 </div>
             </div>
 
-            {/* Interactive Leaflet map */}
+            {/* SVG network map */}
             <div className="border-b border-stone-100 bg-white px-[max(24px,calc(50%-576px))] py-8">
-                <RuteMap />
+                <SubwayMap kota={semuaKota} />
             </div>
 
             {/* Station directory */}
