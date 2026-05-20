@@ -69,7 +69,7 @@ class ScrapeDestinasi extends Command
 
         $query = Stasiun::with('kota')
             ->withCount('destinasi')
-            ->having('destinasi_count', '<=', $minDestinasi);
+            ->havingRaw('(select count(*) from "destinasi" where "stasiun"."id" = "destinasi"."stasiun_id") <= ?', [$minDestinasi]);
 
         if ($this->option('kota')) {
             $query->whereHas('kota', fn ($q) => $q->where('nama', 'ILIKE', '%'.$this->option('kota').'%'));
