@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import DestinasiDetail from '@/components/fragments/Destinasi/DestinasiDetail';
+import LokasiPanel from '@/components/fragments/Destinasi/LokasiPanel';
 import UlasanForm from '@/components/fragments/Ulasan/UlasanForm';
 import UlasanList from '@/components/fragments/Ulasan/UlasanList';
 import PublicLayout from '@/components/layouts/PublicLayout';
@@ -24,6 +25,11 @@ export default function Detail({ destinasi: dest }: Props) {
             {/* Detail view (contains its own px padding for content, but not the image) */}
             <div className="pt-[60px]">
                 <DestinasiDetail destinasi={destinasi} />
+            </div>
+
+            {/* Lokasi & Akses */}
+            <div className="px-[max(24px,calc(50%-576px))] pb-6">
+                <LokasiPanel destinasi={destinasi} />
             </div>
 
             {/* Ulasan section */}
