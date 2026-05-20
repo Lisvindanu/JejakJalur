@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import {
     IconMapPin,
@@ -24,6 +24,16 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
         (sum, k) => sum + k.stasiun.length,
         0,
     );
+
+    const focusDest = useMemo(() => {
+        if (typeof window === 'undefined') return null;
+        const params = new URLSearchParams(window.location.search);
+        const lat = parseFloat(params.get('dest_lat') ?? '');
+        const lng = parseFloat(params.get('dest_lng') ?? '');
+        const nama = params.get('dest_nama') ?? '';
+        if (!isNaN(lat) && !isNaN(lng) && nama) return { lat, lng, nama };
+        return null;
+    }, []);
     const [ruteAktif, setRuteAktif] = useState<StasiunRute[] | null>(null);
     const [kotaAktif, setKotaAktif] = useState<Kota | null>(null);
     const [tampilSemua, setTampilSemua] = useState(false);
@@ -83,7 +93,7 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
 
             {/* Interactive Leaflet map */}
             <div className="border-b border-stone-100 bg-white px-[max(24px,calc(50%-576px))] py-8">
-                <RuteMap semuaKota={semuaKota} route={ruteAktif} />
+                <RuteMap semuaKota={semuaKota} route={ruteAktif} focusDest={focusDest} />
             </div>
 
             {/* Trip planner */}
