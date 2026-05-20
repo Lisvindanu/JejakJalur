@@ -7,7 +7,20 @@ interface KotaSectionProps {
     kota: Kota[];
 }
 
-const VISIBLE = 8;
+const FOTO_KOTA: Record<string, string> = {
+    Bandung:
+        'https://images.unsplash.com/photo-1676910905288-3a72eacb3512?auto=format&fit=crop&w=800&q=80',
+    'Bandung Barat':
+        'https://images.unsplash.com/photo-1620831568226-8735f4e4e8b8?auto=format&fit=crop&w=800&q=80',
+    Banjar: 'https://images.unsplash.com/photo-1622943784867-c0f9e38bb40a?auto=format&fit=crop&w=800&q=80',
+    Bantul: 'https://images.unsplash.com/photo-1705308536459-37414c592fc6?auto=format&fit=crop&w=800&q=80',
+    Banyuwangi:
+        'https://images.unsplash.com/photo-1683186729603-0e6081a605b3?auto=format&fit=crop&w=800&q=80',
+    Batang: 'https://images.unsplash.com/photo-1709462721262-caace3e3a3af?auto=format&fit=crop&w=800&q=80',
+    Blitar: 'https://images.unsplash.com/photo-1719406202631-d2d57b5f377b?auto=format&fit=crop&w=800&q=80',
+};
+
+const VISIBLE = 9;
 const MODAL_STEP = 12;
 
 export default function KotaSection({ kota }: KotaSectionProps) {
@@ -58,27 +71,111 @@ export default function KotaSection({ kota }: KotaSectionProps) {
                 )}
             </div>
 
-            {/* Main pills */}
-            <div className="flex flex-wrap gap-2.5">
-                {visible.map((k) => (
-                    <Link
-                        key={k.id}
-                        href={`/destinasi?kota_id=${k.id}`}
-                        className="group inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-[18px] py-[9px] text-sm no-underline transition-all duration-[180ms] hover:border-emerald-600 hover:bg-emerald-50"
-                    >
-                        <IconMapPin
-                            size={14}
-                            className="text-stone-400 group-hover:text-emerald-700"
-                        />
-                        <span className="font-medium text-stone-700 group-hover:text-emerald-700">
-                            {k.nama}
-                        </span>
-                        <span className="text-stone-300">·</span>
-                        <span className="text-xs text-stone-400">
-                            {k.stasiun.length} stasiun
-                        </span>
-                    </Link>
-                ))}
+            {/* Irregular grid — pola kolom: [3,1 | 1,2,1 | 1,2,1] */}
+            <div className="grid grid-cols-4 gap-3">
+                {visible.map((k, i) => {
+                    const SPANS = [2, 1, 1, 1, 2, 1, 1, 1, 2];
+                    const span = SPANS[i] ?? 1;
+                    const spanClass =
+                        span === 3
+                            ? 'col-span-3'
+                            : span === 2
+                              ? 'col-span-2'
+                              : 'col-span-1';
+                    const isWide = span >= 2;
+                    const gradients = [
+                        'from-emerald-800 to-teal-600',
+                        'from-stone-700 to-stone-500',
+                        'from-amber-700 to-orange-500',
+                        'from-sky-700 to-blue-500',
+                        'from-violet-700 to-purple-500',
+                        'from-rose-700 to-pink-500',
+                        'from-teal-700 to-emerald-500',
+                        'from-orange-700 to-amber-500',
+                        'from-cyan-700 to-sky-500',
+                    ];
+                    const grad = gradients[i % gradients.length];
+                    const foto = FOTO_KOTA[k.nama];
+
+                    if (isWide) {
+                        return (
+                            <Link
+                                key={k.id}
+                                href={`/destinasi?kota_id=${k.id}`}
+                                className={`group flex overflow-hidden rounded-2xl border border-stone-200 bg-white no-underline transition-all duration-[180ms] hover:border-emerald-300 hover:shadow-md ${spanClass}`}
+                            >
+                                <div
+                                    className={`relative shrink-0 overflow-hidden ${span === 3 ? 'w-[55%]' : 'w-[50%]'}`}
+                                >
+                                    {foto ? (
+                                        <img
+                                            src={foto}
+                                            alt={k.nama}
+                                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        />
+                                    ) : (
+                                        <div
+                                            className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${grad}`}
+                                        >
+                                            <IconMapPin
+                                                size={28}
+                                                className="text-white/25"
+                                            />
+                                        </div>
+                                    )}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/10" />
+                                </div>
+                                <div className="flex flex-col justify-center gap-1 px-4 py-4">
+                                    <p className="text-sm font-semibold text-stone-800 group-hover:text-emerald-800">
+                                        {k.nama}
+                                    </p>
+                                    <p className="text-xs text-stone-400">
+                                        {k.stasiun.length} stasiun
+                                    </p>
+                                    <p className="mt-1.5 text-xs font-medium text-emerald-700 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+                                        Lihat destinasi →
+                                    </p>
+                                </div>
+                            </Link>
+                        );
+                    }
+
+                    return (
+                        <Link
+                            key={k.id}
+                            href={`/destinasi?kota_id=${k.id}`}
+                            className="group col-span-1 flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white no-underline transition-all duration-[180ms] hover:border-emerald-300 hover:shadow-md"
+                        >
+                            <div className="relative h-32 overflow-hidden">
+                                {foto ? (
+                                    <img
+                                        src={foto}
+                                        alt={k.nama}
+                                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    />
+                                ) : (
+                                    <div
+                                        className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${grad}`}
+                                    >
+                                        <IconMapPin
+                                            size={20}
+                                            className="text-white/25"
+                                        />
+                                    </div>
+                                )}
+                                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/10" />
+                            </div>
+                            <div className="p-3">
+                                <p className="text-sm font-semibold text-stone-800 group-hover:text-emerald-800">
+                                    {k.nama}
+                                </p>
+                                <p className="text-xs text-stone-400">
+                                    {k.stasiun.length} stasiun
+                                </p>
+                            </div>
+                        </Link>
+                    );
+                })}
             </div>
 
             {/* Floating modal */}

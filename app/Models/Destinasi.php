@@ -42,7 +42,16 @@ class Destinasi extends Model
     protected function fotoUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->foto ? app(FotoService::class)->url($this->foto) : null,
+            get: function () {
+                if (! $this->foto) {
+                    return null;
+                }
+                try {
+                    return app(FotoService::class)->url($this->foto);
+                } catch (\Throwable) {
+                    return null;
+                }
+            },
         );
     }
 
