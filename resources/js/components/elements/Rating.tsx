@@ -9,11 +9,12 @@ interface RatingDisplayProps {
 }
 
 export function RatingDisplay({
-    value,
+    value: rawValue,
     size = 13,
     showLabel = true,
     className,
 }: RatingDisplayProps) {
+    const value = rawValue ?? 0;
     const stars = Array.from({ length: 5 }, (_, i) => {
         const position = i + 1;
         if (value >= position) {
