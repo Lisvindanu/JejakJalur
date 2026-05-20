@@ -5,10 +5,11 @@ import Input from '@/components/elements/Input';
 
 export default function RegisterForm() {
     const { data, setData, post, errors, processing } = useForm({
-        name: '',
+        nama: '',
         email: '',
         password: '',
         password_confirmation: '',
+        consent_given: false,
     });
 
     function handleSubmit(e: React.FormEvent) {
@@ -21,9 +22,9 @@ export default function RegisterForm() {
             <Input
                 label="Nama Lengkap"
                 type="text"
-                value={data.name}
-                onChange={(e) => setData('name', e.target.value)}
-                error={errors.name}
+                value={data.nama}
+                onChange={(e) => setData('nama', e.target.value)}
+                error={errors.nama}
                 placeholder="John Doe"
                 autoComplete="name"
             />
@@ -56,6 +57,25 @@ export default function RegisterForm() {
                 placeholder="••••••••"
                 autoComplete="new-password"
             />
+
+            <div className="space-y-1">
+                <label className="flex items-start gap-2.5 text-sm text-stone-600">
+                    <input
+                        type="checkbox"
+                        checked={data.consent_given}
+                        onChange={(e) => setData('consent_given', e.target.checked)}
+                        className="mt-0.5 h-4 w-4 rounded border-stone-300 accent-emerald-600"
+                    />
+                    <span>
+                        Saya menyetujui{' '}
+                        <span className="font-medium text-stone-800">syarat & ketentuan</span>{' '}
+                        dan pemrosesan data pribadi sesuai UU PDP.
+                    </span>
+                </label>
+                {errors.consent_given && (
+                    <p className="text-xs text-red-500">{errors.consent_given}</p>
+                )}
+            </div>
 
             <Button
                 type="submit"
