@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from '@inertiajs/react';
-import { IconCurrentLocation, IconMap, IconMapPin, IconTrain } from '@tabler/icons-react';
+import {
+    IconCurrentLocation,
+    IconMap,
+    IconMapPin,
+    IconTrain,
+} from '@tabler/icons-react';
 import 'leaflet/dist/leaflet.css';
 import type { Destinasi } from '@/types';
 
@@ -8,7 +13,12 @@ interface Props {
     destinasi: Destinasi;
 }
 
-function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
+function haversine(
+    lat1: number,
+    lng1: number,
+    lat2: number,
+    lng2: number,
+): number {
     const R = 6371;
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
     const dLng = ((lng2 - lng1) * Math.PI) / 180;
@@ -23,7 +33,6 @@ function haversine(lat1: number, lng1: number, lat2: number, lng2: number): numb
 function formatJarak(km: number): string {
     return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
 }
-
 
 export default function LokasiPanel({ destinasi }: Props) {
     const mapRef = useRef<HTMLDivElement>(null);
@@ -53,12 +62,18 @@ export default function LokasiPanel({ destinasi }: Props) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             delete (L.Icon.Default.prototype as any)._getIconUrl;
             L.Icon.Default.mergeOptions({
-                iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-                iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-                shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                iconRetinaUrl:
+                    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+                iconUrl:
+                    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                shadowUrl:
+                    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
             });
 
-            const map = L.map(mapRef.current!, { zoomControl: true, scrollWheelZoom: false });
+            const map = L.map(mapRef.current!, {
+                zoomControl: true,
+                scrollWheelZoom: false,
+            });
             leafletMap.current = map;
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -92,12 +107,18 @@ export default function LokasiPanel({ destinasi }: Props) {
                 bounds.push([stasiunLat, stasiunLng]);
 
                 // Garis dari stasiun ke destinasi
-                L.polyline([[stasiunLat, stasiunLng], [destLat, destLng]], {
-                    color: '#065f46',
-                    weight: 2,
-                    dashArray: '6 4',
-                    opacity: 0.7,
-                }).addTo(map);
+                L.polyline(
+                    [
+                        [stasiunLat, stasiunLng],
+                        [destLat, destLng],
+                    ],
+                    {
+                        color: '#065f46',
+                        weight: 2,
+                        dashArray: '6 4',
+                        opacity: 0.7,
+                    },
+                ).addTo(map);
             }
 
             map.fitBounds(bounds, { padding: [40, 40] });
@@ -115,7 +136,12 @@ export default function LokasiPanel({ destinasi }: Props) {
         setGpsError(null);
         navigator.geolocation.getCurrentPosition(
             (pos) => {
-                const jarak = haversine(pos.coords.latitude, pos.coords.longitude, destLat, destLng);
+                const jarak = haversine(
+                    pos.coords.latitude,
+                    pos.coords.longitude,
+                    destLat,
+                    destLng,
+                );
                 setJarakDariSaya(jarak);
                 setLoadingGps(false);
 
@@ -128,7 +154,9 @@ export default function LokasiPanel({ destinasi }: Props) {
                             iconAnchor: [14, 28],
                             className: '',
                         });
-                        L.marker([pos.coords.latitude, pos.coords.longitude], { icon: myIcon })
+                        L.marker([pos.coords.latitude, pos.coords.longitude], {
+                            icon: myIcon,
+                        })
                             .addTo(leafletMap.current)
                             .bindPopup('<b>Lokasi Saya</b>')
                             .openPopup();
@@ -137,7 +165,11 @@ export default function LokasiPanel({ destinasi }: Props) {
             },
             (err) => {
                 setLoadingGps(false);
-                setGpsError(err.code === 1 ? 'Izin lokasi ditolak.' : 'Gagal mendapatkan lokasi.');
+                setGpsError(
+                    err.code === 1
+                        ? 'Izin lokasi ditolak.'
+                        : 'Gagal mendapatkan lokasi.',
+                );
             },
             { enableHighAccuracy: true, timeout: 10000 },
         );
@@ -147,7 +179,9 @@ export default function LokasiPanel({ destinasi }: Props) {
         // Fallback: belum ada koordinat, tampilkan link maps saja
         return (
             <div className="rounded-xl border border-stone-100 bg-white p-5">
-                <h2 className="mb-3 text-sm font-semibold text-stone-800">Lokasi &amp; Akses</h2>
+                <h2 className="mb-3 text-sm font-semibold text-stone-800">
+                    Lokasi &amp; Akses
+                </h2>
                 <p className="mb-3 flex items-center gap-1.5 text-sm text-stone-500">
                     <IconMapPin size={15} className="shrink-0 text-stone-400" />
                     {destinasi.alamat}
@@ -164,9 +198,11 @@ export default function LokasiPanel({ destinasi }: Props) {
     }
 
     return (
-        <div className="rounded-xl border border-stone-100 bg-white overflow-hidden">
+        <div className="overflow-hidden rounded-xl border border-stone-100 bg-white">
             <div className="p-5 pb-3">
-                <h2 className="mb-1 text-sm font-semibold text-stone-800">Lokasi &amp; Akses</h2>
+                <h2 className="mb-1 text-sm font-semibold text-stone-800">
+                    Lokasi &amp; Akses
+                </h2>
                 <p className="flex items-center gap-1.5 text-xs text-stone-400">
                     <IconMapPin size={13} className="shrink-0" />
                     {destinasi.alamat}
@@ -181,10 +217,15 @@ export default function LokasiPanel({ destinasi }: Props) {
                 {/* Jarak dari stasiun */}
                 {jarakStasiun !== null && (
                     <div className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-sm">
-                        <IconTrain size={15} className="shrink-0 text-blue-600" />
+                        <IconTrain
+                            size={15}
+                            className="shrink-0 text-blue-600"
+                        />
                         <span className="text-stone-600">
                             Dari Stasiun {destinasi.stasiun.nama}:{' '}
-                            <span className="font-semibold text-blue-700">{formatJarak(jarakStasiun)}</span>
+                            <span className="font-semibold text-blue-700">
+                                {formatJarak(jarakStasiun)}
+                            </span>
                         </span>
                     </div>
                 )}
@@ -192,10 +233,15 @@ export default function LokasiPanel({ destinasi }: Props) {
                 {/* Jarak dari saya */}
                 {jarakDariSaya !== null && (
                     <div className="flex items-center gap-2 rounded-lg bg-purple-50 px-3 py-2 text-sm">
-                        <IconCurrentLocation size={15} className="shrink-0 text-purple-600" />
+                        <IconCurrentLocation
+                            size={15}
+                            className="shrink-0 text-purple-600"
+                        />
                         <span className="text-stone-600">
                             Dari lokasi saya:{' '}
-                            <span className="font-semibold text-purple-700">{formatJarak(jarakDariSaya)}</span>
+                            <span className="font-semibold text-purple-700">
+                                {formatJarak(jarakDariSaya)}
+                            </span>
                         </span>
                     </div>
                 )}
@@ -213,7 +259,7 @@ export default function LokasiPanel({ destinasi }: Props) {
 
                     {/* Peta Rute */}
                     <Link
-                        href="/rute"
+                        href={`/rute?dest_lat=${destLat}&dest_lng=${destLng}&dest_nama=${encodeURIComponent(destinasi.nama)}`}
                         className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-700 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-800"
                     >
                         <IconMap size={13} />

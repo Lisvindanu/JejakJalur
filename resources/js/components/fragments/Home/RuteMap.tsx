@@ -4,9 +4,16 @@ import 'leaflet/dist/leaflet.css';
 import { IconTrain, IconX } from '@tabler/icons-react';
 import type { Kota, Stasiun, StasiunRute } from '@/types';
 
+interface FocusDest {
+    lat: number;
+    lng: number;
+    nama: string;
+}
+
 interface Props {
     semuaKota: Kota[];
     route?: StasiunRute[] | null;
+    focusDest?: FocusDest | null;
 }
 
 interface SelectedStation {
@@ -33,7 +40,7 @@ const WARNA_KOTA = [
     '#0f766e',
 ];
 
-export default function RuteMap({ semuaKota, route }: Props) {
+export default function RuteMap({ semuaKota, route, focusDest }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mapRef = useRef<any>(null);
@@ -46,6 +53,7 @@ export default function RuteMap({ semuaKota, route }: Props) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const routePolylineRef = useRef<any>(null);
     const [selected, setSelected] = useState<SelectedStation | null>(null);
+    const [mapReady, setMapReady] = useState(false);
 
     useEffect(() => {
         if (!containerRef.current || mapRef.current) return;
@@ -174,6 +182,7 @@ export default function RuteMap({ semuaKota, route }: Props) {
             });
 
             mapRef.current = map;
+            setMapReady(true);
         });
 
         return () => {
@@ -182,8 +191,29 @@ export default function RuteMap({ semuaKota, route }: Props) {
                 mapRef.current.remove();
                 mapRef.current = null;
             }
+            setMapReady(false);
         };
     }, [semuaKota]);
+
+    // Pin + zoom ke destinasi yang di-fokus (dari query string)
+    useEffect(() => {
+        if (!mapReady || !mapRef.current || !focusDest) return;
+
+        import('leaflet').then((mod) => {
+            const L = mod.default ?? mod;
+            const icon = L.divIcon({
+                html: `<div style="background:#065f46;color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid #fff;box-shadow:0 2px 12px rgba(0,0,0,.35)">📍</div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                className: '',
+            });
+            L.marker([focusDest.lat, focusDest.lng], { icon })
+                .addTo(mapRef.current)
+                .bindPopup(`<b>${focusDest.nama}</b>`)
+                .openPopup();
+            mapRef.current.setView([focusDest.lat, focusDest.lng], 14);
+        });
+    }, [mapReady, focusDest]);
 
     useEffect(() => {
         const map = mapRef.current;
