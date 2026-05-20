@@ -13,7 +13,7 @@ class StasiunRequest extends FormRequest
 
         return [
             'kota_id' => ['required', 'uuid', 'exists:kota,id'],
-            'nama' => ['required', 'string', 'max:100', Rule::unique('stasiun', 'nama')->ignore($stasiunYangDiedit)],
+            'nama' => ['required', 'string', 'max:100', Rule::unique('stasiun')->where('kota_id', $this->input('kota_id'))->ignore($stasiunYangDiedit)],
             'kode_stasiun' => ['required', 'string', 'max:10'],
             'lat' => ['nullable', 'numeric', 'between:-90,90'],
             'lng' => ['nullable', 'numeric', 'between:-180,180'],
