@@ -21,7 +21,7 @@ class Destinasi extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'stasiun_id', 'nama', 'deskripsi', 'alamat',
+        'stasiun_id', 'nama', 'deskripsi', 'alamat', 'lat', 'lng',
         'kategori', 'rating', 'foto', 'is_verified',
     ];
 
