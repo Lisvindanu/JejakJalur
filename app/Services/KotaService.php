@@ -3,10 +3,13 @@
 namespace App\Services;
 
 use App\Models\Kota;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
 class KotaService
 {
+    private const JUMLAH_PER_HALAMAN = 20;
+
     public function semuaKotaDenganStasiun(): Collection
     {
         return Kota::with(['stasiun' => fn ($q) => $q->withCount('destinasi')])
@@ -15,12 +18,13 @@ class KotaService
             ->get();
     }
 
-    public function semuaKota(?string $search = null): Collection
+    public function semuaKota(?string $search = null): LengthAwarePaginator
     {
         return Kota::withCount('stasiun')
             ->when($search, fn ($q) => $q->where('nama', 'ILIKE', "%{$search}%"))
             ->orderBy('nama')
-            ->get();
+            ->paginate(self::JUMLAH_PER_HALAMAN)
+            ->withQueryString();
     }
 
     public function buatKota(array $data): Kota
