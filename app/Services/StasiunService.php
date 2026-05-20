@@ -7,9 +7,14 @@ use Illuminate\Database\Eloquent\Collection;
 
 class StasiunService
 {
-    public function semuaStasiunDenganKota(): Collection
+    public function semuaStasiunDenganKota(?string $search = null): Collection
     {
-        return Stasiun::with('kota')->withCount('destinasi')->orderBy('nama')->get();
+        return Stasiun::with('kota')
+            ->withCount('destinasi')
+            ->when($search, fn ($q) => $q->where('nama', 'ILIKE', "%{$search}%")
+                ->orWhereHas('kota', fn ($k) => $k->where('nama', 'ILIKE', "%{$search}%")))
+            ->orderBy('nama')
+            ->get();
     }
 
     public function stasiunBerdasarkanKota(string $kotaId): Collection

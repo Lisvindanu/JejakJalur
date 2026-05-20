@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\KotaRequest;
 use App\Models\Kota;
 use App\Services\KotaService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,10 +15,11 @@ class KotaController extends Controller
 {
     public function __construct(private KotaService $kotaService) {}
 
-    public function indeks(): Response
+    public function indeks(Request $request): Response
     {
         return Inertia::render('Admin/Kota/Indeks', [
-            'kota' => $this->kotaService->semuaKota(),
+            'kota' => $this->kotaService->semuaKota($request->input('search')),
+            'search' => $request->input('search'),
         ]);
     }
 

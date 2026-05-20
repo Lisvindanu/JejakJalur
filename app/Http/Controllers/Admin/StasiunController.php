@@ -8,6 +8,7 @@ use App\Models\Stasiun;
 use App\Services\KotaService;
 use App\Services\StasiunService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,10 +19,11 @@ class StasiunController extends Controller
         private KotaService $kotaService,
     ) {}
 
-    public function indeks(): Response
+    public function indeks(Request $request): Response
     {
         return Inertia::render('Admin/Stasiun/Indeks', [
-            'stasiun' => $this->stasiunService->semuaStasiunDenganKota(),
+            'stasiun' => $this->stasiunService->semuaStasiunDenganKota($request->input('search')),
+            'search' => $request->input('search'),
         ]);
     }
 
