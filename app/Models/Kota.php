@@ -2,13 +2,18 @@
 
 namespace App\Models;
 
+use App\Observers\KotaObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[ObservedBy(KotaObserver::class)]
 class Kota extends Model
 {
     protected $table = 'kota';
+
     protected $keyType = 'string';
+
     public $incrementing = false;
 
     protected $fillable = ['nama', 'kode_ibukota'];
