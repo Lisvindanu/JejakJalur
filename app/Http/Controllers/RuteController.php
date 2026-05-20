@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Stasiun;
-use App\Services\RuteService;
+use App\Services\KotaService;
+use App\Services\StasiunService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -11,43 +11,30 @@ use Inertia\Response;
 
 class RuteController extends Controller
 {
-    public function __construct(private RuteService $ruteService) {}
+    public function __construct(
+        private KotaService $kotaService,
+        private StasiunService $stasiunService,
+    ) {}
 
-    public function tampilkan(Request $request): Response
+    public function tampilkan(): Response
     {
-        $rute = null;
-        $dariStasiun = null;
-        $keStasiun = null;
-        $tidakDitemukan = false;
-
-        if ($request->filled('dari') && $request->filled('ke')) {
-            $dariStasiun = Stasiun::with('kota')->find($request->input('dari'));
-            $keStasiun = Stasiun::with('kota')->find($request->input('ke'));
-
-            if ($dariStasiun && $keStasiun) {
-                $rute = $this->ruteService->cariRute($dariStasiun->id, $keStasiun->id);
-                $tidakDitemukan = $rute === null;
-            }
-        }
-
-        return Inertia::render('rute/tampilkan', [
-            'rute' => $rute,
-            'dariStasiun' => $dariStasiun,
-            'keStasiun' => $keStasiun,
-            'tidakDitemukan' => $tidakDitemukan,
+        return Inertia::render('Rute/Tampilkan', [
+            'semuaKota' => $this->kotaService->semuaKotaDenganStasiun(),
         ]);
     }
 
     public function cariStasiun(Request $request): JsonResponse
     {
-        $query = $request->input('q', '');
+        $query = $request->string('q')->toString();
 
         if (strlen($query) < 2) {
             return response()->json([]);
         }
 
-        $results = $this->ruteService->cariStasiun($query);
+        $stasiun = $this->stasiunService->semuaStasiunDenganKota()
+            ->filter(fn ($s) => str_contains(strtolower($s->nama), strtolower($query)))
+            ->values();
 
-        return response()->json($results);
+        return response()->json($stasiun);
     }
 }
