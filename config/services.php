@@ -43,6 +43,8 @@ return [
 
     'tavily' => [
         'key' => env('TAVILY_API_KEY'),
+        'key_2' => env('TAVILY_API_KEY_2'),
+        'key_3' => env('TAVILY_API_KEY_3'),
     ],
 
 ];
