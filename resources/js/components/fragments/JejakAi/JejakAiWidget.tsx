@@ -1,10 +1,5 @@
 import { usePage } from '@inertiajs/react';
-import {
-    IconRobot,
-    IconSend,
-    IconTrain,
-    IconX,
-} from '@tabler/icons-react';
+import { IconRobot, IconSend, IconTrain, IconX } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { SharedProps } from '@/types';
@@ -55,7 +50,7 @@ function TypingDots() {
             {[0, 1, 2].map((i) => (
                 <span
                     key={i}
-                    className="h-2 w-2 rounded-full bg-stone-400 animate-bounce"
+                    className="h-2 w-2 animate-bounce rounded-full bg-stone-400"
                     style={{ animationDelay: `${i * 0.15}s` }}
                 />
             ))}
@@ -69,7 +64,7 @@ function MessageBubble({ msg }: { msg: Message }) {
     return (
         <div className={cn('flex', isUser ? 'justify-end' : 'justify-start')}>
             {!isUser && (
-                <div className="mr-2 mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+                <div className="mt-1 mr-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100">
                     <IconRobot size={15} className="text-emerald-700" />
                 </div>
             )}
@@ -128,7 +123,9 @@ export default function JejakAiWidget() {
 
     /* Load status on mount */
     useEffect(() => {
-        apiGet<Usage>('/ai/status').then(setUsage).catch(() => null);
+        apiGet<Usage>('/ai/status')
+            .then(setUsage)
+            .catch(() => null);
     }, []);
 
     /* Scroll to bottom on new messages */
@@ -244,13 +241,15 @@ export default function JejakAiWidget() {
             <div
                 className={cn(
                     /* mobile: bottom sheet */
-                    'fixed left-0 right-0 bottom-0 z-[200] flex flex-col',
+                    'fixed right-0 bottom-0 left-0 z-[200] flex flex-col',
                     'rounded-t-2xl bg-white shadow-[0_-4px_40px_rgba(0,0,0,0.18)]',
                     'transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
                     open ? 'translate-y-0' : 'translate-y-full',
                     /* desktop: floating panel */
-                    'sm:left-auto sm:right-6 sm:bottom-[88px] sm:w-[380px] sm:rounded-2xl sm:shadow-[0_16px_64px_rgba(0,0,0,0.22)]',
-                    open ? 'sm:translate-y-0' : 'sm:translate-y-4 sm:opacity-0 sm:pointer-events-none',
+                    'sm:right-6 sm:bottom-[88px] sm:left-auto sm:w-[380px] sm:rounded-2xl sm:shadow-[0_16px_64px_rgba(0,0,0,0.22)]',
+                    open
+                        ? 'sm:translate-y-0'
+                        : 'sm:pointer-events-none sm:translate-y-4 sm:opacity-0',
                 )}
                 style={{ maxHeight: '80dvh' }}
             >
@@ -259,7 +258,7 @@ export default function JejakAiWidget() {
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-700">
                         <IconRobot size={17} className="text-white" />
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                             <span className="text-sm font-semibold text-stone-800">
                                 Jejak AI
@@ -290,7 +289,7 @@ export default function JejakAiWidget() {
                     ))}
                     {loading && (
                         <div className="flex justify-start">
-                            <div className="mr-2 mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+                            <div className="mt-1 mr-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100">
                                 <IconRobot
                                     size={15}
                                     className="text-emerald-700"
@@ -330,7 +329,7 @@ export default function JejakAiWidget() {
                 {/* Input */}
                 {!limitReached && (
                     <div className="shrink-0 border-t border-stone-100 p-3">
-                        <div className="flex items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 focus-within:border-emerald-400 focus-within:bg-white transition-colors">
+                        <div className="flex items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 transition-colors focus-within:border-emerald-400 focus-within:bg-white">
                             <input
                                 ref={inputRef}
                                 value={input}
@@ -347,7 +346,7 @@ export default function JejakAiWidget() {
                                     'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors',
                                     input.trim() && !loading
                                         ? 'bg-emerald-700 text-white hover:bg-emerald-800'
-                                        : 'bg-stone-200 text-stone-400 cursor-not-allowed',
+                                        : 'cursor-not-allowed bg-stone-200 text-stone-400',
                                 )}
                             >
                                 <IconSend size={15} />
@@ -365,10 +364,10 @@ export default function JejakAiWidget() {
             <button
                 onClick={() => setOpen((o) => !o)}
                 className={cn(
-                    'fixed bottom-6 right-6 z-[200] flex h-14 w-14 items-center justify-center rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.22)] transition-all duration-300',
+                    'fixed right-6 bottom-6 z-[200] flex h-14 w-14 items-center justify-center rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.22)] transition-all duration-300',
                     open
-                        ? 'bg-stone-700 rotate-0 scale-95'
-                        : 'bg-emerald-700 hover:bg-emerald-800 hover:scale-105',
+                        ? 'scale-95 rotate-0 bg-stone-700'
+                        : 'bg-emerald-700 hover:scale-105 hover:bg-emerald-800',
                 )}
                 aria-label="Buka Jejak AI"
             >
