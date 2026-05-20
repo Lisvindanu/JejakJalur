@@ -159,14 +159,53 @@ class JejakAiService
 
     private function buildKnowledge(string $query): string
     {
-        // Try vector similarity search first
         $parts = $this->vectorKnowledge($query);
+
+        // Always supplement with direct name-match search
+        // so specific station/destination names never get missed
+        $nameParts = $this->nameMatchKnowledge($query, array_column($parts, null));
+        if (! empty($nameParts)) {
+            $parts = array_merge($parts, $nameParts);
+        }
+
         if (! empty($parts)) {
             return implode("\n\n", $parts);
         }
 
         // Fallback: keyword search
         return $this->keywordKnowledge($query);
+    }
+
+    private function nameMatchKnowledge(string $query, array $existingParts): array
+    {
+        $parts = [];
+        $lower = strtolower($query);
+        $existingText = implode(' ', $existingParts);
+
+        // Direct station name match
+        $stasiuns = Stasiun::with('kota')
+            ->where(fn ($q) => $q->whereRaw('LOWER(nama) LIKE ?', ["%{$lower}%"])
+                ->orWhereRaw('LOWER(kode_stasiun) LIKE ?', ["%{$lower}%"]))
+            ->limit(5)->get();
+
+        $newStasiuns = $stasiuns->filter(fn ($s) => ! str_contains($existingText, $s->nama));
+        if ($newStasiuns->isNotEmpty()) {
+            $list = $newStasiuns->map(fn ($s) => "- Stasiun {$s->nama} [{$s->kode_stasiun}] di {$s->kota->nama}")->join("\n");
+            $parts[] = "STASIUN (nama match):\n{$list}";
+        }
+
+        // Direct destinasi name match
+        $destinasis = Destinasi::with('stasiun.kota')
+            ->whereRaw('LOWER(nama) LIKE ?', ["%{$lower}%"])
+            ->limit(5)->get();
+
+        $newDest = $destinasis->filter(fn ($d) => ! str_contains($existingText, $d->nama));
+        if ($newDest->isNotEmpty()) {
+            $list = $newDest->map(fn ($d) => "- {$d->nama} [{$d->kategori}] dekat Stasiun {$d->stasiun?->nama}, {$d->stasiun?->kota?->nama}")->join("\n");
+            $parts[] = "DESTINASI (nama match):\n{$list}";
+        }
+
+        return $parts;
     }
 
     private function vectorKnowledge(string $query): array
@@ -337,6 +376,13 @@ YANG BISA KAMU JAWAB:
 - Stasiun apa saja yang ada di suatu kota (gunakan data di bawah)
 - Destinasi wisata, kuliner, UMKM di sekitar stasiun (gunakan data di bawah)
 - Pertanyaan navigasi aplikasi JejakJalur
+- Siapa yang membuat/mengembangkan JejakJalur (gunakan info developer di bawah)
+
+INFO DEVELOPER JEJAKJALUR:
+JejakJalur dikembangkan oleh dua orang:
+- Lisvindanu — portofolio: anaphygon.my.id
+- Muhamad Marsa Nur Jaman — portofolio: cyliatech.my.id
+Jika ada yang bertanya siapa pembuat, kreator, developer, atau yang mengerjakan JejakJalur, sebutkan keduanya beserta link portofolio masing-masing.
 
 YANG TIDAK BISA KAMU JAWAB (redirect sopan):
 - Jadwal keberangkatan/kedatangan kereta → arahkan ke kai.id atau KAI Access
