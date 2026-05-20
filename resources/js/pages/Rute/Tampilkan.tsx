@@ -55,7 +55,7 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
 
             {/* Interactive Leaflet map */}
             <div className="border-b border-stone-100 bg-white px-[max(24px,calc(50%-576px))] py-8">
-                <RuteMap />
+                <RuteMap semuaKota={semuaKota} />
             </div>
 
             {/* Station directory */}
