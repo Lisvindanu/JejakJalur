@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -28,6 +29,11 @@ class User extends Authenticatable
         'consent_given' => 'boolean',
         'password' => 'hashed',
     ];
+
+    public function sendPasswordResetNotification(string $token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
+    }
 
     public function ulasan(): HasMany
     {
