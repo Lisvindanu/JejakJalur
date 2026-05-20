@@ -53,7 +53,8 @@ export default function RuteMap({ semuaKota, route, focusDest }: Props) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const routePolylineRef = useRef<any>(null);
     const [selected, setSelected] = useState<SelectedStation | null>(null);
-    const [mapReady, setMapReady] = useState(false);
+    const focusDestRef = useRef<FocusDest | null>(null);
+    focusDestRef.current = focusDest ?? null;
 
     useEffect(() => {
         if (!containerRef.current || mapRef.current) return;
@@ -182,7 +183,22 @@ export default function RuteMap({ semuaKota, route, focusDest }: Props) {
             });
 
             mapRef.current = map;
-            setMapReady(true);
+
+            // Pin + zoom ke destinasi jika datang dari halaman detail
+            const fd = focusDestRef.current;
+            if (fd) {
+                const destPinIcon = L.divIcon({
+                    html: `<div style="background:#065f46;color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid #fff;box-shadow:0 2px 12px rgba(0,0,0,.35)">📍</div>`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32],
+                    className: '',
+                });
+                L.marker([fd.lat, fd.lng], { icon: destPinIcon })
+                    .addTo(map)
+                    .bindPopup(`<b>${fd.nama}</b>`)
+                    .openPopup();
+                map.setView([fd.lat, fd.lng], 14);
+            }
         });
 
         return () => {
@@ -191,29 +207,8 @@ export default function RuteMap({ semuaKota, route, focusDest }: Props) {
                 mapRef.current.remove();
                 mapRef.current = null;
             }
-            setMapReady(false);
         };
-    }, [semuaKota]);
-
-    // Pin + zoom ke destinasi yang di-fokus (dari query string)
-    useEffect(() => {
-        if (!mapReady || !mapRef.current || !focusDest) return;
-
-        import('leaflet').then((mod) => {
-            const L = mod.default ?? mod;
-            const icon = L.divIcon({
-                html: `<div style="background:#065f46;color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid #fff;box-shadow:0 2px 12px rgba(0,0,0,.35)">📍</div>`,
-                iconSize: [32, 32],
-                iconAnchor: [16, 32],
-                className: '',
-            });
-            L.marker([focusDest.lat, focusDest.lng], { icon })
-                .addTo(mapRef.current)
-                .bindPopup(`<b>${focusDest.nama}</b>`)
-                .openPopup();
-            mapRef.current.setView([focusDest.lat, focusDest.lng], 14);
-        });
-    }, [mapReady, focusDest]);
+    }, [semuaKota]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         const map = mapRef.current;
