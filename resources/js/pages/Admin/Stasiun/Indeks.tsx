@@ -7,7 +7,12 @@ import type { PaginatedData } from '@/types';
 import { useConfirm } from '@/hooks/useConfirm';
 import { MOCK_STASIUN, mockPaginate } from '@/lib/mock-data';
 import { Head, Link, router } from '@inertiajs/react';
-import { IconPencil, IconPlus, IconSearch, IconTrash } from '@tabler/icons-react';
+import {
+    IconPencil,
+    IconPlus,
+    IconSearch,
+    IconTrash,
+} from '@tabler/icons-react';
 import { useState } from 'react';
 
 interface StasiunRow {
@@ -23,14 +28,21 @@ interface Props {
     search?: string;
 }
 
-export default function StasiunIndeks({ stasiun: stasiunProp, search: searchProp }: Props) {
-    const stasiun = stasiunProp ?? mockPaginate(MOCK_STASIUN as unknown as StasiunRow[]);
+export default function StasiunIndeks({
+    stasiun: stasiunProp,
+    search: searchProp,
+}: Props) {
+    const stasiun =
+        stasiunProp ?? mockPaginate(MOCK_STASIUN as unknown as StasiunRow[]);
     const [search, setSearch] = useState(searchProp ?? '');
     const { isOpen, confirm, handleConfirm, handleCancel } = useConfirm();
 
     function handleSearch(value: string) {
         setSearch(value);
-        router.get('/admin/stasiun', value ? { search: value } : {}, { preserveState: true, replace: true });
+        router.get('/admin/stasiun', value ? { search: value } : {}, {
+            preserveState: true,
+            replace: true,
+        });
     }
 
     const columns = [
@@ -40,7 +52,9 @@ export default function StasiunIndeks({ stasiun: stasiunProp, search: searchProp
             className: 'w-12',
             render: (row: StasiunRow) => (
                 <span className="text-stone-400">
-                    {stasiun.data.indexOf(row) + 1 + (stasiun.current_page - 1) * stasiun.per_page}
+                    {stasiun.data.indexOf(row) +
+                        1 +
+                        (stasiun.current_page - 1) * stasiun.per_page}
                 </span>
             ),
         },
