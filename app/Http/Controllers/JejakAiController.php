@@ -33,7 +33,14 @@ class JejakAiController extends Controller
             ], 429);
         }
 
-        $reply = $this->aiService->chat($request->input('message'), $request->input('history', []));
+        try {
+            $reply = $this->aiService->chat($request->input('message'), $request->input('history', []));
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'error' => 'Maaf, Jejak AI sedang tidak tersedia. Silakan coba lagi nanti.',
+                'retry' => true,
+            ], 503);
+        }
 
         $session->increment('message_count');
         $session->update(['last_message_at' => now()]);
