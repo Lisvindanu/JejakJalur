@@ -1,11 +1,14 @@
 import AdminLayout from '@/components/layouts/AdminLayout';
 import Button from '@/components/elements/Button';
+import Input from '@/components/elements/Input';
 import DataTable from '@/components/fragments/Admin/DataTable';
 import ConfirmModal from '@/components/fragments/Admin/ConfirmModal';
+import type { PaginatedData } from '@/types';
 import { useConfirm } from '@/hooks/useConfirm';
-import { MOCK_STASIUN } from '@/lib/mock-data';
+import { MOCK_STASIUN, mockPaginate } from '@/lib/mock-data';
 import { Head, Link, router } from '@inertiajs/react';
-import { IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconPencil, IconPlus, IconSearch, IconTrash } from '@tabler/icons-react';
+import { useState } from 'react';
 
 interface StasiunRow {
     id: string;
@@ -16,12 +19,19 @@ interface StasiunRow {
 }
 
 interface Props {
-    stasiun?: StasiunRow[];
+    stasiun?: PaginatedData<StasiunRow>;
+    search?: string;
 }
 
-export default function StasiunIndeks({ stasiun: stasiunProp }: Props) {
-    const stasiun = (stasiunProp ?? MOCK_STASIUN) as StasiunRow[];
+export default function StasiunIndeks({ stasiun: stasiunProp, search: searchProp }: Props) {
+    const stasiun = stasiunProp ?? mockPaginate(MOCK_STASIUN as unknown as StasiunRow[]);
+    const [search, setSearch] = useState(searchProp ?? '');
     const { isOpen, confirm, handleConfirm, handleCancel } = useConfirm();
+
+    function handleSearch(value: string) {
+        setSearch(value);
+        router.get('/admin/stasiun', value ? { search: value } : {}, { preserveState: true, replace: true });
+    }
 
     const columns = [
         {
@@ -30,7 +40,7 @@ export default function StasiunIndeks({ stasiun: stasiunProp }: Props) {
             className: 'w-12',
             render: (row: StasiunRow) => (
                 <span className="text-stone-400">
-                    {stasiun.indexOf(row) + 1}
+                    {stasiun.data.indexOf(row) + 1 + (stasiun.current_page - 1) * stasiun.per_page}
                 </span>
             ),
         },
@@ -86,7 +96,7 @@ export default function StasiunIndeks({ stasiun: stasiunProp }: Props) {
                             Daftar Stasiun
                         </h2>
                         <p className="text-sm text-stone-500">
-                            {stasiun.length} stasiun terdaftar
+                            {stasiun.total} stasiun terdaftar
                         </p>
                     </div>
                     <Link href="/admin/stasiun/buat">
@@ -100,9 +110,19 @@ export default function StasiunIndeks({ stasiun: stasiunProp }: Props) {
                     </Link>
                 </div>
 
+                <div className="w-64">
+                    <Input
+                        placeholder="Cari stasiun atau kota..."
+                        value={search}
+                        leftIcon={<IconSearch size={15} />}
+                        onChange={(e) => handleSearch(e.target.value)}
+                    />
+                </div>
+
                 <DataTable
                     columns={columns}
-                    data={stasiun}
+                    data={stasiun.data}
+                    pagination={stasiun}
                     keyField="id"
                     empty="Belum ada stasiun."
                 />
