@@ -395,8 +395,8 @@ export default function PerencanaRute({
                     </p>
                 </div>
 
-                {/* 3-column picker row */}
-                <div className="flex items-stretch gap-3">
+                {/* Picker row: stacked on mobile, side-by-side on md+ */}
+                <div className="flex flex-col gap-3 md:flex-row md:items-stretch">
                     {/* ── DARI (left) ── */}
                     <div className="min-w-0 flex-1 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
                         <div className="mb-2 flex items-center justify-between">
@@ -433,7 +433,7 @@ export default function PerencanaRute({
                     </div>
 
                     {/* ── Separator ── */}
-                    <div className="flex shrink-0 flex-col items-center justify-center gap-1 self-center">
+                    <div className="hidden shrink-0 flex-col items-center justify-center gap-1 self-center md:flex">
                         <IconChevronRight
                             size={18}
                             className="text-stone-300"
