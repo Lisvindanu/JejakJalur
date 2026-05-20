@@ -1,7 +1,5 @@
 import { Link } from '@inertiajs/react';
 import {
-    IconArrowLeft,
-    IconArrowRight,
     IconBuildingCastle,
     IconMapPin,
     IconRoute,
@@ -107,63 +105,47 @@ function HeroCardDeck({ destinations }: { destinations: Destinasi[] }) {
         B: { dataIdx: 1, pos: 'mid' },
         C: { dataIdx: 2, pos: 'back' },
     });
-    const [dragX, setDragX] = useState(0);
-    const [isDragging, setIsDragging] = useState(false);
-    const [animating, setAnimating] = useState(false);
     const [noTx, setNoTx] = useState(false);
-    const [hinted, setHinted] = useState(false);
-    const startX = useRef(0);
+    const busy = useRef(false);
     const nextData = useRef(3);
 
-    const doSwipe = () => {
-        if (animating || noTx) return;
-        setHinted(true);
-        setIsDragging(false);
-        setDragX(0);
-        setAnimating(true);
-        setSlots((prev) => {
-            const n = { ...prev } as typeof prev;
-            (Object.keys(n) as SlotId[]).forEach((id) => {
-                n[id] = { ...n[id], pos: NEXT[n[id].pos] };
-            });
-            return n;
-        });
-        setTimeout(() => {
-            setNoTx(true);
+    useEffect(() => {
+        const tick = () => {
+            if (busy.current) return;
+            busy.current = true;
             setSlots((prev) => {
                 const n = { ...prev } as typeof prev;
-                const backId = (Object.keys(n) as SlotId[]).find(
-                    (id) => n[id].pos === 'back',
-                )!;
-                n[backId] = { ...n[backId], dataIdx: nextData.current % total };
-                nextData.current++;
+                (Object.keys(n) as SlotId[]).forEach((id) => {
+                    n[id] = { ...n[id], pos: NEXT[n[id].pos] };
+                });
                 return n;
             });
-            setAnimating(false);
-            requestAnimationFrame(() =>
-                requestAnimationFrame(() => setNoTx(false)),
-            );
-        }, 440);
-    };
+            setTimeout(() => {
+                setNoTx(true);
+                setSlots((prev) => {
+                    const n = { ...prev } as typeof prev;
+                    const backId = (Object.keys(n) as SlotId[]).find(
+                        (id) => n[id].pos === 'back',
+                    )!;
+                    n[backId] = {
+                        ...n[backId],
+                        dataIdx: nextData.current % total,
+                    };
+                    nextData.current++;
+                    return n;
+                });
+                requestAnimationFrame(() =>
+                    requestAnimationFrame(() => {
+                        setNoTx(false);
+                        busy.current = false;
+                    }),
+                );
+            }, 440);
+        };
 
-    const onDown = (x: number) => {
-        if (animating) return;
-        startX.current = x;
-        setIsDragging(true);
-    };
-    const onMove = (x: number) => {
-        if (!isDragging || animating) return;
-        setDragX(x - startX.current);
-    };
-    const onUp = () => {
-        if (!isDragging) return;
-        setIsDragging(false);
-        if (Math.abs(dragX) > 80) {
-            doSwipe();
-        } else {
-            setDragX(0);
-        }
-    };
+        const id = setInterval(tick, 3500);
+        return () => clearInterval(id);
+    }, [total]);
 
     const BASE: React.CSSProperties = {
         position: 'absolute',
@@ -173,31 +155,14 @@ function HeroCardDeck({ destinations }: { destinations: Destinasi[] }) {
     };
     const EASE = 'all 0.44s cubic-bezier(0.4,0,0.2,1)';
 
-    const swipeProgress = Math.min(Math.abs(dragX) / 100, 1);
-    const swipeDir = dragX > 0 ? 'right' : dragX < 0 ? 'left' : null;
-
-    const frontSlot = (Object.values(slots) as (typeof slots.A)[]).find(
-        (s) => s.pos === 'front',
-    )!;
-    const activeDot = frontSlot.dataIdx % total;
-
     return (
         <div
             className="select-none"
-            style={{ position: 'relative', width: 420, height: 530 }}
+            style={{ position: 'relative', width: 420, height: 480 }}
         >
-            {/* Cards */}
             {(Object.entries(slots) as [SlotId, typeof slots.A][]).map(
                 ([id, { dataIdx, pos }]) => {
                     const s = POS[pos];
-                    const isFront = pos === 'front';
-                    const tx = isFront ? dragX : 0;
-                    const rot = isFront ? dragX / 18 : s.rot;
-                    const shadow =
-                        isFront && isDragging
-                            ? '0 32px 80px rgba(0,0,0,0.42)'
-                            : s.sh;
-
                     return (
                         <div
                             key={id}
@@ -209,213 +174,16 @@ function HeroCardDeck({ destinations }: { destinations: Destinasi[] }) {
                                 left: s.l,
                                 opacity: s.op,
                                 zIndex: s.z,
-                                boxShadow: shadow,
-                                transform: `translateX(${tx}px) rotate(${rot}deg)`,
-                                transition:
-                                    (isDragging && isFront) || noTx
-                                        ? 'none'
-                                        : EASE,
-                                cursor: isFront
-                                    ? isDragging
-                                        ? 'grabbing'
-                                        : 'grab'
-                                    : 'default',
-                                userSelect: 'none',
+                                boxShadow: s.sh,
+                                transform: `rotate(${s.rot}deg)`,
+                                transition: noTx ? 'none' : EASE,
                             }}
-                            onMouseDown={
-                                isFront ? (e) => onDown(e.clientX) : undefined
-                            }
-                            onMouseMove={
-                                isFront ? (e) => onMove(e.clientX) : undefined
-                            }
-                            onMouseUp={isFront ? onUp : undefined}
-                            onMouseLeave={isFront ? onUp : undefined}
-                            onTouchStart={
-                                isFront
-                                    ? (e) => onDown(e.touches[0].clientX)
-                                    : undefined
-                            }
-                            onTouchMove={
-                                isFront
-                                    ? (e) => onMove(e.touches[0].clientX)
-                                    : undefined
-                            }
-                            onTouchEnd={isFront ? onUp : undefined}
                         >
                             <HeroCardFace d={destinations[dataIdx % total]} />
-
-                            {/* Drag tint overlay */}
-                            {isFront && isDragging && swipeDir && (
-                                <div
-                                    style={{
-                                        position: 'absolute',
-                                        inset: 0,
-                                        pointerEvents: 'none',
-                                        opacity: swipeProgress * 0.35,
-                                        background:
-                                            swipeDir === 'right'
-                                                ? 'linear-gradient(135deg, rgba(4,120,87,0.6) 0%, transparent 60%)'
-                                                : 'linear-gradient(225deg, rgba(220,38,38,0.5) 0%, transparent 60%)',
-                                        transition: 'opacity 0.08s',
-                                    }}
-                                />
-                            )}
-
-                            {/* Directional arrow badge */}
-                            {isFront &&
-                                isDragging &&
-                                swipeDir &&
-                                swipeProgress > 0.15 && (
-                                    <div
-                                        style={{
-                                            position: 'absolute',
-                                            top: 16,
-                                            ...(swipeDir === 'right'
-                                                ? { left: 16 }
-                                                : { right: 16 }),
-                                            opacity: Math.min(
-                                                (swipeProgress - 0.15) / 0.4,
-                                                1,
-                                            ),
-                                            transform: `scale(${0.7 + swipeProgress * 0.3})`,
-                                            transition: 'none',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 4,
-                                            background:
-                                                swipeDir === 'right'
-                                                    ? '#047857'
-                                                    : '#dc2626',
-                                            color: '#fff',
-                                            borderRadius: 9999,
-                                            padding: '4px 10px 4px 8px',
-                                            fontSize: 11,
-                                            fontWeight: 600,
-                                            boxShadow:
-                                                '0 4px 12px rgba(0,0,0,0.2)',
-                                        }}
-                                    >
-                                        {swipeDir === 'left' ? (
-                                            <>
-                                                <IconArrowLeft size={13} />
-                                                Geser
-                                            </>
-                                        ) : (
-                                            <>
-                                                <IconArrowRight size={13} />
-                                                Lanjut
-                                            </>
-                                        )}
-                                    </div>
-                                )}
                         </div>
                     );
                 },
             )}
-
-            {/* Swipe hint */}
-            {!hinted && !isDragging && !animating && (
-                <div
-                    style={{
-                        position: 'absolute',
-                        bottom: 56,
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        zIndex: 10,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        background: 'rgba(0,0,0,0.52)',
-                        backdropFilter: 'blur(6px)',
-                        color: '#fff',
-                        borderRadius: 9999,
-                        padding: '5px 14px',
-                        fontSize: 11,
-                        fontWeight: 500,
-                        letterSpacing: '0.03em',
-                        pointerEvents: 'none',
-                        animation: 'swipeHint 2.4s ease-in-out infinite',
-                    }}
-                >
-                    <IconArrowLeft size={12} style={{ opacity: 0.7 }} />
-                    geser kartu
-                    <IconArrowRight size={12} style={{ opacity: 0.7 }} />
-                </div>
-            )}
-
-            {/* Progress dots */}
-            <div
-                style={{
-                    position: 'absolute',
-                    bottom: 8,
-                    left: 14,
-                    display: 'flex',
-                    gap: 6,
-                    alignItems: 'center',
-                    zIndex: 10,
-                }}
-            >
-                {destinations.map((_, i) => (
-                    <button
-                        key={i}
-                        onClick={() => {
-                            if (animating || i === activeDot) return;
-                            setHinted(true);
-                            doSwipe();
-                        }}
-                        style={{
-                            width: i === activeDot ? 20 : 6,
-                            height: 6,
-                            borderRadius: 9999,
-                            background:
-                                i === activeDot
-                                    ? '#047857'
-                                    : 'rgba(255,255,255,0.45)',
-                            border: 'none',
-                            padding: 0,
-                            cursor: i === activeDot ? 'default' : 'pointer',
-                            transition: 'all 0.3s ease',
-                        }}
-                    />
-                ))}
-            </div>
-
-            {/* Next arrow button */}
-            <button
-                onClick={() => {
-                    if (animating) return;
-                    setHinted(true);
-                    doSwipe();
-                }}
-                style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    right: 0,
-                    zIndex: 10,
-                    width: 36,
-                    height: 36,
-                    borderRadius: 9999,
-                    background: '#047857',
-                    color: '#fff',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 16px rgba(4,120,87,0.4)',
-                    transition: 'background 0.15s, transform 0.1s',
-                }}
-                onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background =
-                        '#065f46';
-                }}
-                onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background =
-                        '#047857';
-                }}
-            >
-                <IconArrowRight size={16} />
-            </button>
         </div>
     );
 }
