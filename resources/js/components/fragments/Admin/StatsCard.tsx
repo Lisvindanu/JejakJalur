@@ -1,50 +1,47 @@
 import { cn } from '@/lib/utils';
 import type { ReactNode } from 'react';
 
-type Color = 'emerald' | 'amber' | 'blue' | 'purple';
+type Tone = 'emerald' | 'sky' | 'amber' | 'indigo' | 'rose' | 'stone';
 
 interface StatsCardProps {
+    icon: ReactNode;
     label: string;
     value: number | string;
-    icon: ReactNode;
-    color?: Color;
-    description?: string;
+    sub?: ReactNode;
+    tone?: Tone;
 }
 
-const colorClasses: Record<Color, { wrapper: string; icon: string }> = {
-    emerald: { wrapper: 'bg-emerald-100', icon: 'text-emerald-700' },
-    amber: { wrapper: 'bg-amber-100', icon: 'text-amber-700' },
-    blue: { wrapper: 'bg-blue-100', icon: 'text-blue-700' },
-    purple: { wrapper: 'bg-purple-100', icon: 'text-purple-700' },
+const toneClasses: Record<Tone, string> = {
+    emerald: 'bg-emerald-50 text-emerald-700',
+    sky: 'bg-sky-50 text-sky-700',
+    amber: 'bg-amber-50 text-amber-700',
+    indigo: 'bg-indigo-50 text-indigo-700',
+    rose: 'bg-rose-50 text-rose-700',
+    stone: 'bg-stone-100 text-stone-700',
 };
 
 export default function StatsCard({
+    icon,
     label,
     value,
-    icon,
-    color = 'emerald',
-    description,
+    sub,
+    tone = 'emerald',
 }: StatsCardProps) {
-    const { wrapper, icon: iconColor } = colorClasses[color];
-
     return (
-        <div className="flex items-start justify-between rounded-xl border border-stone-100 bg-white p-5">
-            <div>
-                <p className="text-2xl font-bold text-stone-800">{value}</p>
-                <p className="mt-0.5 text-sm text-stone-500">{label}</p>
-                {description && (
-                    <p className="mt-1 text-xs text-stone-400">{description}</p>
-                )}
-            </div>
-            <div
+        <div className="rounded-xl border border-stone-200 bg-white p-5">
+            <span
                 className={cn(
-                    'flex h-8 w-8 items-center justify-center rounded-xl',
-                    wrapper,
-                    iconColor,
+                    'inline-flex h-9 w-9 items-center justify-center rounded-lg',
+                    toneClasses[tone],
                 )}
             >
                 {icon}
+            </span>
+            <div className="mt-4 text-3xl font-bold tracking-tight text-stone-900 tabular-nums">
+                {value}
             </div>
+            <div className="mt-0.5 text-xs text-stone-500">{label}</div>
+            {sub && <div className="mt-2 text-xs text-stone-500">{sub}</div>}
         </div>
     );
 }
