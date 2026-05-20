@@ -1,4 +1,5 @@
 import AdminLayout from '@/components/layouts/AdminLayout';
+import StatsCard from '@/components/fragments/Admin/StatsCard';
 import {
     IconBuilding,
     IconCheck,
@@ -13,7 +14,6 @@ import {
 import { Head, Link } from '@inertiajs/react';
 import { MOCK_STATISTIK } from '@/lib/mock-data';
 import { cn } from '@/lib/utils';
-import type { ReactNode } from 'react';
 
 interface DestinasiPending {
     id: string;
@@ -47,56 +47,11 @@ interface Props {
     ulasanTerbaru?: UlasanTerbaru[];
 }
 
-type Tone = 'emerald' | 'sky' | 'amber' | 'indigo' | 'rose' | 'stone';
-
-const toneClasses: Record<Tone, string> = {
-    emerald: 'bg-emerald-50 text-emerald-700',
-    sky: 'bg-sky-50 text-sky-700',
-    amber: 'bg-amber-50 text-amber-700',
-    indigo: 'bg-indigo-50 text-indigo-700',
-    rose: 'bg-rose-50 text-rose-700',
-    stone: 'bg-stone-100 text-stone-700',
-};
-
 const KATEGORI_COLOR: Record<string, string> = {
     Wisata: 'bg-blue-100 text-blue-700',
     Kuliner: 'bg-amber-100 text-amber-700',
     UMKM: 'bg-emerald-100 text-emerald-700',
 };
-
-function StatCard({
-    icon,
-    label,
-    value,
-    sub,
-    tone = 'emerald',
-}: {
-    icon: ReactNode;
-    label: string;
-    value: number | string;
-    sub?: ReactNode;
-    tone?: Tone;
-}) {
-    return (
-        <div className="rounded-xl border border-stone-200 bg-white p-5">
-            <div className="flex items-center justify-between">
-                <span
-                    className={cn(
-                        'inline-flex h-9 w-9 items-center justify-center rounded-lg',
-                        toneClasses[tone],
-                    )}
-                >
-                    {icon}
-                </span>
-            </div>
-            <div className="mt-4 text-3xl font-bold tracking-tight text-stone-900 tabular-nums">
-                {value}
-            </div>
-            <div className="mt-0.5 text-xs text-stone-500">{label}</div>
-            {sub && <div className="mt-2 text-xs text-stone-500">{sub}</div>}
-        </div>
-    );
-}
 
 export default function Dashboard({
     statistik: stat,
@@ -117,19 +72,19 @@ export default function Dashboard({
             <div className="space-y-8">
                 {/* Stats grid */}
                 <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                    <StatCard
+                    <StatsCard
                         icon={<IconBuilding size={16} />}
                         label="Kota"
                         value={statistik.jumlah_kota}
                         tone="emerald"
                     />
-                    <StatCard
+                    <StatsCard
                         icon={<IconTrain size={16} />}
                         label="Stasiun"
                         value={statistik.jumlah_stasiun}
                         tone="sky"
                     />
-                    <StatCard
+                    <StatsCard
                         icon={<IconMapPin size={16} />}
                         label="Destinasi"
                         value={statistik.jumlah_destinasi}
@@ -146,19 +101,19 @@ export default function Dashboard({
                             </>
                         }
                     />
-                    <StatCard
+                    <StatsCard
                         icon={<IconUsers size={16} />}
                         label="Pengguna"
                         value={statistik.jumlah_pengguna}
                         tone="indigo"
                     />
-                    <StatCard
+                    <StatsCard
                         icon={<IconStar size={16} />}
                         label="Ulasan"
                         value={statistik.jumlah_ulasan}
                         tone="rose"
                     />
-                    <StatCard
+                    <StatsCard
                         icon={<IconRobot size={16} />}
                         label="AI pesan hari ini"
                         value={statistik.ai_pesan_hari_ini}
@@ -176,7 +131,8 @@ export default function Dashboard({
                                     Destinasi Menunggu Verifikasi
                                 </h3>
                                 <p className="text-xs text-stone-500">
-                                    {statistik.destinasi_pending} antri menunggu moderator.
+                                    {statistik.destinasi_pending} antri menunggu
+                                    moderator.
                                 </p>
                             </div>
                             <Link
@@ -194,7 +150,8 @@ export default function Dashboard({
                                     className="mx-auto text-emerald-400"
                                 />
                                 <p className="mt-2 text-sm text-stone-500">
-                                    Tidak ada destinasi yang menunggu verifikasi.
+                                    Tidak ada destinasi yang menunggu
+                                    verifikasi.
                                 </p>
                             </div>
                         ) : (
@@ -212,7 +169,9 @@ export default function Dashboard({
                                                 <span
                                                     className={cn(
                                                         'rounded-full px-1.5 py-0.5 text-[10px] font-medium',
-                                                        KATEGORI_COLOR[d.kategori] ??
+                                                        KATEGORI_COLOR[
+                                                            d.kategori
+                                                        ] ??
                                                             'bg-stone-100 text-stone-600',
                                                     )}
                                                 >
@@ -235,7 +194,8 @@ export default function Dashboard({
                                             href="/admin/destinasi"
                                             className="text-xs text-stone-400 no-underline hover:text-stone-600"
                                         >
-                                            Lihat semua ({statistik.destinasi_pending}) →
+                                            Lihat semua (
+                                            {statistik.destinasi_pending}) →
                                         </Link>
                                     </div>
                                 )}

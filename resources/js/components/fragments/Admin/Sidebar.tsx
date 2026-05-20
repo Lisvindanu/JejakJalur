@@ -19,13 +19,39 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-    { label: 'Dashboard', href: '/admin', icon: <IconLayoutDashboard size={16} /> },
-    { label: 'Kota', href: '/admin/kota', icon: <IconBuilding size={16} />, separator: true },
+    {
+        label: 'Dashboard',
+        href: '/admin',
+        icon: <IconLayoutDashboard size={16} />,
+    },
+    {
+        label: 'Kota',
+        href: '/admin/kota',
+        icon: <IconBuilding size={16} />,
+        separator: true,
+    },
     { label: 'Stasiun', href: '/admin/stasiun', icon: <IconTrain size={16} /> },
-    { label: 'Destinasi', href: '/admin/destinasi', icon: <IconMapPin size={16} />, separator: true },
-    { label: 'Pengguna', href: '/admin/pengguna', icon: <IconUsers size={16} /> },
-    { label: 'Ulasan', href: '/admin/ulasan', icon: <IconMessageCircle size={16} /> },
-    { label: 'Sesi AI', href: '/admin/ai-session', icon: <IconRobot size={16} /> },
+    {
+        label: 'Destinasi',
+        href: '/admin/destinasi',
+        icon: <IconMapPin size={16} />,
+        separator: true,
+    },
+    {
+        label: 'Pengguna',
+        href: '/admin/pengguna',
+        icon: <IconUsers size={16} />,
+    },
+    {
+        label: 'Ulasan',
+        href: '/admin/ulasan',
+        icon: <IconMessageCircle size={16} />,
+    },
+    {
+        label: 'Sesi AI',
+        href: '/admin/ai-session',
+        icon: <IconRobot size={16} />,
+    },
 ];
 
 export default function Sidebar() {
@@ -44,7 +70,7 @@ export default function Sidebar() {
                 </p>
             </div>
 
-            <nav className="flex-1 overflow-y-auto px-2 py-1 space-y-0.5">
+            <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-1">
                 {navItems.map((item) => (
                     <div key={item.href}>
                         {item.separator && (

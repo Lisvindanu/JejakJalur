@@ -46,7 +46,7 @@ function StatItem({
                 {icon}
             </span>
             <div>
-                <div className="text-xl font-bold tabular-nums text-stone-900">
+                <div className="text-xl font-bold text-stone-900 tabular-nums">
                     {value}
                 </div>
                 <div className="text-xs text-stone-500">{label}</div>
@@ -162,8 +162,8 @@ export default function Tampilkan({
                             Zona Bahaya
                         </h3>
                         <p className="mt-1 text-sm text-stone-600">
-                            Tindakan ini tidak dapat dibatalkan. Semua ulasan dan
-                            data akun akan dihapus permanen.
+                            Tindakan ini tidak dapat dibatalkan. Semua ulasan
+                            dan data akun akan dihapus permanen.
                         </p>
                         <Button
                             variant="danger"
@@ -195,7 +195,8 @@ export default function Tampilkan({
             >
                 <p className="text-sm text-stone-600">
                     Apakah kamu yakin ingin menghapus akun? Tindakan ini tidak
-                    dapat dibatalkan dan semua data akunmu akan dihapus permanen.
+                    dapat dibatalkan dan semua data akunmu akan dihapus
+                    permanen.
                 </p>
             </Modal>
         </PublicLayout>
