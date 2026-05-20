@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { IconCurrentLocation, IconExternalLink, IconMapPin, IconTrain } from '@tabler/icons-react';
+import { Link } from '@inertiajs/react';
+import { IconCurrentLocation, IconMap, IconMapPin, IconTrain } from '@tabler/icons-react';
 import 'leaflet/dist/leaflet.css';
 import type { Destinasi } from '@/types';
 
@@ -23,9 +24,6 @@ function formatJarak(km: number): string {
     return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
 }
 
-function mapsUrl(lat: number, lng: number, label: string): string {
-    return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}&query_place_id=${encodeURIComponent(label)}`;
-}
 
 export default function LokasiPanel({ destinasi }: Props) {
     const mapRef = useRef<HTMLDivElement>(null);
@@ -154,15 +152,13 @@ export default function LokasiPanel({ destinasi }: Props) {
                     <IconMapPin size={15} className="shrink-0 text-stone-400" />
                     {destinasi.alamat}
                 </p>
-                <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destinasi.alamat)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                <Link
+                    href="/rute"
                     className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-800"
                 >
-                    <IconExternalLink size={14} />
-                    Buka di Google Maps
-                </a>
+                    <IconMap size={14} />
+                    Lihat Peta Rute
+                </Link>
             </div>
         );
     }
@@ -215,16 +211,14 @@ export default function LokasiPanel({ destinasi }: Props) {
                         {loadingGps ? 'Mendeteksi...' : 'Jarak dari Saya'}
                     </button>
 
-                    {/* Google Maps */}
-                    <a
-                        href={mapsUrl(destLat, destLng, destinasi.nama)}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    {/* Peta Rute */}
+                    <Link
+                        href="/rute"
                         className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-700 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-800"
                     >
-                        <IconExternalLink size={13} />
-                        Google Maps
-                    </a>
+                        <IconMap size={13} />
+                        Peta Rute
+                    </Link>
                 </div>
 
                 {gpsError && (
