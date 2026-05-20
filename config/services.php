@@ -47,4 +47,14 @@ return [
         'key_3' => env('TAVILY_API_KEY_3'),
     ],
 
+    'ollama' => [
+        'key_1' => env('OLLAMA_API_KEY_1'),
+        'key_2' => env('OLLAMA_API_KEY_2'),
+        'key_3' => env('OLLAMA_API_KEY_3'),
+        'key_4' => env('OLLAMA_API_KEY_4'),
+        'key_5' => env('OLLAMA_API_KEY_5'),
+        'model' => env('OLLAMA_MODEL', 'gemma3:4b'),
+        'endpoint' => env('OLLAMA_ENDPOINT', 'https://ollama.com/api/chat'),
+    ],
+
 ];
