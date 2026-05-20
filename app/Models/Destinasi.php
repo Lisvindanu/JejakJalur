@@ -22,6 +22,8 @@ class Destinasi extends Model
         'kategori', 'rating', 'foto', 'is_verified',
     ];
 
+    protected $appends = ['foto_url'];
+
     protected $casts = [
         'is_verified' => 'boolean',
         'rating' => 'decimal:2',

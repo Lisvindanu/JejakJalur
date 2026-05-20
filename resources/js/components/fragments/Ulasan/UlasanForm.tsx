@@ -16,8 +16,8 @@ export default function UlasanForm({
     onSuccess,
 }: UlasanFormProps) {
     const { data, setData, post, patch, errors, processing } = useForm({
-        nilai: existingUlasan?.nilai ?? 0,
-        komentar: existingUlasan?.komentar ?? '',
+        rating: existingUlasan?.rating ?? 0,
+        konten: existingUlasan?.konten ?? '',
     });
 
     function handleSubmit(e: React.FormEvent) {
@@ -37,15 +37,15 @@ export default function UlasanForm({
         <form onSubmit={handleSubmit} className="space-y-4">
             <RatingInput
                 label="Rating"
-                value={data.nilai}
-                onChange={(val) => setData('nilai', val)}
+                value={data.rating}
+                onChange={(val) => setData('rating', val)}
             />
             <TextArea
                 label="Komentar"
                 rows={3}
-                value={data.komentar}
-                onChange={(e) => setData('komentar', e.target.value)}
-                error={errors.komentar}
+                value={data.konten}
+                onChange={(e) => setData('konten', e.target.value)}
+                error={errors.konten}
                 placeholder="Ceritakan pengalamanmu..."
             />
             <Button
