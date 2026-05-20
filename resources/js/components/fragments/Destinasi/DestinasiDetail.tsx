@@ -44,9 +44,9 @@ export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
             <div
                 className={`flex h-[360px] w-full items-center justify-center overflow-hidden bg-gradient-to-br ${placeholder.gradient}`}
             >
-                {destinasi.foto ? (
+                {destinasi.foto_url ? (
                     <img
-                        src={destinasi.foto}
+                        src={destinasi.foto_url}
                         alt={destinasi.nama}
                         className="h-full w-full object-cover"
                     />
