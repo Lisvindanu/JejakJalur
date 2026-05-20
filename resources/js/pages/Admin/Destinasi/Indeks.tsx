@@ -7,6 +7,7 @@ import DataTable from '@/components/fragments/Admin/DataTable';
 import ConfirmModal from '@/components/fragments/Admin/ConfirmModal';
 import type { Destinasi, PaginatedData } from '@/types';
 import { useConfirm } from '@/hooks/useConfirm';
+import { MOCK_DESTINASI, MOCK_STASIUN, mockPaginate } from '@/lib/mock-data';
 import { Head, Link, router } from '@inertiajs/react';
 import {
     IconCheck,
@@ -17,9 +18,9 @@ import {
 } from '@tabler/icons-react';
 
 interface Props {
-    destinasi: PaginatedData<Destinasi>;
-    semuaStasiun: Array<{ id: string; nama: string; kota: { nama: string } }>;
-    filter: {
+    destinasi?: PaginatedData<Destinasi>;
+    semuaStasiun?: Array<{ id: string; nama: string; kota: { nama: string } }>;
+    filter?: {
         kata_kunci?: string;
         stasiun_id?: string;
         kategori?: string;
@@ -33,10 +34,13 @@ const kategoriOptions = [
 ];
 
 export default function DestinasiIndeks({
-    destinasi,
-    semuaStasiun,
-    filter,
+    destinasi: destProp,
+    semuaStasiun: stasiunProp,
+    filter: fil,
 }: Props) {
+    const destinasi = destProp ?? mockPaginate(MOCK_DESTINASI);
+    const semuaStasiun = (stasiunProp ?? MOCK_STASIUN) as Array<{ id: string; nama: string; kota: { nama: string } }>;
+    const filter = fil ?? {};
     const { isOpen, confirm, handleConfirm, handleCancel } = useConfirm();
 
     function applyFilter(partial: Partial<typeof filter>) {

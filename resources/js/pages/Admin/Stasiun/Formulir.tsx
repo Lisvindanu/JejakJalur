@@ -4,15 +4,17 @@ import Input from '@/components/elements/Input';
 import Select from '@/components/elements/Select';
 import FormCard from '@/components/fragments/Admin/FormCard';
 import type { Kota, Stasiun } from '@/types';
+import { MOCK_KOTA } from '@/lib/mock-data';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { IconArrowLeft } from '@tabler/icons-react';
 
 interface Props {
     stasiun?: Stasiun;
-    semuaKota: Kota[];
+    semuaKota?: Kota[];
 }
 
-export default function StasiunFormulir({ stasiun, semuaKota }: Props) {
+export default function StasiunFormulir({ stasiun, semuaKota: kotaProp }: Props) {
+    const semuaKota = kotaProp ?? MOCK_KOTA;
     const isEdit = !!stasiun;
 
     const { data, setData, post, patch, processing, errors } = useForm({

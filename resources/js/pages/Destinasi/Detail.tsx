@@ -3,13 +3,15 @@ import DestinasiDetail from '@/components/fragments/Destinasi/DestinasiDetail';
 import UlasanForm from '@/components/fragments/Ulasan/UlasanForm';
 import UlasanList from '@/components/fragments/Ulasan/UlasanList';
 import PublicLayout from '@/components/layouts/PublicLayout';
+import { MOCK_DESTINASI, MOCK_ULASAN } from '@/lib/mock-data';
 import type { Destinasi, SharedProps } from '@/types';
 
 interface Props {
-    destinasi: Destinasi;
+    destinasi?: Destinasi;
 }
 
-export default function Detail({ destinasi }: Props) {
+export default function Detail({ destinasi: dest }: Props) {
+    const destinasi: Destinasi = dest ?? { ...MOCK_DESTINASI[0], ulasan: MOCK_ULASAN };
     const { auth } = usePage<SharedProps>().props;
 
     return (

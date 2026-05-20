@@ -3,6 +3,7 @@ import DestinasiFilter from '@/components/fragments/Destinasi/DestinasiFilter';
 import DestinasiGrid from '@/components/fragments/Destinasi/DestinasiGrid';
 import Pagination from '@/components/elements/Pagination';
 import PublicLayout from '@/components/layouts/PublicLayout';
+import { MOCK_DESTINASI, MOCK_KOTA, mockPaginate } from '@/lib/mock-data';
 import type { Destinasi, Kota, PaginatedData } from '@/types';
 
 interface Filter {
@@ -13,12 +14,15 @@ interface Filter {
 }
 
 interface Props {
-    destinasi: PaginatedData<Destinasi>;
-    semuaKota: Kota[];
-    filter: Filter;
+    destinasi?: PaginatedData<Destinasi>;
+    semuaKota?: Kota[];
+    filter?: Filter;
 }
 
-export default function Indeks({ destinasi, semuaKota, filter }: Props) {
+export default function Indeks({ destinasi: dest, semuaKota: kota, filter: fil }: Props) {
+    const destinasi = dest ?? mockPaginate(MOCK_DESTINASI);
+    const semuaKota = kota ?? MOCK_KOTA;
+    const filter = fil ?? {};
     return (
         <PublicLayout>
             <Head title="Destinasi — JejakJalur" />
