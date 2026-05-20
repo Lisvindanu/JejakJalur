@@ -124,7 +124,7 @@ export default function RuteMap({ semuaKota, route, focusDest }: Props) {
                 },
             );
 
-            terrain.addTo(map);
+            street.addTo(map);
             railwayOverlay.addTo(map);
             L.control
                 .layers(
@@ -283,7 +283,7 @@ export default function RuteMap({ semuaKota, route, focusDest }: Props) {
     }
 
     return (
-        <div className="overflow-hidden rounded-2xl border border-stone-200 shadow-sm">
+        <div className="isolate overflow-hidden rounded-2xl border border-stone-200 shadow-sm">
             {/* Header */}
             <div className="flex items-center gap-2 border-b border-stone-100 bg-white px-5 py-3 text-xs text-stone-500">
                 <span className="inline-block h-0.5 w-5 rounded-full bg-emerald-700" />
