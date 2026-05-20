@@ -7,7 +7,12 @@ import type { Kota, PaginatedData } from '@/types';
 import { useConfirm } from '@/hooks/useConfirm';
 import { MOCK_KOTA, mockPaginate } from '@/lib/mock-data';
 import { Head, Link, router } from '@inertiajs/react';
-import { IconPencil, IconPlus, IconSearch, IconTrash } from '@tabler/icons-react';
+import {
+    IconPencil,
+    IconPlus,
+    IconSearch,
+    IconTrash,
+} from '@tabler/icons-react';
 import { useState } from 'react';
 
 type KotaWithCount = Kota & { stasiun_count?: number };
@@ -25,14 +30,20 @@ type KotaRow = {
     [key: string]: unknown;
 };
 
-export default function KotaIndeks({ kota: kotaProp, search: searchProp }: Props) {
+export default function KotaIndeks({
+    kota: kotaProp,
+    search: searchProp,
+}: Props) {
     const kota = kotaProp ?? mockPaginate(MOCK_KOTA);
     const [search, setSearch] = useState(searchProp ?? '');
     const { isOpen, confirm, handleConfirm, handleCancel } = useConfirm();
 
     function handleSearch(value: string) {
         setSearch(value);
-        router.get('/admin/kota', value ? { search: value } : {}, { preserveState: true, replace: true });
+        router.get('/admin/kota', value ? { search: value } : {}, {
+            preserveState: true,
+            replace: true,
+        });
     }
 
     const rows: KotaRow[] = kota.data.map((k) => ({
@@ -48,7 +59,10 @@ export default function KotaIndeks({ kota: kotaProp, search: searchProp }: Props
             header: 'No',
             className: 'w-12',
             render: (_row: KotaRow) => {
-                const index = rows.indexOf(_row) + 1 + (kota.current_page - 1) * kota.per_page;
+                const index =
+                    rows.indexOf(_row) +
+                    1 +
+                    (kota.current_page - 1) * kota.per_page;
                 return <span className="text-stone-400">{index}</span>;
             },
         },
