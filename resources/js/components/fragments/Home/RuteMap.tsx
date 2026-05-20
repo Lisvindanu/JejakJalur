@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import 'leaflet/dist/leaflet.css';
 
-/* ── Coordinate data ── */
+/* ── Station coordinate data ── */
 const DATA_KOTA = {
     jakarta: {
         nama: 'Jakarta',
@@ -99,98 +99,41 @@ const DATA_KOTA = {
     },
 } as const;
 
-const JALUR: { id: string; nama: string; warna: string; coords: [number, number][] }[] = [
-    {
-        id: 'pantura',
-        nama: 'Jalur Utara (Pantura)',
-        warna: '#047857',
-        coords: [
-            [-6.1767, 106.8306],
-            [-6.7053, 108.5554],
-            [-6.9644, 110.4277],
-            [-7.2476, 112.7302],
-        ],
-    },
-    {
-        id: 'selatan',
-        nama: 'Jalur Selatan',
-        warna: '#b45309',
-        coords: [
-            [-6.9147, 107.6098],
-            [-7.4191, 109.2215],
-            [-7.7891, 110.3634],
-            [-7.5568, 110.8217],
-            [-7.2654, 112.7519],
-        ],
-    },
-    {
-        id: 'jkt-bdg',
-        nama: 'Jakarta–Bandung',
-        warna: '#7c3aed',
-        coords: [
-            [-6.1767, 106.8306],
-            [-6.843, 107.4973],
-            [-6.9147, 107.6098],
-        ],
-    },
-    {
-        id: 'krl-bogor',
-        nama: 'KRL Jakarta–Bogor',
-        warna: '#dc2626',
-        coords: [
-            [-6.1376, 106.8146],
-            [-6.2098, 106.8503],
-            [-6.4925, 106.7946],
-            [-6.5948, 106.7893],
-        ],
-    },
-    {
-        id: 'crb-pwt',
-        nama: 'Cirebon–Purwokerto',
-        warna: '#0369a1',
-        coords: [
-            [-6.7053, 108.5554],
-            [-7.4191, 109.2215],
-        ],
-    },
-    {
-        id: 'smg-solo',
-        nama: 'Semarang–Solo',
-        warna: '#059669',
-        coords: [
-            [-6.9644, 110.4277],
-            [-7.5568, 110.8217],
-        ],
-    },
-    {
-        id: 'solo-ygy',
-        nama: 'Solo–Yogyakarta',
-        warna: '#d97706',
-        coords: [
-            [-7.5568, 110.8217],
-            [-7.7891, 110.3634],
-        ],
-    },
-    {
-        id: 'sby-mlg',
-        nama: 'Surabaya–Malang',
-        warna: '#ea580c',
-        coords: [
-            [-7.2654, 112.7519],
-            [-7.9776, 112.637],
-        ],
-    },
+/* ── Fallback straight lines (used if Overpass fetch fails) ── */
+const JALUR_FALLBACK: { id: string; nama: string; warna: string; coords: [number, number][] }[] = [
+    { id: 'pantura', nama: 'Jalur Utara (Pantura)', warna: '#047857', coords: [[-6.1767, 106.8306], [-6.7053, 108.5554], [-6.9644, 110.4277], [-7.2476, 112.7302]] },
+    { id: 'selatan', nama: 'Jalur Selatan', warna: '#b45309', coords: [[-6.9147, 107.6098], [-7.4191, 109.2215], [-7.7891, 110.3634], [-7.5568, 110.8217], [-7.2654, 112.7519]] },
+    { id: 'jkt-bdg', nama: 'Jakarta–Bandung', warna: '#7c3aed', coords: [[-6.1767, 106.8306], [-6.843, 107.4973], [-6.9147, 107.6098]] },
+    { id: 'krl-bogor', nama: 'KRL Jakarta–Bogor', warna: '#dc2626', coords: [[-6.1376, 106.8146], [-6.2098, 106.8503], [-6.4925, 106.7946], [-6.5948, 106.7893]] },
+    { id: 'crb-pwt', nama: 'Cirebon–Purwokerto', warna: '#0369a1', coords: [[-6.7053, 108.5554], [-7.4191, 109.2215]] },
+    { id: 'smg-solo', nama: 'Semarang–Solo', warna: '#059669', coords: [[-6.9644, 110.4277], [-7.5568, 110.8217]] },
+    { id: 'solo-ygy', nama: 'Solo–Yogyakarta', warna: '#d97706', coords: [[-7.5568, 110.8217], [-7.7891, 110.3634]] },
+    { id: 'sby-mlg', nama: 'Surabaya–Malang', warna: '#ea580c', coords: [[-7.2654, 112.7519], [-7.9776, 112.637]] },
 ];
+
+/* Overpass QL — main + branch railway ways in Java, no service tracks */
+const OVERPASS_QUERY = `[out:json][timeout:30];
+(
+  way["railway"="rail"]["usage"~"^(main|branch)$"](-8.8,105.0,-5.8,115.5);
+  way["railway"="rail"][!"usage"][!"service"](-8.8,105.0,-5.8,115.5);
+);
+out geom;`;
+
+type TrackStatus = 'loading' | 'loaded' | 'fallback';
 
 export default function RuteMap() {
     const containerRef = useRef<HTMLDivElement>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mapRef = useRef<any>(null);
+    const [trackStatus, setTrackStatus] = useState<TrackStatus>('loading');
 
     useEffect(() => {
         if (!containerRef.current || mapRef.current) return;
 
+        let cancelled = false;
+
         import('leaflet').then((mod) => {
+            if (cancelled) return;
             const L = mod.default ?? mod;
 
             const map = L.map(containerRef.current!, {
@@ -201,8 +144,7 @@ export default function RuteMap() {
             const street = L.tileLayer(
                 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                 {
-                    attribution:
-                        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
                     maxZoom: 19,
                 },
             );
@@ -210,8 +152,7 @@ export default function RuteMap() {
             const terrain = L.tileLayer(
                 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
                 {
-                    attribution:
-                        '© <a href="https://opentopomap.org">OpenTopoMap</a>',
+                    attribution: '© <a href="https://opentopomap.org">OpenTopoMap</a>',
                     maxZoom: 17,
                 },
             );
@@ -225,27 +166,41 @@ export default function RuteMap() {
             );
 
             terrain.addTo(map);
-
             L.control
-                .layers(
-                    { Jalan: street, Terrain: terrain, Satelit: satellite },
-                    {},
-                    { position: 'topright' },
-                )
+                .layers({ Jalan: street, Terrain: terrain, Satelit: satellite }, {}, { position: 'topright' })
                 .addTo(map);
 
-            /* Rail lines */
-            JALUR.forEach((jalur) => {
-                L.polyline(jalur.coords, {
-                    color: jalur.warna,
-                    weight: 4,
-                    opacity: 0.85,
+            /* ── Fetch real railway geometry from Overpass API ── */
+            fetch('https://overpass-api.de/api/interpreter', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'data=' + encodeURIComponent(OVERPASS_QUERY),
+            })
+                .then((r) => r.json())
+                .then((data: { elements: { geometry?: { lat: number; lon: number }[] }[] }) => {
+                    if (cancelled) return;
+                    let drawn = 0;
+                    data.elements.forEach((way) => {
+                        if (!way.geometry || way.geometry.length < 2) return;
+                        const coords: [number, number][] = way.geometry.map((pt) => [pt.lat, pt.lon]);
+                        L.polyline(coords, {
+                            color: '#047857',
+                            weight: 3,
+                            opacity: 0.85,
+                            interactive: false,
+                        }).addTo(map);
+                        drawn++;
+                    });
+                    if (!cancelled) setTrackStatus(drawn > 0 ? 'loaded' : 'fallback');
+                    if (drawn === 0) drawFallback(L, map);
                 })
-                    .bindPopup(`<b style="color:${jalur.warna}">${jalur.nama}</b>`)
-                    .addTo(map);
-            });
+                .catch(() => {
+                    if (cancelled) return;
+                    drawFallback(L, map);
+                    setTrackStatus('fallback');
+                });
 
-            /* Station markers */
+            /* ── Station markers ── */
             Object.values(DATA_KOTA).forEach((kota) => {
                 kota.stasiun.forEach((s, idx) => {
                     const isHub = idx === 0;
@@ -272,6 +227,7 @@ export default function RuteMap() {
         });
 
         return () => {
+            cancelled = true;
             if (mapRef.current) {
                 mapRef.current.remove();
                 mapRef.current = null;
@@ -281,25 +237,45 @@ export default function RuteMap() {
 
     return (
         <div className="overflow-hidden rounded-2xl border border-stone-200 shadow-sm">
-            {/* Legend */}
-            <div className="flex flex-wrap gap-x-5 gap-y-2 border-b border-stone-100 bg-white px-5 py-3">
-                {JALUR.map((j) => (
-                    <div key={j.id} className="flex items-center gap-1.5">
-                        <div
-                            className="h-0.5 w-5 rounded-full"
-                            style={{ background: j.warna }}
-                        />
-                        <span className="text-xs text-stone-500">{j.nama}</span>
-                    </div>
-                ))}
+            {/* Status bar */}
+            <div className="flex items-center gap-2 border-b border-stone-100 bg-white px-5 py-3 text-xs text-stone-500">
+                {trackStatus === 'loading' && (
+                    <>
+                        <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+                        Memuat jalur kereta dari OpenStreetMap…
+                    </>
+                )}
+                {trackStatus === 'loaded' && (
+                    <>
+                        <span className="inline-block h-0.5 w-5 rounded-full bg-emerald-700" />
+                        <span>Jalur KAI — geometri real dari OpenStreetMap</span>
+                        <span className="ml-auto text-stone-400">Klik stasiun untuk detail</span>
+                    </>
+                )}
+                {trackStatus === 'fallback' && (
+                    <>
+                        <span className="inline-block h-0.5 w-5 rounded-full bg-stone-400" />
+                        <span>Menampilkan jalur perkiraan (Overpass tidak tersedia)</span>
+                        <span className="ml-auto text-stone-400">Klik stasiun untuk detail</span>
+                    </>
+                )}
             </div>
 
             {/* Leaflet map */}
             <div ref={containerRef} style={{ height: '520px', width: '100%' }} />
 
             <div className="border-t border-stone-100 bg-stone-50 px-5 py-2 text-xs text-stone-400">
-                Ganti tampilan: gunakan kontrol di kanan atas (Jalan / Terrain / Satelit). Klik stasiun untuk detail.
+                Ganti tampilan: gunakan kontrol di kanan atas (Jalan / Terrain / Satelit).
             </div>
         </div>
     );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function drawFallback(L: any, map: any) {
+    JALUR_FALLBACK.forEach((jalur) => {
+        L.polyline(jalur.coords, { color: jalur.warna, weight: 4, opacity: 0.85 })
+            .bindPopup(`<b style="color:${jalur.warna}">${jalur.nama}</b>`)
+            .addTo(map);
+    });
 }
