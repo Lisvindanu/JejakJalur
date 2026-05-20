@@ -150,6 +150,7 @@ class ScrapeDestinasi extends Command
         ];
 
         $allResults = [];
+        $allImages = [];
 
         foreach ($queries as $q) {
             try {
@@ -164,13 +165,20 @@ class ScrapeDestinasi extends Command
                 if ($response->successful()) {
                     $data = $response->json();
                     $allResults = array_merge($allResults, $data['results'] ?? []);
+                    $allImages = array_merge($allImages, $data['images'] ?? []);
                 }
             } catch (\Exception $e) {
                 $this->warn("  API error: {$e->getMessage()}");
             }
         }
 
-        return array_slice($allResults, 0, 9);
+        // Distribute images round-robin to results
+        $results = array_slice($allResults, 0, 9);
+        foreach ($results as $i => &$result) {
+            $result['image'] = $allImages[$i] ?? null;
+        }
+
+        return $results;
     }
 
     private function extractNama(array $item): string
