@@ -2,15 +2,19 @@ import AdminLayout from '@/components/layouts/AdminLayout';
 import Button from '@/components/elements/Button';
 import DataTable from '@/components/fragments/Admin/DataTable';
 import ConfirmModal from '@/components/fragments/Admin/ConfirmModal';
-import type { Kota } from '@/types';
+import Input from '@/components/elements/Input';
+import type { Kota, PaginatedData } from '@/types';
 import { useConfirm } from '@/hooks/useConfirm';
-import { MOCK_KOTA } from '@/lib/mock-data';
-import { Head, Link } from '@inertiajs/react';
-import { router } from '@inertiajs/react';
-import { IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
+import { MOCK_KOTA, mockPaginate } from '@/lib/mock-data';
+import { Head, Link, router } from '@inertiajs/react';
+import { IconPencil, IconPlus, IconSearch, IconTrash } from '@tabler/icons-react';
+import { useState } from 'react';
+
+type KotaWithCount = Kota & { stasiun_count?: number };
 
 interface Props {
-    kota?: Kota[];
+    kota?: PaginatedData<KotaWithCount>;
+    search?: string;
 }
 
 type KotaRow = {
@@ -21,15 +25,21 @@ type KotaRow = {
     [key: string]: unknown;
 };
 
-export default function KotaIndeks({ kota: kotaProp }: Props) {
-    const kota = kotaProp ?? MOCK_KOTA;
+export default function KotaIndeks({ kota: kotaProp, search: searchProp }: Props) {
+    const kota = kotaProp ?? mockPaginate(MOCK_KOTA);
+    const [search, setSearch] = useState(searchProp ?? '');
     const { isOpen, confirm, handleConfirm, handleCancel } = useConfirm();
 
-    const rows: KotaRow[] = kota.map((k) => ({
+    function handleSearch(value: string) {
+        setSearch(value);
+        router.get('/admin/kota', value ? { search: value } : {}, { preserveState: true, replace: true });
+    }
+
+    const rows: KotaRow[] = kota.data.map((k) => ({
         id: k.id,
         nama: k.nama,
         kode_ibukota: k.kode_ibukota,
-        jumlah_stasiun: (k as unknown as { stasiun_count?: number }).stasiun_count ?? k.stasiun?.length ?? 0,
+        jumlah_stasiun: k.stasiun_count ?? k.stasiun?.length ?? 0,
     }));
 
     const columns = [
@@ -38,7 +48,7 @@ export default function KotaIndeks({ kota: kotaProp }: Props) {
             header: 'No',
             className: 'w-12',
             render: (_row: KotaRow) => {
-                const index = rows.indexOf(_row) + 1;
+                const index = rows.indexOf(_row) + 1 + (kota.current_page - 1) * kota.per_page;
                 return <span className="text-stone-400">{index}</span>;
             },
         },
@@ -96,7 +106,7 @@ export default function KotaIndeks({ kota: kotaProp }: Props) {
                             Daftar Kota
                         </h2>
                         <p className="text-sm text-stone-500">
-                            {kota.length} kota terdaftar
+                            {kota.total} kota terdaftar
                         </p>
                     </div>
                     <Link href="/admin/kota/buat">
@@ -110,9 +120,19 @@ export default function KotaIndeks({ kota: kotaProp }: Props) {
                     </Link>
                 </div>
 
+                <div className="w-64">
+                    <Input
+                        placeholder="Cari kota..."
+                        value={search}
+                        leftIcon={<IconSearch size={15} />}
+                        onChange={(e) => handleSearch(e.target.value)}
+                    />
+                </div>
+
                 <DataTable
                     columns={columns}
                     data={rows}
+                    pagination={kota}
                     keyField="id"
                     empty="Belum ada kota."
                 />

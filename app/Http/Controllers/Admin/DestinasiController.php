@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DestinasiRequest;
 use App\Models\Destinasi;
+use App\Models\Stasiun;
 use App\Services\DestinasiService;
 use App\Services\StasiunService;
 use Illuminate\Http\RedirectResponse;
@@ -24,7 +25,7 @@ class DestinasiController extends Controller
 
         return Inertia::render('Admin/Destinasi/Indeks', [
             'destinasi' => $this->destinasiService->daftarDestinasiTerfilter($filter),
-            'semuaStasiun' => $this->stasiunService->semuaStasiunDenganKota(),
+            'semuaStasiun' => Stasiun::with('kota:id,nama')->orderBy('nama')->get(['id', 'nama', 'kota_id']),
             'filter' => $filter,
         ]);
     }
