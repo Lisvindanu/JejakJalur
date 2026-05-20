@@ -11,7 +11,9 @@ class HitungJarakKoneksi extends Command
 {
     protected $signature = 'jejak:hitung-jarak-koneksi
                             {--force : Update jarak_km yang sudah ada juga}
-                            {--validate : Tandai koneksi yang tidak ada jalur rel (via Overpass)}';
+                            {--validate : Tandai koneksi yang tidak ada jalur rel (via Overpass)}
+                            {--dari= : Filter kode stasiun asal (misal BD)}
+                            {--ke= : Filter kode stasiun tujuan (misal GMR)}';
 
     protected $description = 'Hitung jarak_km tiap koneksi stasiun via Overpass API (rail geometry) + fallback Haversine';
 
@@ -24,6 +26,14 @@ class HitungJarakKoneksi extends Command
 
         if (! $this->option('force')) {
             $query->whereNull('jarak_km');
+        }
+
+        if ($dari = $this->option('dari')) {
+            $query->whereHas('stasiunDari', fn ($q) => $q->where('kode_stasiun', strtoupper($dari)));
+        }
+
+        if ($ke = $this->option('ke')) {
+            $query->whereHas('stasiunKe', fn ($q) => $q->where('kode_stasiun', strtoupper($ke)));
         }
 
         $koneksis = $query->get();
