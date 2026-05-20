@@ -2,6 +2,7 @@ import { IconAlertCircle, IconCheck, IconX } from '@tabler/icons-react';
 import type { ReactNode } from 'react';
 import Footer from '@/components/fragments/Common/Footer';
 import Navbar from '@/components/fragments/Common/Navbar';
+import JejakAiWidget from '@/components/fragments/JejakAi/JejakAiWidget';
 import { useFlash } from '@/hooks/useFlash';
 
 interface PublicLayoutProps {
@@ -48,6 +49,7 @@ export default function PublicLayout({
             <main>{children}</main>
 
             <Footer />
+            <JejakAiWidget />
         </div>
     );
 }
