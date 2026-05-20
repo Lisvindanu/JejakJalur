@@ -211,41 +211,22 @@ function HeroCardDeck({ destinations }: { destinations: Destinasi[] }) {
                                 left: s.l,
                                 opacity: s.op,
                                 zIndex: s.z,
-                                boxShadow:
-                                    isFront && isDragging
-                                        ? '0 32px 80px rgba(0,0,0,0.40)'
-                                        : s.sh,
+                                boxShadow: isFront && isDragging
+                                    ? '0 32px 80px rgba(0,0,0,0.40)'
+                                    : s.sh,
                                 transform: `translateX(${tx}px) rotate(${rot}deg)`,
-                                transition:
-                                    (isDragging && isFront) || noTx
-                                        ? 'none'
-                                        : EASE,
+                                transition: (isDragging && isFront) || noTx
+                                    ? 'none'
+                                    : EASE,
                                 cursor: isFront
-                                    ? isDragging
-                                        ? 'grabbing'
-                                        : 'grab'
+                                    ? isDragging ? 'grabbing' : 'grab'
                                     : 'default',
                             }}
-                            onMouseDown={
-                                isFront ? (e) => onDown(e.clientX) : undefined
-                            }
-                            onMouseMove={
-                                isFront ? (e) => onMove(e.clientX) : undefined
-                            }
+                            onMouseDown={isFront ? (e) => onDown(e.clientX) : undefined}
+                            onMouseMove={isFront ? (e) => onMove(e.clientX) : undefined}
                             onMouseUp={isFront ? onUp : undefined}
-                            onTouchStart={
-                                isFront
-                                    ? (e) => onDown(e.touches[0].clientX)
-                                    : undefined
-                            }
-                            onTouchMove={
-                                isFront
-                                    ? (e) => {
-                                          e.preventDefault();
-                                          onMove(e.touches[0].clientX);
-                                      }
-                                    : undefined
-                            }
+                            onTouchStart={isFront ? (e) => onDown(e.touches[0].clientX) : undefined}
+                            onTouchMove={isFront ? (e) => { e.preventDefault(); onMove(e.touches[0].clientX); } : undefined}
                             onTouchEnd={isFront ? onUp : undefined}
                         >
                             <HeroCardFace d={destinations[dataIdx % total]} />

@@ -10,63 +10,27 @@ interface SubwayMapProps {
  * SVG viewport 900×360. Lon 105.5–115°E, Lat 5.8–8.4°S.
  */
 const GEO: Record<string, { x: number; y: number }> = {
-    Jakarta: { x: 129, y: 55 },
-    Bogor: { x: 129, y: 117 },
-    Bandung: { x: 211, y: 161 },
-    Cirebon: { x: 299, y: 131 },
+    Jakarta:    { x: 129, y: 55 },
+    Bogor:      { x: 129, y: 117 },
+    Bandung:    { x: 211, y: 161 },
+    Cirebon:    { x: 299, y: 131 },
     Purwokerto: { x: 352, y: 210 },
-    Semarang: { x: 449, y: 152 },
+    Semarang:   { x: 449, y: 152 },
     Yogyakarta: { x: 449, y: 250 },
-    Solo: { x: 486, y: 230 },
-    Surabaya: { x: 665, y: 178 },
-    Malang: { x: 658, y: 265 },
+    Solo:       { x: 486, y: 230 },
+    Surabaya:   { x: 665, y: 178 },
+    Malang:     { x: 658, y: 265 },
 };
 
-const LINES: { id: string; color: string; label: string; cities: string[] }[] =
-    [
-        {
-            id: 'pantura',
-            color: '#047857',
-            label: 'Jalur Utara (Pantura)',
-            cities: ['Jakarta', 'Cirebon', 'Semarang', 'Surabaya'],
-        },
-        {
-            id: 'selatan',
-            color: '#b45309',
-            label: 'Jalur Selatan',
-            cities: ['Bandung', 'Purwokerto', 'Yogyakarta', 'Solo', 'Surabaya'],
-        },
-        {
-            id: 'jkt-bdg',
-            color: '#6d28d9',
-            label: 'Jakarta–Bandung',
-            cities: ['Jakarta', 'Bandung'],
-        },
-        {
-            id: 'crb-pwt',
-            color: '#0369a1',
-            label: 'Cirebon–Purwokerto',
-            cities: ['Cirebon', 'Purwokerto'],
-        },
-        {
-            id: 'smg-solo',
-            color: '#047857',
-            label: 'Semarang–Solo',
-            cities: ['Semarang', 'Solo'],
-        },
-        {
-            id: 'sby-mlg',
-            color: '#b45309',
-            label: 'Surabaya–Malang',
-            cities: ['Surabaya', 'Malang'],
-        },
-        {
-            id: 'jkt-bgr',
-            color: '#dc2626',
-            label: 'Commuter Jakarta–Bogor',
-            cities: ['Jakarta', 'Bogor'],
-        },
-    ];
+const LINES: { id: string; color: string; label: string; cities: string[] }[] = [
+    { id: 'pantura', color: '#047857', label: 'Jalur Utara (Pantura)', cities: ['Jakarta', 'Cirebon', 'Semarang', 'Surabaya'] },
+    { id: 'selatan', color: '#b45309', label: 'Jalur Selatan', cities: ['Bandung', 'Purwokerto', 'Yogyakarta', 'Solo', 'Surabaya'] },
+    { id: 'jkt-bdg', color: '#6d28d9', label: 'Jakarta–Bandung', cities: ['Jakarta', 'Bandung'] },
+    { id: 'crb-pwt', color: '#0369a1', label: 'Cirebon–Purwokerto', cities: ['Cirebon', 'Purwokerto'] },
+    { id: 'smg-solo', color: '#047857', label: 'Semarang–Solo', cities: ['Semarang', 'Solo'] },
+    { id: 'sby-mlg', color: '#b45309', label: 'Surabaya–Malang', cities: ['Surabaya', 'Malang'] },
+    { id: 'jkt-bgr', color: '#dc2626', label: 'Commuter Jakarta–Bogor', cities: ['Jakarta', 'Bogor'] },
+];
 
 function getPos(nama: string): { x: number; y: number } | null {
     return GEO[nama] ?? null;
@@ -91,21 +55,13 @@ export default function SubwayMap({ kota }: SubwayMapProps) {
             <div className="mb-4 flex flex-wrap gap-x-5 gap-y-1.5">
                 {LINES.map((l) => (
                     <div key={l.id} className="flex items-center gap-1.5">
-                        <div
-                            className="h-0.5 w-5 rounded-full"
-                            style={{ background: l.color }}
-                        />
-                        <span className="text-xs text-stone-500">
-                            {l.label}
-                        </span>
+                        <div className="h-0.5 w-5 rounded-full" style={{ background: l.color }} />
+                        <span className="text-xs text-stone-500">{l.label}</span>
                     </div>
                 ))}
             </div>
 
-            <div
-                className="relative w-full"
-                style={{ aspectRatio: '900 / 360' }}
-            >
+            <div className="relative w-full" style={{ aspectRatio: '900 / 360' }}>
                 <svg
                     viewBox="0 0 900 360"
                     className="h-full w-full"
@@ -130,17 +86,9 @@ export default function SubwayMap({ kota }: SubwayMapProps) {
 
                     {/* Rail lines */}
                     {LINES.map((line) => {
-                        const pts = line.cities.map(getPos).filter(Boolean) as {
-                            x: number;
-                            y: number;
-                        }[];
+                        const pts = line.cities.map(getPos).filter(Boolean) as { x: number; y: number }[];
                         if (pts.length < 2) return null;
-                        const d = pts
-                            .map(
-                                (p, i) =>
-                                    `${i === 0 ? 'M' : 'L'} ${p.x},${p.y}`,
-                            )
-                            .join(' ');
+                        const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x},${p.y}`).join(' ');
                         return (
                             <path
                                 key={line.id}
@@ -168,16 +116,10 @@ export default function SubwayMap({ kota }: SubwayMapProps) {
                                 style={{ cursor: 'pointer' }}
                             >
                                 {isHovered && (
-                                    <circle
-                                        cx={pos.x}
-                                        cy={pos.y}
-                                        r={18}
-                                        fill="rgba(4,120,87,0.12)"
-                                    />
+                                    <circle cx={pos.x} cy={pos.y} r={18} fill="rgba(4,120,87,0.12)" />
                                 )}
                                 <circle
-                                    cx={pos.x}
-                                    cy={pos.y}
+                                    cx={pos.x} cy={pos.y}
                                     r={isHovered ? 9 : 7}
                                     fill={isHovered ? '#047857' : '#fff'}
                                     stroke="#047857"
@@ -185,16 +127,12 @@ export default function SubwayMap({ kota }: SubwayMapProps) {
                                     style={{ transition: 'r 0.15s' }}
                                 />
                                 <text
-                                    x={pos.x}
-                                    y={pos.y - 14}
+                                    x={pos.x} y={pos.y - 14}
                                     textAnchor="middle"
                                     fill={isHovered ? '#047857' : '#44403c'}
                                     fontSize={isHovered ? 12 : 10.5}
                                     fontWeight={isHovered ? 700 : 500}
-                                    style={{
-                                        userSelect: 'none',
-                                        transition: 'all 0.15s',
-                                    }}
+                                    style={{ userSelect: 'none', transition: 'all 0.15s' }}
                                 >
                                     {k.nama}
                                 </text>
@@ -204,39 +142,32 @@ export default function SubwayMap({ kota }: SubwayMapProps) {
                 </svg>
 
                 {/* Tooltip */}
-                {hoveredKota &&
-                    (() => {
-                        const pos = getPos(hoveredKota.nama);
-                        if (!pos) return null;
-                        return (
-                            <div
-                                className="pointer-events-none absolute z-10 min-w-[160px] rounded-xl border border-stone-200 bg-white p-3 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
-                                style={{
-                                    left: `${(pos.x / 900) * 100}%`,
-                                    top: `${(pos.y / 360) * 100}%`,
-                                    transform:
-                                        'translate(-50%, calc(-100% - 16px))',
-                                }}
-                            >
-                                <p className="mb-1.5 text-[11px] font-semibold tracking-[0.06em] text-emerald-700 uppercase">
-                                    {hoveredKota.nama}
-                                </p>
-                                <ul className="space-y-0.5">
-                                    {hoveredKota.stasiun.map((s) => (
-                                        <li
-                                            key={s.id}
-                                            className="flex items-center justify-between gap-3 text-xs text-stone-600"
-                                        >
-                                            <span>{s.nama}</span>
-                                            <span className="font-mono text-[10px] text-stone-400">
-                                                {s.kode_stasiun}
-                                            </span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        );
-                    })()}
+                {hoveredKota && (() => {
+                    const pos = getPos(hoveredKota.nama);
+                    if (!pos) return null;
+                    return (
+                        <div
+                            className="pointer-events-none absolute z-10 min-w-[160px] rounded-xl border border-stone-200 bg-white p-3 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
+                            style={{
+                                left: `${(pos.x / 900) * 100}%`,
+                                top: `${(pos.y / 360) * 100}%`,
+                                transform: 'translate(-50%, calc(-100% - 16px))',
+                            }}
+                        >
+                            <p className="mb-1.5 text-[11px] font-semibold tracking-[0.06em] text-emerald-700 uppercase">
+                                {hoveredKota.nama}
+                            </p>
+                            <ul className="space-y-0.5">
+                                {hoveredKota.stasiun.map((s) => (
+                                    <li key={s.id} className="flex items-center justify-between gap-3 text-xs text-stone-600">
+                                        <span>{s.nama}</span>
+                                        <span className="font-mono text-[10px] text-stone-400">{s.kode_stasiun}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    );
+                })()}
             </div>
         </div>
     );
