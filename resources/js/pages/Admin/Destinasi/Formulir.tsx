@@ -35,6 +35,8 @@ export default function DestinasiFormulir({
         nama: string;
         deskripsi: string;
         alamat: string;
+        lat: string;
+        lng: string;
         kategori: string;
         stasiun_id: string;
         foto: File | null;
@@ -43,6 +45,8 @@ export default function DestinasiFormulir({
         nama: destinasi?.nama ?? '',
         deskripsi: destinasi?.deskripsi ?? '',
         alamat: destinasi?.alamat ?? '',
+        lat: destinasi?.lat != null ? String(destinasi.lat) : '',
+        lng: destinasi?.lng != null ? String(destinasi.lng) : '',
         kategori: destinasi?.kategori ?? '',
         stasiun_id: destinasi?.stasiun?.id ?? '',
         foto: null,
@@ -140,6 +144,32 @@ export default function DestinasiFormulir({
                             placeholder="cth. Jl. Parangtritis Km.28, Bantul"
                             required
                         />
+
+                        <div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input
+                                    label="Latitude (opsional)"
+                                    value={data.lat}
+                                    onChange={(e) => setData('lat', e.target.value)}
+                                    error={errors.lat}
+                                    placeholder="cth. -7.8888"
+                                    type="number"
+                                    step="any"
+                                />
+                                <Input
+                                    label="Longitude (opsional)"
+                                    value={data.lng}
+                                    onChange={(e) => setData('lng', e.target.value)}
+                                    error={errors.lng}
+                                    placeholder="cth. 110.3333"
+                                    type="number"
+                                    step="any"
+                                />
+                            </div>
+                            <p className="mt-1 text-xs text-stone-400">
+                                Kosongkan untuk auto-geocode dari alamat.
+                            </p>
+                        </div>
 
                         <Select
                             label="Kategori"
