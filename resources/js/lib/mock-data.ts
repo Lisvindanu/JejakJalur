@@ -298,8 +298,8 @@ export const MOCK_DESTINASI: Destinasi[] = [
 export const MOCK_ULASAN: Ulasan[] = [
     {
         id: '1',
-        nilai: 5,
-        komentar:
+        rating: 5,
+        konten:
             'Tempatnya luar biasa! Sangat bersih dan terawat. Staff ramah dan informatif. Wajib dikunjungi kalau ke Solo.',
         created_at: '2026-03-15T10:00:00Z',
         updated_at: '2026-03-15T10:00:00Z',
@@ -307,8 +307,8 @@ export const MOCK_ULASAN: Ulasan[] = [
     },
     {
         id: '2',
-        nilai: 4,
-        komentar:
+        rating: 4,
+        konten:
             'Bagus banget tempatnya. Sedikit ramai di akhir pekan tapi masih sangat menikmati kunjungan. Tiket masuk terjangkau.',
         created_at: '2026-03-10T14:00:00Z',
         updated_at: '2026-03-10T14:00:00Z',
@@ -316,8 +316,8 @@ export const MOCK_ULASAN: Ulasan[] = [
     },
     {
         id: '3',
-        nilai: 5,
-        komentar:
+        rating: 5,
+        konten:
             'Pengalaman yang tak terlupakan! Pemandu wisatanya sangat berpengetahuan dan ramah. Sangat rekomendasikan.',
         created_at: '2026-02-28T09:00:00Z',
         updated_at: '2026-02-28T09:00:00Z',

@@ -58,9 +58,9 @@ export default function UlasanCard({
                     </div>
                 )}
             </div>
-            <RatingDisplay value={ulasan.nilai} size={12} />
+            <RatingDisplay value={ulasan.rating} size={12} />
             <p className="mt-2 text-sm leading-relaxed text-stone-600">
-                {ulasan.komentar}
+                {ulasan.konten}
             </p>
         </div>
     );

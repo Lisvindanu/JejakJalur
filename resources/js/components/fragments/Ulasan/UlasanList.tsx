@@ -21,7 +21,7 @@ export default function UlasanList({
 
     const average =
         ulasan.length > 0
-            ? ulasan.reduce((sum, u) => sum + u.nilai, 0) / ulasan.length
+            ? ulasan.reduce((sum, u) => sum + u.rating, 0) / ulasan.length
             : 0;
 
     function handleDelete(id: string) {

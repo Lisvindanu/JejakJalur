@@ -33,6 +33,7 @@ export type Destinasi = {
     kategori: 'Wisata' | 'Kuliner' | 'UMKM';
     rating: string;
     foto: string | null;
+    foto_url?: string | null;
     is_verified: boolean;
     stasiun: {
         id?: string;
@@ -45,8 +46,9 @@ export type Destinasi = {
 
 export type Ulasan = {
     id: string;
-    nilai: number;
-    komentar: string;
+    rating: number;
+    judul?: string | null;
+    konten: string;
     created_at: string;
     updated_at: string;
     user: {
