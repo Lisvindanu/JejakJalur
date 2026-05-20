@@ -155,6 +155,7 @@ export default function JejakAiWidget() {
             const data = await apiPost<{
                 reply?: string;
                 error?: string;
+                retry?: boolean;
                 limit_reached?: boolean;
                 require_login?: boolean;
                 usage?: { count: number; limit: number };
@@ -166,7 +167,19 @@ export default function JejakAiWidget() {
                 })),
             });
 
-            if (data.limit_reached) {
+            if (data.retry) {
+                /* AI unavailable — don't count, show error, keep input */
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        role: 'assistant',
+                        content:
+                            data.error ??
+                            'Maaf, Jejak AI sedang tidak tersedia. Silakan coba lagi.',
+                    },
+                ]);
+                setInput(text);
+            } else if (data.limit_reached) {
                 setLimitReached(true);
                 setMessages((prev) => [
                     ...prev,
@@ -200,6 +213,7 @@ export default function JejakAiWidget() {
                     content: 'Maaf, terjadi kesalahan. Coba lagi.',
                 },
             ]);
+            setInput(text);
         } finally {
             setLoading(false);
         }

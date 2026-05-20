@@ -79,7 +79,7 @@ class JejakAiService
             }
         }
 
-        return 'Maaf, Jejak AI sedang tidak tersedia. Silakan coba lagi nanti.';
+        throw new \RuntimeException('Jejak AI sedang tidak tersedia.');
     }
 
     private function buildKnowledge(string $query): string
