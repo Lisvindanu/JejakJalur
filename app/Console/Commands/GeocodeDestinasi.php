@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-#[Signature('jejak:geocode-destinasi {--force : Re-geocode even if lat/lng already set}')]
+#[Signature('jejak:geocode-destinasi {--force : Re-geocode even if lat/lng already set} {--id= : Geocode satu destinasi berdasarkan UUID}')]
 #[Description('Geocode destinasi addresses via Nominatim (OpenStreetMap)')]
 class GeocodeDestinasi extends Command
 {
@@ -17,7 +17,9 @@ class GeocodeDestinasi extends Command
     {
         $query = Destinasi::with('stasiun.kota');
 
-        if (! $this->option('force')) {
+        if ($this->option('id')) {
+            $query->where('id', $this->option('id'));
+        } elseif (! $this->option('force')) {
             $query->whereNull('lat');
         }
 
