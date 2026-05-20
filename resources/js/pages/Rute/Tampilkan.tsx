@@ -1,18 +1,10 @@
 import { useMemo, useState } from 'react';
-import { Head, router } from '@inertiajs/react';
-import {
-    IconMapPin,
-    IconTrain,
-    IconChevronRight,
-    IconChevronDown,
-} from '@tabler/icons-react';
+import { Head } from '@inertiajs/react';
 import PublicLayout from '@/components/layouts/PublicLayout';
 import RuteMap from '@/components/fragments/Home/RuteMap';
 import PerencanaRute from '@/components/fragments/Rute/PerencanaRute';
-import Modal from '@/components/elements/Modal';
-import type { Kota, Stasiun, StasiunRute } from '@/types';
+import type { Kota, StasiunRute } from '@/types';
 import { MOCK_KOTA } from '@/lib/mock-data';
-import { indeks as destinasiIndeks } from '@/routes/destinasi';
 
 interface Props {
     semuaKota?: Kota[];
@@ -34,25 +26,8 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
         if (!isNaN(lat) && !isNaN(lng) && nama) return { lat, lng, nama };
         return null;
     }, []);
+
     const [ruteAktif, setRuteAktif] = useState<StasiunRute[] | null>(null);
-    const [kotaAktif, setKotaAktif] = useState<Kota | null>(null);
-    const [tampilSemua, setTampilSemua] = useState(false);
-    const [shownKota, setShownKota] = useState(10);
-    const [newKotaFrom, setNewKotaFrom] = useState<number | null>(null);
-
-    const LIMIT = 5;
-    const KOTA_STEP = 10;
-
-    function tutupModal() {
-        setKotaAktif(null);
-        setTampilSemua(false);
-    }
-
-    function bukaStasiun(stasiun: Stasiun) {
-        router.visit(
-            destinasiIndeks.url({ query: { stasiun_id: stasiun.id } }),
-        );
-    }
 
     return (
         <PublicLayout>
@@ -70,7 +45,6 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
                     Peta Rute Kereta
                 </h1>
 
-                {/* Stats */}
                 <div className="flex flex-wrap gap-6">
                     <div className="flex items-center gap-2">
                         <span className="font-serif text-2xl text-emerald-700">
@@ -93,7 +67,11 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
 
             {/* Interactive Leaflet map */}
             <div className="border-b border-stone-100 bg-white px-[max(24px,calc(50%-576px))] py-8">
-                <RuteMap semuaKota={semuaKota} route={ruteAktif} focusDest={focusDest} />
+                <RuteMap
+                    semuaKota={semuaKota}
+                    route={ruteAktif}
+                    focusDest={focusDest}
+                />
             </div>
 
             {/* Trip planner */}
@@ -102,130 +80,6 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
                 onRuteFound={setRuteAktif}
                 onRuteClear={() => setRuteAktif(null)}
             />
-
-            {/* City directory */}
-            <div className="px-[max(24px,calc(50%-576px))] py-10">
-                <div className="mb-5 flex items-center gap-2">
-                    <IconMapPin size={16} className="text-emerald-700" />
-                    <h2 className="text-sm font-semibold text-stone-700">
-                        Direktori Stasiun
-                    </h2>
-                    <span className="text-xs text-stone-400">
-                        — klik kota untuk lihat stasiun
-                    </span>
-                </div>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                    {semuaKota.slice(0, shownKota).map((kota, i) => {
-                        const isNew = newKotaFrom !== null && i >= newKotaFrom;
-                        return (
-                            <button
-                                key={kota.id}
-                                onClick={() => setKotaAktif(kota)}
-                                className={`group flex flex-col gap-1 rounded-xl border border-stone-200 bg-white px-4 py-3 text-left transition-all hover:border-emerald-200 hover:bg-emerald-50 hover:shadow-sm ${isNew ? 'animate-[fadeUp_0.28s_ease_both]' : ''}`}
-                                style={
-                                    isNew
-                                        ? {
-                                              animationDelay: `${(i - newKotaFrom!) * 30}ms`,
-                                          }
-                                        : undefined
-                                }
-                            >
-                                <span className="text-sm font-semibold text-stone-800 group-hover:text-emerald-800">
-                                    {kota.nama}
-                                </span>
-                                <span className="text-xs text-stone-400 group-hover:text-emerald-600">
-                                    {kota.stasiun.length} stasiun
-                                </span>
-                                <span className="text-xs text-stone-300 group-hover:text-emerald-500">
-                                    {kota.destinasi_count ?? 0} destinasi
-                                </span>
-                            </button>
-                        );
-                    })}
-                </div>
-
-                {shownKota < semuaKota.length && (
-                    <button
-                        onClick={() => {
-                            setNewKotaFrom(shownKota);
-                            setShownKota((s) => s + KOTA_STEP);
-                        }}
-                        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-stone-200 py-3 text-sm font-medium text-stone-500 transition-colors hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
-                    >
-                        <IconChevronDown size={15} />+
-                        {semuaKota.length - shownKota} kota lainnya
-                    </button>
-                )}
-            </div>
-
-            {/* Modal stasiun per kota */}
-            <Modal
-                open={kotaAktif !== null}
-                onClose={tutupModal}
-                title={kotaAktif ? `Stasiun di ${kotaAktif.nama}` : ''}
-                size="md"
-            >
-                {kotaAktif && (
-                    <div className="space-y-2">
-                        <p className="mb-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                            Mau cari makan atau jalan-jalan di sekitar stasiun
-                            mana?
-                        </p>
-
-                        {kotaAktif.stasiun
-                            .slice(0, tampilSemua ? undefined : LIMIT)
-                            .map((s) => (
-                                <button
-                                    key={s.id}
-                                    onClick={() => bukaStasiun(s)}
-                                    className="group flex w-full items-center justify-between rounded-xl border border-stone-100 bg-stone-50 px-4 py-3 text-left transition-all hover:border-emerald-200 hover:bg-emerald-50"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm group-hover:bg-emerald-100">
-                                            <IconTrain
-                                                size={14}
-                                                className="text-emerald-700"
-                                            />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-stone-800 group-hover:text-emerald-800">
-                                                {s.nama}
-                                            </p>
-                                            <p className="font-mono text-xs text-stone-400">
-                                                {s.kode_stasiun}
-                                                {s.destinasi_count != null && (
-                                                    <span className="ml-2 font-sans text-stone-300 not-italic">
-                                                        · {s.destinasi_count}{' '}
-                                                        destinasi
-                                                    </span>
-                                                )}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <IconChevronRight
-                                        size={16}
-                                        className="text-stone-300 group-hover:text-emerald-500"
-                                    />
-                                </button>
-                            ))}
-
-                        {kotaAktif.stasiun.length > LIMIT && (
-                            <button
-                                onClick={() => setTampilSemua((v) => !v)}
-                                className="group flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-stone-200 py-2.5 text-sm text-stone-500 transition-all hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
-                            >
-                                <IconChevronDown
-                                    size={15}
-                                    className={`transition-transform duration-300 ${tampilSemua ? 'rotate-180' : ''}`}
-                                />
-                                {tampilSemua
-                                    ? 'Sembunyikan'
-                                    : `Lihat ${kotaAktif.stasiun.length - LIMIT} stasiun lainnya`}
-                            </button>
-                        )}
-                    </div>
-                )}
-            </Modal>
         </PublicLayout>
     );
 }
