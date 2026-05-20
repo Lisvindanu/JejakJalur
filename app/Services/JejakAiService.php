@@ -49,8 +49,9 @@ class JejakAiService
         }
 
         // If last injected history was 'user', we'd end up with user+user which is invalid.
-        // Ensure last message before the new user input is 'assistant' (or history is empty).
-        if ($expectedRole === 'user' && count($messages) > 1) {
+        // After processing a 'user' message, expectedRole flips to 'assistant'.
+        // So: expectedRole === 'assistant' means the last processed was 'user' → must pop it.
+        if ($expectedRole === 'assistant' && count($messages) > 1) {
             array_pop($messages);
         }
 
