@@ -261,7 +261,7 @@ function HeroCardDeck({ destinations }: { destinations: Destinasi[] }) {
 export default function HeroSection({ destinations }: HeroSectionProps) {
     return (
         <section
-            className="relative grid min-h-screen px-[max(24px,calc(50%-576px))] lg:grid-cols-2"
+            className="relative grid min-h-screen px-[max(24px,calc(50%-576px))] lg:min-h-0 lg:grid-cols-2"
             style={{ background: '#065f46' }}
         >
             {/* Track pattern */}
@@ -275,7 +275,7 @@ export default function HeroSection({ destinations }: HeroSectionProps) {
             />
 
             {/* Left column */}
-            <div className="relative z-[2] flex animate-[fadeUp_0.7s_ease_both] flex-col self-center py-20">
+            <div className="relative z-[2] flex animate-[fadeUp_0.7s_ease_both] flex-col self-center py-20 lg:py-14">
                 <div className="mb-7 flex w-fit items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-[5px] text-[11px] font-semibold tracking-[0.12em] text-white/70 uppercase">
                     <IconRoute size={14} />
                     Wisata &amp; Kuliner via Kereta Api
@@ -283,14 +283,14 @@ export default function HeroSection({ destinations }: HeroSectionProps) {
 
                 <h1
                     className="mb-5 font-serif leading-[1.08] font-normal tracking-[-1px] text-white"
-                    style={{ fontSize: 'clamp(44px,6vw,72px)' }}
+                    style={{ fontSize: 'clamp(36px,4.5vw,58px)' }}
                 >
                     Temukan <em className="text-emerald-300 italic">Permata</em>
                     <br />
                     di Setiap Stasiun
                 </h1>
 
-                <p className="mb-11 max-w-[400px] text-[17px] leading-[1.65] font-light text-white/65">
+                <p className="mb-11 max-w-[400px] text-[15px] leading-[1.65] font-light text-white/65 lg:text-[16px]">
                     Direktori destinasi wisata dan kuliner terbaik yang mudah
                     dijangkau dari stasiun kereta api terdekat.
                 </p>
@@ -313,7 +313,7 @@ export default function HeroSection({ destinations }: HeroSectionProps) {
                 </div>
 
                 {/* Stats */}
-                <div className="mt-[52px] flex gap-0 border-t border-white/10 pt-7">
+                <div className="mt-[52px] flex gap-0 border-t border-white/10 pt-7 lg:mt-8 lg:pt-5">
                     {[
                         { num: '240+', label: 'Destinasi Terdaftar' },
                         { num: '38', label: 'Stasiun Terhubung' },
@@ -323,7 +323,7 @@ export default function HeroSection({ destinations }: HeroSectionProps) {
                             key={i}
                             className={`flex flex-col gap-0.5 ${i < 2 ? 'mr-8 border-r border-white/10 pr-8' : ''}`}
                         >
-                            <span className="font-serif text-[32px] leading-none text-white">
+                            <span className="font-serif text-[32px] leading-none text-white lg:text-[26px]">
                                 {s.num}
                             </span>
                             <span className="text-xs text-white/50">

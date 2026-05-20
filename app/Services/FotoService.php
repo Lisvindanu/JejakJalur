@@ -28,6 +28,10 @@ class FotoService
 
     public function url(string $path): string
     {
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
         return Storage::disk(self::DISK)->url($path);
     }
 }
