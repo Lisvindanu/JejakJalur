@@ -1140,6 +1140,54 @@ class DestinasiKota2Seeder extends Seeder
                     'rating' => 4.5,
                 ],
             ],
+
+            // ── Magetan ───────────────────────────────────────────────────
+            'BAT' => [
+                [
+                    'nama' => 'Telaga Sarangan',
+                    'deskripsi' => 'Danau kawah vulkanik alami di ketinggian 1.200 mdpl yang dikelilingi hutan pinus dan pegunungan sejuk. Destinasi wisata andalan Magetan dengan pemandangan indah, perahu wisata, kuda tunggang, dan kuliner khas Sarangan seperti sate kelinci.',
+                    'alamat' => 'Sarangan, Plaosan, Magetan',
+                    'kategori' => 'Wisata',
+                    'is_verified' => true,
+                    'rating' => 4.7,
+                ],
+                [
+                    'nama' => 'Sentra Kerajinan Kulit Magetan',
+                    'deskripsi' => 'Pusat industri kerajinan kulit terbesar di Jawa Timur yang sudah eksis sejak ratusan tahun lalu. Ratusan toko di sepanjang Jalan Sawojajar menjual jaket kulit, tas, sepatu, dan aksesori kulit berkualitas dengan harga langsung dari pengrajin.',
+                    'alamat' => 'Jl. Sawojajar, Magetan',
+                    'kategori' => 'UMKM',
+                    'is_verified' => true,
+                    'rating' => 4.5,
+                ],
+                [
+                    'nama' => 'Lontong Tahu Magetan',
+                    'deskripsi' => 'Kuliner khas Magetan berupa lontong dengan tahu goreng, tauge, dan kacang tanah yang disiram bumbu kacang gurih-pedas khas. Berbeda dari lontong tahu daerah lain, versi Magetan memiliki cita rasa yang lebih kaya rempah dan tekstur bumbu yang lebih kasar.',
+                    'alamat' => 'Pasar Sayur Magetan, Jl. Tripandita, Magetan',
+                    'kategori' => 'Kuliner',
+                    'is_verified' => true,
+                    'rating' => 4.3,
+                ],
+            ],
+
+            // ── Subang ────────────────────────────────────────────────────
+            'CKM' => [
+                [
+                    'nama' => 'Perkebunan Nanas Subang',
+                    'deskripsi' => 'Subang dikenal sebagai "Kota Nanas" dengan perkebunan nanas terluas di Jawa Barat. Pengunjung dapat memetik nanas langsung dari kebun, melihat proses pengolahan, dan membeli olahan nanas segar — selai, keripik, dodol nanas — langsung dari petani.',
+                    'alamat' => 'Jalancagak, Subang',
+                    'kategori' => 'Wisata',
+                    'is_verified' => true,
+                    'rating' => 4.3,
+                ],
+                [
+                    'nama' => 'Sate Maranggi Subang',
+                    'deskripsi' => 'Sate khas Subang-Purwakarta yang berbeda dari sate biasa — daging sapi atau kambing yang sudah dimarinasi rempah sebelum dibakar, disajikan tanpa saus kacang melainkan dengan sambal tomat segar dan ketan bakar. Kuliner wajib di Subang.',
+                    'alamat' => 'Jl. Otto Iskandardinata, Subang',
+                    'kategori' => 'Kuliner',
+                    'is_verified' => true,
+                    'rating' => 4.6,
+                ],
+            ],
         ];
 
         foreach ($daftarDestinasi as $kodeStasiun => $destinasiList) {
