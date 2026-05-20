@@ -97,7 +97,12 @@ class JejakAiService
 
     private function isRouteQuery(string $query): bool
     {
-        $routeWords = ['rute', 'jalur', 'semua kota', 'kota apa', 'kota mana', 'terhubung', 'jaringan', 'kota saja', 'kota-kota'];
+        $routeWords = [
+            'rute', 'jalur', 'semua kota', 'kota apa', 'kota mana', 'terhubung', 'jaringan', 'kota saja', 'kota-kota',
+            'mau ke', 'pergi ke', 'perjalanan', 'naik kereta', 'berangkat', 'dari bandung', 'ke bandung',
+            'dari jakarta', 'ke jakarta', 'dari surabaya', 'ke surabaya', 'dari yogyakarta', 'ke yogyakarta',
+            'turun di', 'transit', 'keberangkatan', 'peta',
+        ];
 
         $lower = strtolower($query);
         foreach ($routeWords as $word) {
