@@ -29,7 +29,7 @@ export default function KotaIndeks({ kota: kotaProp }: Props) {
         id: k.id,
         nama: k.nama,
         kode_ibukota: k.kode_ibukota,
-        jumlah_stasiun: k.stasiun?.length ?? 0,
+        jumlah_stasiun: (k as unknown as { stasiun_count?: number }).stasiun_count ?? k.stasiun?.length ?? 0,
     }));
 
     const columns = [
