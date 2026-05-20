@@ -25,8 +25,14 @@ class RuteController extends Controller
 
     public function cariStasiun(Request $request): JsonResponse
     {
+        $query = $request->string('q')->toString();
+
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
         $stasiun = $this->stasiunService->semuaStasiunDenganKota()
-            ->filter(fn ($s) => str_contains(strtolower($s->nama), strtolower($request->string('q'))))
+            ->filter(fn ($s) => str_contains(strtolower($s->nama), strtolower($query)))
             ->values();
 
         return response()->json($stasiun);
