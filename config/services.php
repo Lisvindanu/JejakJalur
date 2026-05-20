@@ -55,6 +55,8 @@ return [
         'key_5' => env('OLLAMA_API_KEY_5'),
         'model' => env('OLLAMA_MODEL', 'gemma3:4b'),
         'endpoint' => env('OLLAMA_ENDPOINT', 'https://ollama.com/api/chat'),
+        'embed_endpoint' => env('OLLAMA_EMBED_ENDPOINT', 'http://localhost:11434/api/embed'),
+        'embed_model' => env('OLLAMA_EMBED_MODEL', 'nomic-embed-text'),
     ],
 
 ];
