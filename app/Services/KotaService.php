@@ -9,7 +9,10 @@ class KotaService
 {
     public function semuaKotaDenganStasiun(): Collection
     {
-        return Kota::with('stasiun')->orderBy('nama')->get();
+        return Kota::with(['stasiun' => fn ($q) => $q->withCount('destinasi')])
+            ->withCount('destinasi')
+            ->orderBy('nama')
+            ->get();
     }
 
     public function semuaKota(?string $search = null): Collection

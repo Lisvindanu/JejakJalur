@@ -27,7 +27,7 @@ export default function Detail({ destinasi: dest }: Props) {
             </div>
 
             {/* Ulasan section */}
-            <div className="px-[max(24px,calc(50%-576px))] py-10">
+            <div className="px-[max(24px,calc(50%-576px))] py-8">
                 {/* Write review or login prompt */}
                 {auth?.user ? (
                     <div className="mb-10">
