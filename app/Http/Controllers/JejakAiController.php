@@ -43,7 +43,19 @@ class JejakAiController extends Controller
         }
 
         $session->increment('message_count');
-        $session->update(['last_message_at' => now()]);
+
+        // Persist history to DB (only for logged-in users; guests use localStorage)
+        if ($user) {
+            $incoming = array_values(array_slice($request->input('history', []), -18));
+            $incoming[] = ['role' => 'user', 'content' => $request->input('message')];
+            $incoming[] = ['role' => 'assistant', 'content' => $reply];
+            $session->update([
+                'last_message_at' => now(),
+                'history' => array_slice($incoming, -20),
+            ]);
+        } else {
+            $session->update(['last_message_at' => now()]);
+        }
 
         return response()->json([
             'reply' => $reply,
@@ -62,6 +74,7 @@ class JejakAiController extends Controller
             'limit' => $limit,
             'remaining' => max(0, $limit - $session->message_count),
             'require_login' => ! $user,
+            'history' => $user ? ($session->history ?? []) : null,
         ]);
     }
 
