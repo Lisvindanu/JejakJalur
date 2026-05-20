@@ -35,6 +35,8 @@ export type Destinasi = {
     nama: string;
     deskripsi: string;
     alamat: string;
+    lat?: number | null;
+    lng?: number | null;
     kategori: 'Wisata' | 'Kuliner' | 'UMKM';
     rating: string;
     foto: string | null;
@@ -44,6 +46,8 @@ export type Destinasi = {
         id?: string;
         nama: string;
         kode_stasiun?: string;
+        lat?: number | null;
+        lng?: number | null;
         kota: { id?: string; nama: string };
     };
     ulasan?: Ulasan[];
