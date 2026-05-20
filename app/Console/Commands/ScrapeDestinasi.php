@@ -81,9 +81,8 @@ class ScrapeDestinasi extends Command
 
     public function handle(): int
     {
-        // Support multiple keys: TAVILY_API_KEY, TAVILY_API_KEY_2, TAVILY_API_KEY_3 ...
-        foreach (['TAVILY_API_KEY', 'TAVILY_API_KEY_2', 'TAVILY_API_KEY_3'] as $envKey) {
-            $key = env($envKey);
+        foreach (['services.tavily.key', 'services.tavily.key_2', 'services.tavily.key_3'] as $configKey) {
+            $key = config($configKey);
             if ($key) {
                 $this->apiKeys[] = $key;
             }
