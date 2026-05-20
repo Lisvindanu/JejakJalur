@@ -1,9 +1,17 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Link } from '@inertiajs/react';
 import 'leaflet/dist/leaflet.css';
-import type { Kota } from '@/types';
+import { IconTrain, IconX } from '@tabler/icons-react';
+import type { Kota, Stasiun } from '@/types';
 
 interface Props {
     semuaKota: Kota[];
+}
+
+interface SelectedStation {
+    kota: Kota;
+    stasiun: Stasiun;
+    warna: string;
 }
 
 const WARNA_KOTA = [
@@ -28,17 +36,24 @@ export default function RuteMap({ semuaKota }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mapRef = useRef<any>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const markersRef = useRef<
+        Array<{ marker: any; kota: Kota; stasiun: Stasiun; orig: any }>
+    >([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const selectedMarkerRef = useRef<any>(null);
+    const [selected, setSelected] = useState<SelectedStation | null>(null);
 
     useEffect(() => {
         if (!containerRef.current || mapRef.current) return;
 
         let cancelled = false;
+        markersRef.current = [];
 
         import('leaflet').then((mod) => {
             if (cancelled) return;
             const L = mod.default ?? mod;
 
-            /* Compute map center from station coordinates */
             const allCoords: [number, number][] = semuaKota.flatMap((k) =>
                 k.stasiun
                     .filter((s) => s.lat && s.lng)
@@ -61,12 +76,8 @@ export default function RuteMap({ semuaKota }: Props) {
                       ]
                     : [-7.3, 110.0];
 
-            const map = L.map(containerRef.current!, {
-                center,
-                zoom: 7,
-            });
+            const map = L.map(containerRef.current!, { center, zoom: 7 });
 
-            /* Base layers */
             const street = L.tileLayer(
                 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                 {
@@ -75,7 +86,6 @@ export default function RuteMap({ semuaKota }: Props) {
                     maxZoom: 19,
                 },
             );
-
             const terrain = L.tileLayer(
                 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
                 {
@@ -84,7 +94,6 @@ export default function RuteMap({ semuaKota }: Props) {
                     maxZoom: 17,
                 },
             );
-
             const satellite = L.tileLayer(
                 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                 {
@@ -92,8 +101,6 @@ export default function RuteMap({ semuaKota }: Props) {
                     maxZoom: 19,
                 },
             );
-
-            /* OpenRailwayMap overlay — accurate real-time railway geometry from OSM */
             const railwayOverlay = L.tileLayer(
                 'https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png',
                 {
@@ -107,7 +114,6 @@ export default function RuteMap({ semuaKota }: Props) {
 
             terrain.addTo(map);
             railwayOverlay.addTo(map);
-
             L.control
                 .layers(
                     { Jalan: street, Terrain: terrain, Satelit: satellite },
@@ -116,36 +122,51 @@ export default function RuteMap({ semuaKota }: Props) {
                 )
                 .addTo(map);
 
-            /* Station markers */
             semuaKota.forEach((kota, idx) => {
                 const warna = WARNA_KOTA[idx % WARNA_KOTA.length];
 
                 kota.stasiun.forEach((s, sIdx) => {
                     if (!s.lat || !s.lng) return;
-
                     const lat = parseFloat(s.lat);
                     const lng = parseFloat(s.lng);
                     if (isNaN(lat) || isNaN(lng)) return;
 
                     const isHub = sIdx === 0;
-
-                    L.circleMarker([lat, lng], {
+                    const orig = {
                         radius: isHub ? 8 : 5,
                         fillColor: warna,
                         color: '#fff',
                         weight: isHub ? 2.5 : 1.5,
                         opacity: 1,
                         fillOpacity: isHub ? 1 : 0.8,
-                    })
-                        .bindPopup(
-                            `<div style="min-width:140px;font-family:system-ui">
-                                <p style="margin:0 0 3px;font-size:10px;font-weight:700;color:${warna};text-transform:uppercase;letter-spacing:0.07em">${kota.nama}</p>
-                                <p style="margin:0;font-size:13px;font-weight:600;color:#1c1917">${s.nama}</p>
-                                <p style="margin:3px 0 0;font-size:11px;color:#78716c;font-family:monospace">${s.kode_stasiun}</p>
-                                <p style="margin:4px 0 0;font-size:10px;color:#a8a29e">${lat.toFixed(4)}°, ${lng.toFixed(4)}°</p>
-                            </div>`,
-                        )
-                        .addTo(map);
+                    };
+
+                    const marker = L.circleMarker([lat, lng], {
+                        ...orig,
+                        interactive: true,
+                    }).addTo(map);
+                    markersRef.current.push({ marker, kota, stasiun: s, orig });
+
+                    marker.on('click', () => {
+                        /* Reset previously highlighted marker */
+                        if (selectedMarkerRef.current) {
+                            const prev = markersRef.current.find(
+                                (e) => e.marker === selectedMarkerRef.current,
+                            );
+                            if (prev) prev.marker.setStyle(prev.orig);
+                        }
+                        /* Highlight this marker */
+                        marker.setStyle({
+                            radius: isHub ? 11 : 8,
+                            fillColor: warna,
+                            color: '#fff',
+                            weight: 3,
+                            fillOpacity: 1,
+                        });
+                        marker.bringToFront();
+                        selectedMarkerRef.current = marker;
+                        setSelected({ kota, stasiun: s, warna });
+                    });
                 });
             });
 
@@ -161,8 +182,20 @@ export default function RuteMap({ semuaKota }: Props) {
         };
     }, [semuaKota]);
 
+    function handleClose() {
+        if (selectedMarkerRef.current) {
+            const prev = markersRef.current.find(
+                (e) => e.marker === selectedMarkerRef.current,
+            );
+            if (prev) prev.marker.setStyle(prev.orig);
+            selectedMarkerRef.current = null;
+        }
+        setSelected(null);
+    }
+
     return (
         <div className="overflow-hidden rounded-2xl border border-stone-200 shadow-sm">
+            {/* Header */}
             <div className="flex items-center gap-2 border-b border-stone-100 bg-white px-5 py-3 text-xs text-stone-500">
                 <span className="inline-block h-0.5 w-5 rounded-full bg-emerald-700" />
                 <span>
@@ -170,15 +203,77 @@ export default function RuteMap({ semuaKota }: Props) {
                     OpenStreetMap
                 </span>
                 <span className="ml-auto text-stone-400">
-                    Klik stasiun untuk detail
+                    Klik marker stasiun untuk detail
                 </span>
             </div>
 
-            <div
-                ref={containerRef}
-                style={{ height: '520px', width: '100%' }}
-            />
+            {/* Map + overlay panel */}
+            <div className="relative" style={{ height: '520px' }}>
+                <div ref={containerRef} className="h-full w-full" />
 
+                {/* Station info panel — React overlay, avoids Leaflet popup clipping */}
+                {selected && (
+                    <div className="absolute right-3 bottom-10 z-[500] w-56 origin-bottom-right animate-[scaleIn_0.18s_ease_both] overflow-hidden rounded-2xl border border-stone-100 bg-white shadow-[0_8px_32px_rgba(0,0,0,0.18)]">
+                        <div
+                            className="h-1 w-full"
+                            style={{ background: selected.warna }}
+                        />
+                        <div className="p-4">
+                            <div className="mb-3 flex items-start justify-between">
+                                <div
+                                    className="flex h-8 w-8 items-center justify-center rounded-lg"
+                                    style={{
+                                        background: selected.warna + '20',
+                                    }}
+                                >
+                                    <IconTrain
+                                        size={15}
+                                        style={{ color: selected.warna }}
+                                    />
+                                </div>
+                                <button
+                                    onClick={handleClose}
+                                    className="flex h-6 w-6 items-center justify-center rounded-lg text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600"
+                                >
+                                    <IconX size={13} />
+                                </button>
+                            </div>
+
+                            <p
+                                className="mb-0.5 text-[10px] font-semibold tracking-[0.1em] uppercase"
+                                style={{ color: selected.warna }}
+                            >
+                                {selected.kota.nama}
+                            </p>
+                            <p className="mb-0.5 text-sm leading-tight font-semibold text-stone-800">
+                                {selected.stasiun.nama}
+                            </p>
+                            <p className="mb-3 font-mono text-xs text-stone-400">
+                                {selected.stasiun.kode_stasiun}
+                            </p>
+
+                            {selected.stasiun.destinasi_count != null && (
+                                <p className="mb-3 text-xs text-stone-500">
+                                    <span className="font-semibold text-stone-700">
+                                        {selected.stasiun.destinasi_count}
+                                    </span>{' '}
+                                    destinasi tersedia
+                                </p>
+                            )}
+
+                            <Link
+                                href={`/destinasi?stasiun_id=${selected.stasiun.id}`}
+                                className="flex w-full items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold text-white no-underline transition-opacity hover:opacity-90"
+                                style={{ background: selected.warna }}
+                            >
+                                Lihat destinasi
+                            </Link>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Footer */}
             <div className="border-t border-stone-100 bg-stone-50 px-5 py-2 text-xs text-stone-400">
                 Ganti tampilan: gunakan kontrol di kanan atas (Jalan / Terrain /
                 Satelit). Jalur Kereta dapat diaktifkan/nonaktifkan.
