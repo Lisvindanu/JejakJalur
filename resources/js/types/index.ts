@@ -15,8 +15,8 @@ export type Stasiun = {
     id: string;
     nama: string;
     kode_stasiun: string;
-    lat?: string | null;
-    lng?: string | null;
+    lat?: number | null;
+    lng?: number | null;
     kota?: Kota;
     destinasi_count?: number;
 };
