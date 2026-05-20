@@ -10,9 +10,12 @@ class AiSession extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['user_id', 'session_token', 'message_count', 'last_message_at'];
+    protected $fillable = ['user_id', 'session_token', 'message_count', 'last_message_at', 'history'];
 
-    protected $casts = ['last_message_at' => 'datetime'];
+    protected $casts = [
+        'last_message_at' => 'datetime',
+        'history' => 'array',
+    ];
 
     public function user(): BelongsTo
     {

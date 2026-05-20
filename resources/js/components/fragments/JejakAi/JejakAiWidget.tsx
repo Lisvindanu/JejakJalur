@@ -123,10 +123,7 @@ function loadHistory(): Message[] {
 function saveHistory(msgs: Message[]) {
     try {
         // Keep last 20 messages to avoid bloat
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(msgs.slice(-20)),
-        );
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs.slice(-20)));
     } catch {}
 }
 
@@ -142,17 +139,26 @@ export default function JejakAiWidget() {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    /* Persist messages to localStorage */
+    /* Load status + history on mount */
     useEffect(() => {
-        saveHistory(messages);
-    }, [messages]);
-
-    /* Load status on mount */
-    useEffect(() => {
-        apiGet<Usage>('/ai/status')
-            .then(setUsage)
-            .catch(() => null);
+        apiGet<Usage & { history?: { role: string; content: string }[] | null }>(
+            '/ai/status',
+        ).then((data) => {
+            setUsage(data);
+            // Logged-in: use DB history; guest: localStorage already loaded via useState init
+            if (data.history) {
+                setMessages(data.history as Message[]);
+            }
+        }).catch(() => null);
     }, []);
+
+    /* Persist messages to localStorage (guests only — logged-in uses DB) */
+    const isLoggedIn = !!auth?.user;
+    useEffect(() => {
+        if (!isLoggedIn) {
+            saveHistory(messages);
+        }
+    }, [messages, isLoggedIn]);
 
     /* Scroll to bottom on new messages */
     useEffect(() => {
