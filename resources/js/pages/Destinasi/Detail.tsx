@@ -11,7 +11,10 @@ interface Props {
 }
 
 export default function Detail({ destinasi: dest }: Props) {
-    const destinasi: Destinasi = dest ?? { ...MOCK_DESTINASI[0], ulasan: MOCK_ULASAN };
+    const destinasi: Destinasi = dest ?? {
+        ...MOCK_DESTINASI[0],
+        ulasan: MOCK_ULASAN,
+    };
     const { auth } = usePage<SharedProps>().props;
 
     return (
