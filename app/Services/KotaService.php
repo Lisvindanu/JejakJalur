@@ -12,9 +12,12 @@ class KotaService
         return Kota::with('stasiun')->orderBy('nama')->get();
     }
 
-    public function semuaKota(): Collection
+    public function semuaKota(?string $search = null): Collection
     {
-        return Kota::withCount('stasiun')->orderBy('nama')->get();
+        return Kota::withCount('stasiun')
+            ->when($search, fn ($q) => $q->where('nama', 'ILIKE', "%{$search}%"))
+            ->orderBy('nama')
+            ->get();
     }
 
     public function buatKota(array $data): Kota

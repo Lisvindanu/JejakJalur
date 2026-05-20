@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Kota extends Model
 {
     protected $table = 'kota';
+
     protected $keyType = 'string';
+
     public $incrementing = false;
 
-    protected $fillable = ['nama', 'kode_ibukota'];
+    protected $fillable = ['nama', 'kode_ibukota', 'foto'];
 
     public function stasiun(): HasMany
     {
