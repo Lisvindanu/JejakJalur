@@ -18,7 +18,10 @@ class ScrapeDestinasi extends Command
 
     protected $description = 'Scrape destinasi data from Tavily for stasiun that have few or no destinasi';
 
-    private string $apiKey;
+    /** Multiple API keys — rotated on 429 or error */
+    private array $apiKeys = [];
+
+    private int $currentKeyIndex = 0;
 
     private array $kategoriMap = [
         'museum' => 'Wisata',
@@ -54,15 +57,45 @@ class ScrapeDestinasi extends Command
         'galeri' => 'UMKM',
     ];
 
+    /** Patterns that indicate a listicle/article, not a place name */
+    private array $junkPatterns = [
+        '/^\d+[\s.]+/u',                        // starts with number: "7 Tempat..."
+        '/rekomendasi/iu',
+        '/terbaik/iu',
+        '/terdekat/iu',
+        '/dekat stasiun/iu',
+        '/dekat bandara/iu',
+        '/harga tiket/iu',
+        '/buka \d+ jam/iu',
+        '/tempat makan/iu',
+        '/tempat wisata/iu',
+        '/objek wisata/iu',
+        '/hotel di dekat/iu',
+        '/hotel dekat/iu',
+        '/penginapan dekat/iu',
+        '/kafe.*stasiun/iu',
+        '/instagram/iu',
+        '/Title:/u',
+        '/https?:\/\//u',
+    ];
+
     public function handle(): int
     {
-        $this->apiKey = config('services.tavily.key');
+        // Support multiple keys: TAVILY_API_KEY, TAVILY_API_KEY_2, TAVILY_API_KEY_3 ...
+        foreach (['TAVILY_API_KEY', 'TAVILY_API_KEY_2', 'TAVILY_API_KEY_3'] as $envKey) {
+            $key = env($envKey);
+            if ($key) {
+                $this->apiKeys[] = $key;
+            }
+        }
 
-        if (! $this->apiKey) {
-            $this->error('TAVILY_API_KEY not set in .env');
+        if (empty($this->apiKeys)) {
+            $this->error('No TAVILY_API_KEY set in .env');
 
             return 1;
         }
+
+        $this->info('Using '.count($this->apiKeys).' API key(s).');
 
         $minDestinasi = (int) $this->option('min');
         $limit = (int) $this->option('limit');
@@ -109,7 +142,9 @@ class ScrapeDestinasi extends Command
                 $foto = $item['image'] ?? null;
                 $kategori = $this->guessKategori($nama, $deskripsi);
 
-                if (! $nama || strlen($deskripsi) < 30) {
+                if (! $nama || $this->isJunk($nama) || strlen($deskripsi) < 40) {
+                    $this->line("  - SKIP: {$nama}");
+
                     continue;
                 }
 
@@ -132,7 +167,7 @@ class ScrapeDestinasi extends Command
                 }
             }
 
-            usleep(500000);
+            usleep(300000);
         }
 
         $this->newLine();
@@ -141,34 +176,65 @@ class ScrapeDestinasi extends Command
         return 0;
     }
 
+    private function currentKey(): string
+    {
+        return $this->apiKeys[$this->currentKeyIndex % count($this->apiKeys)];
+    }
+
+    private function rotateKey(): bool
+    {
+        $next = ($this->currentKeyIndex + 1) % count($this->apiKeys);
+        if ($next === $this->currentKeyIndex) {
+            return false; // only one key, can't rotate
+        }
+        $this->currentKeyIndex = $next;
+        $this->warn('  Rate limited — rotating to key #'.($this->currentKeyIndex + 1));
+
+        return true;
+    }
+
     private function searchTavily(string $stasiun, string $kota): array
     {
         $queries = [
-            "tempat wisata menarik dekat Stasiun {$stasiun} {$kota} Indonesia",
-            "kuliner khas {$kota} dekat Stasiun {$stasiun}",
-            "UMKM kerajinan oleh-oleh khas {$kota} dekat stasiun kereta",
+            "wisata kuliner UMKM terpopuler di {$kota} dekat stasiun kereta {$stasiun}",
+            "makanan khas {$kota} enak terkenal wajib coba",
+            "tempat belanja oleh-oleh produk lokal UMKM {$kota}",
         ];
 
         $allResults = [];
         $allImages = [];
 
         foreach ($queries as $q) {
-            try {
-                $response = Http::timeout(15)->post('https://api.tavily.com/search', [
-                    'api_key' => $this->apiKey,
-                    'query' => $q,
-                    'search_depth' => 'basic',
-                    'include_images' => true,
-                    'max_results' => 3,
-                ]);
+            $attempts = 0;
+            while ($attempts < count($this->apiKeys)) {
+                try {
+                    $response = Http::timeout(15)->post('https://api.tavily.com/search', [
+                        'api_key' => $this->currentKey(),
+                        'query' => $q,
+                        'search_depth' => 'basic',
+                        'include_images' => true,
+                        'max_results' => 3,
+                    ]);
 
-                if ($response->successful()) {
-                    $data = $response->json();
-                    $allResults = array_merge($allResults, $data['results'] ?? []);
-                    $allImages = array_merge($allImages, $data['images'] ?? []);
+                    if ($response->status() === 429) {
+                        if (! $this->rotateKey()) {
+                            break;
+                        }
+                        $attempts++;
+
+                        continue;
+                    }
+
+                    if ($response->successful()) {
+                        $data = $response->json();
+                        $allResults = array_merge($allResults, $data['results'] ?? []);
+                        $allImages = array_merge($allImages, $data['images'] ?? []);
+                    }
+                    break;
+                } catch (\Exception $e) {
+                    $this->warn("  API error: {$e->getMessage()}");
+                    break;
                 }
-            } catch (\Exception $e) {
-                $this->warn("  API error: {$e->getMessage()}");
             }
         }
 
@@ -181,10 +247,32 @@ class ScrapeDestinasi extends Command
         return $results;
     }
 
+    private function isJunk(string $nama): bool
+    {
+        foreach ($this->junkPatterns as $pattern) {
+            if (preg_match($pattern, $nama)) {
+                return true;
+            }
+        }
+
+        // Too long = probably a headline, not a place name
+        if (strlen($nama) > 80) {
+            return true;
+        }
+
+        return false;
+    }
+
     private function extractNama(array $item): string
     {
         $title = $item['title'] ?? '';
-        $title = preg_split('/\s[-|]\s/', $title)[0];
+
+        // Strip site name suffix after " - " or " | " or " : "
+        $title = preg_split('/\s[-|:]\s/', $title)[0];
+
+        // Strip trailing ellipsis
+        $title = rtrim($title, '.');
+        $title = preg_replace('/\s*\.\.\.$/', '', $title);
 
         return trim(substr($title, 0, 100));
     }
@@ -192,6 +280,12 @@ class ScrapeDestinasi extends Command
     private function extractDeskripsi(array $item): string
     {
         $content = $item['content'] ?? $item['snippet'] ?? '';
+
+        // Remove markdown-style artifacts and "Title: ..." prefix
+        $content = preg_replace('/^Title:.*?#\s*/su', '', $content);
+        $content = preg_replace('/\*\*([^*]+)\*\*/u', '$1', $content);
+        $content = preg_replace('/https?:\/\/\S+/u', '', $content);
+        $content = preg_replace('/\s{2,}/u', ' ', $content);
 
         if (strlen($content) > 500) {
             $content = substr($content, 0, 500);
