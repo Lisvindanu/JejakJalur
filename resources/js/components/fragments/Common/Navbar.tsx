@@ -1,13 +1,13 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import {
     IconChevronDown,
+    IconLayoutDashboard,
     IconLogout,
     IconTrain,
     IconUser,
 } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import Avatar from '@/components/elements/Avatar';
-import { getInitials } from '@/lib/utils';
 import type { SharedProps } from '@/types';
 
 interface NavbarProps {
@@ -42,7 +42,6 @@ export default function Navbar({ transparent = false }: NavbarProps) {
     }, [dropdownOpen]);
 
     const isOpaque = !transparent || scrolled;
-
     const textColor = isOpaque
         ? 'text-stone-600 hover:text-emerald-700'
         : 'text-white/80 hover:text-white';
@@ -95,7 +94,7 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                     <div ref={dropdownRef} className="relative">
                         <button
                             onClick={() => setDropdownOpen((o) => !o)}
-                            className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 transition-colors ${
+                            className={`flex cursor-pointer items-center gap-2 rounded-full p-0.5 pr-3 transition-colors ${
                                 isOpaque
                                     ? 'hover:bg-stone-100'
                                     : 'hover:bg-white/10'
@@ -107,14 +106,14 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                                 size="sm"
                             />
                             <span
-                                className={`text-sm transition-colors duration-300 ${
+                                className={`hidden text-sm font-medium transition-colors duration-300 sm:inline ${
                                     isOpaque ? 'text-stone-700' : 'text-white'
                                 }`}
                             >
                                 {auth.user.name.split(' ')[0]}
                             </span>
                             <IconChevronDown
-                                size={15}
+                                size={14}
                                 className={`transition-colors duration-300 ${
                                     isOpaque
                                         ? 'text-stone-400'
@@ -124,30 +123,52 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                         </button>
 
                         {dropdownOpen && (
-                            <div className="absolute top-[60px] right-0 z-[200] min-w-[160px] rounded-xl border border-stone-100 bg-white p-1.5 shadow-[0_10px_40px_rgba(0,0,0,0.12)]">
+                            <div className="absolute top-full right-0 z-[200] mt-1.5 w-56 rounded-xl border border-stone-200 bg-white py-1.5 shadow-lg">
+                                <div className="mb-1 border-b border-stone-100 px-3 pb-2">
+                                    <div className="text-sm font-medium text-stone-800">
+                                        {auth.user.name}
+                                    </div>
+                                    <div className="truncate text-xs text-stone-500">
+                                        {auth.user.email}
+                                    </div>
+                                </div>
+
                                 <Link
                                     href="/profil"
                                     onClick={() => setDropdownOpen(false)}
-                                    className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-stone-700 no-underline transition-colors hover:bg-stone-50 hover:text-emerald-700"
+                                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-stone-700 no-underline hover:bg-stone-50"
                                 >
                                     <IconUser
                                         size={15}
                                         className="text-stone-400"
                                     />
-                                    Profil
+                                    Profil saya
                                 </Link>
+
+                                {auth.user.is_admin && (
+                                    <Link
+                                        href="/admin"
+                                        onClick={() => setDropdownOpen(false)}
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-stone-700 no-underline hover:bg-stone-50"
+                                    >
+                                        <IconLayoutDashboard
+                                            size={15}
+                                            className="text-stone-400"
+                                        />
+                                        Admin Panel
+                                    </Link>
+                                )}
+
                                 <hr className="my-1 border-stone-100" />
+
                                 <button
                                     onClick={() => {
                                         setDropdownOpen(false);
                                         router.post('/keluar');
                                     }}
-                                    className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-stone-700 transition-colors hover:bg-red-50 hover:text-red-600"
+                                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 transition-colors hover:bg-red-50"
                                 >
-                                    <IconLogout
-                                        size={15}
-                                        className="text-stone-400"
-                                    />
+                                    <IconLogout size={15} />
                                     Keluar
                                 </button>
                             </div>
