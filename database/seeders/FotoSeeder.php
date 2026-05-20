@@ -327,7 +327,7 @@ class FotoSeeder extends Seeder
 
             // ── Jember ────────────────────────────────────────────────────
             '579bdb2e-0970-4620-8367-827af5203543' => 'https://ik.imagekit.io/tvlk/blog/2025/06/Sekilas-Tentang-Alun-Alun-Jember.jpg?tr=q-70,c-at_max,w-1000,h-600',
-            '4a93a1e7-caae-4297-ac33-2f41fb33342f' => 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgrXq09FoESeJuiinvxU4IGYK5L0uesHMMosFBPiRbHwU-1bLHtWWOTCLdp79gCAAqmMkV14ykYir9qtGpBGxGcclv8ACHszzHCZ6J-3dTaPgisBlqaDVO4AYhKlxTDHo6yUW3knCRd4dpLMFYqP-FVayTwr5pvSA0cdzsB0YQ5f-dn_jTv6ibVj4U85ErO/s3780/IMG_8853.JPG',
+            '4a93a1e7-caae-4297-ac33-2f41fb33342f' => null,
             '6a1c74b2-824f-41cf-b5d5-2c02727fdcd5' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Suwar-suwir_Sari_Rasa.jpg/1280px-Suwar-suwir_Sari_Rasa.jpg',
             '132dbd83-2439-4046-8b6a-10ee1441e9a4' => 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/17/fd/a8/c2/20190620-101204-largejpg.jpg?w=900&h=500&s=1',
 
