@@ -1,7 +1,8 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
     IconArrowRight,
     IconChevronDown,
+    IconCurrentLocation,
     IconLoader2,
     IconRoute,
     IconSearch,
@@ -9,6 +10,18 @@ import {
     IconX,
 } from '@tabler/icons-react';
 import type { Kota, StasiunRute } from '@/types';
+
+function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLng = ((lng2 - lng1) * Math.PI) / 180;
+    const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos((lat1 * Math.PI) / 180) *
+            Math.cos((lat2 * Math.PI) / 180) *
+            Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 interface StasiunFlat {
     id: string;
@@ -27,6 +40,7 @@ function SimpleDropdown<T extends { id: string }>({
     displayValue,
     options,
     renderOption,
+    searchText,
     disabled,
 }: {
     placeholder: string;
@@ -36,6 +50,7 @@ function SimpleDropdown<T extends { id: string }>({
     displayValue: (item: T) => React.ReactNode;
     options: T[];
     renderOption: (item: T) => React.ReactNode;
+    searchText: (item: T) => string;
     disabled?: boolean;
 }) {
     const [open, setOpen] = useState(false);
@@ -105,8 +120,7 @@ function SimpleDropdown<T extends { id: string }>({
                             options
                                 .filter((item) => {
                                     if (!query.trim()) return true;
-                                    return renderOption(item)
-                                        ?.toString()
+                                    return searchText(item)
                                         .toLowerCase()
                                         .includes(query.toLowerCase());
                                 })
@@ -144,6 +158,19 @@ function KotaStasiunPicker({
     const [kotaAktif, setKotaAktif] = useState<Kota | null>(() =>
         value ? (semuaKota.find((k) => k.id === value.kotaId) ?? null) : null,
     );
+
+    // Sync kotaAktif jika value berubah dari luar (mis. GPS auto-select)
+    useEffect(() => {
+        if (value) {
+            setKotaAktif((prev) =>
+                prev?.id === value.kotaId
+                    ? prev
+                    : (semuaKota.find((k) => k.id === value.kotaId) ?? null),
+            );
+        } else {
+            setKotaAktif(null);
+        }
+    }, [value, semuaKota]);
 
     const kotaOptions = useMemo(
         () =>
@@ -198,6 +225,7 @@ function KotaStasiunPicker({
                     renderOption={(k) => (
                         <span className="text-stone-800">{k.nama}</span>
                     )}
+                    searchText={(k) => k.nama}
                 />
 
                 {/* Step 2: Stasiun */}
@@ -231,6 +259,7 @@ function KotaStasiunPicker({
                             </div>
                         </div>
                     )}
+                    searchText={(s) => `${s.nama} ${s.kode_stasiun}`}
                     disabled={!kotaAktif}
                 />
             </div>
@@ -255,6 +284,53 @@ export default function PerencanaRute({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showAllStops, setShowAllStops] = useState(false);
+    const [loadingGps, setLoadingGps] = useState(false);
+    const [gpsError, setGpsError] = useState<string | null>(null);
+
+    function findNearestStation(lat: number, lng: number): StasiunFlat | null {
+        let nearest: StasiunFlat | null = null;
+        let minDist = Infinity;
+        for (const kota of semuaKota) {
+            for (const s of kota.stasiun) {
+                if (!s.lat || !s.lng) continue;
+                const sLat = typeof s.lat === 'string' ? parseFloat(s.lat as string) : (s.lat as number);
+                const sLng = typeof s.lng === 'string' ? parseFloat(s.lng as string) : (s.lng as number);
+                if (isNaN(sLat) || isNaN(sLng)) continue;
+                const d = haversine(lat, lng, sLat, sLng);
+                if (d < minDist) {
+                    minDist = d;
+                    nearest = { ...s, kotaNama: kota.nama, kotaId: kota.id };
+                }
+            }
+        }
+        return nearest;
+    }
+
+    function handleGps() {
+        if (!navigator.geolocation) {
+            setGpsError('GPS tidak didukung browser ini.');
+            return;
+        }
+        setLoadingGps(true);
+        setGpsError(null);
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const nearest = findNearestStation(pos.coords.latitude, pos.coords.longitude);
+                if (nearest) {
+                    setAsal(nearest);
+                    resetRute();
+                } else {
+                    setGpsError('Tidak ada stasiun dengan koordinat di database.');
+                }
+                setLoadingGps(false);
+            },
+            (err) => {
+                setGpsError(err.code === 1 ? 'Izin lokasi ditolak.' : 'Gagal mendapatkan lokasi.');
+                setLoadingGps(false);
+            },
+            { enableHighAccuracy: true, timeout: 10000 },
+        );
+    }
 
     function resetRute() {
         setRute(null);
@@ -310,16 +386,35 @@ export default function PerencanaRute({
                 </span>
             </div>
 
+            {gpsError && (
+                <p className="mb-3 text-xs text-red-500">{gpsError}</p>
+            )}
+
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-                <KotaStasiunPicker
-                    label="Stasiun Asal"
-                    value={asal}
-                    onChange={(s) => {
-                        setAsal(s);
-                        resetRute();
-                    }}
-                    semuaKota={semuaKota}
-                />
+                <div className="relative min-w-0 flex-1">
+                    <button
+                        onClick={handleGps}
+                        disabled={loadingGps}
+                        title="Deteksi stasiun terdekat dari lokasi saya"
+                        className="absolute top-0 right-0 flex items-center gap-1 rounded-lg px-2 py-0.5 text-[10px] font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-50"
+                    >
+                        {loadingGps ? (
+                            <IconLoader2 size={11} className="animate-spin" />
+                        ) : (
+                            <IconCurrentLocation size={11} />
+                        )}
+                        GPS
+                    </button>
+                    <KotaStasiunPicker
+                        label="Stasiun Asal"
+                        value={asal}
+                        onChange={(s) => {
+                            setAsal(s);
+                            resetRute();
+                        }}
+                        semuaKota={semuaKota}
+                    />
+                </div>
                 <div className="hidden shrink-0 items-center pb-1 sm:flex">
                     <IconArrowRight size={16} className="text-stone-300" />
                 </div>
