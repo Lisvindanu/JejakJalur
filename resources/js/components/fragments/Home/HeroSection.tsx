@@ -30,12 +30,21 @@ function HeroCardFace({ d }: { d: Destinasi }) {
             return <IconShoppingBag size={52} className="text-white/40" />;
         return <IconBuildingCastle size={52} className="text-white/40" />;
     }
+    const fotoUrl = d.foto_url ?? d.foto;
     return (
         <>
             <div
                 className={`relative flex h-[55%] items-center justify-center overflow-hidden bg-gradient-to-br ${grad(d.kategori)}`}
             >
-                {icon(d.kategori)}
+                {fotoUrl ? (
+                    <img
+                        src={fotoUrl}
+                        alt={d.nama}
+                        className="absolute inset-0 h-full w-full object-cover"
+                    />
+                ) : (
+                    icon(d.kategori)
+                )}
                 <div className="absolute right-0 bottom-0 left-0 h-16 bg-gradient-to-t from-white to-transparent" />
             </div>
             <div className="p-4">
