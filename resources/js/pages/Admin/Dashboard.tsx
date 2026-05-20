@@ -1,9 +1,10 @@
 import AdminLayout from '@/components/layouts/AdminLayout';
-import StatsCard from '@/components/fragments/Admin/StatsCard';
 import {
     IconBuilding,
+    IconCheck,
     IconMapPin,
     IconMessageCircle,
+    IconPlus,
     IconRobot,
     IconStar,
     IconTrain,
@@ -12,6 +13,7 @@ import {
 import { Head, Link } from '@inertiajs/react';
 import { MOCK_STATISTIK } from '@/lib/mock-data';
 import { cn } from '@/lib/utils';
+import type { ReactNode } from 'react';
 
 interface DestinasiPending {
     id: string;
@@ -45,94 +47,253 @@ interface Props {
     ulasanTerbaru?: UlasanTerbaru[];
 }
 
+type Tone = 'emerald' | 'sky' | 'amber' | 'indigo' | 'rose' | 'stone';
+
+const toneClasses: Record<Tone, string> = {
+    emerald: 'bg-emerald-50 text-emerald-700',
+    sky: 'bg-sky-50 text-sky-700',
+    amber: 'bg-amber-50 text-amber-700',
+    indigo: 'bg-indigo-50 text-indigo-700',
+    rose: 'bg-rose-50 text-rose-700',
+    stone: 'bg-stone-100 text-stone-700',
+};
+
 const KATEGORI_COLOR: Record<string, string> = {
     Wisata: 'bg-blue-100 text-blue-700',
     Kuliner: 'bg-amber-100 text-amber-700',
     UMKM: 'bg-emerald-100 text-emerald-700',
 };
 
-export default function Dashboard({ statistik: stat, destinasiPending = [], ulasanTerbaru = [] }: Props) {
-    const statistik = stat ?? { ...MOCK_STATISTIK, destinasi_pending: 0, jumlah_ulasan: 0, ai_pesan_hari_ini: 0 };
+function StatCard({
+    icon,
+    label,
+    value,
+    sub,
+    tone = 'emerald',
+}: {
+    icon: ReactNode;
+    label: string;
+    value: number | string;
+    sub?: ReactNode;
+    tone?: Tone;
+}) {
+    return (
+        <div className="rounded-xl border border-stone-200 bg-white p-5">
+            <div className="flex items-center justify-between">
+                <span
+                    className={cn(
+                        'inline-flex h-9 w-9 items-center justify-center rounded-lg',
+                        toneClasses[tone],
+                    )}
+                >
+                    {icon}
+                </span>
+            </div>
+            <div className="mt-4 text-3xl font-bold tracking-tight text-stone-900 tabular-nums">
+                {value}
+            </div>
+            <div className="mt-0.5 text-xs text-stone-500">{label}</div>
+            {sub && <div className="mt-2 text-xs text-stone-500">{sub}</div>}
+        </div>
+    );
+}
+
+export default function Dashboard({
+    statistik: stat,
+    destinasiPending = [],
+    ulasanTerbaru = [],
+}: Props) {
+    const statistik = stat ?? {
+        ...MOCK_STATISTIK,
+        destinasi_pending: 0,
+        jumlah_ulasan: 0,
+        ai_pesan_hari_ini: 0,
+    };
 
     return (
         <AdminLayout title="Dashboard">
             <Head title="Dashboard — Admin JejakJalur" />
 
-            <div className="space-y-6">
+            <div className="space-y-8">
                 {/* Stats grid */}
-                <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-                    <StatsCard label="Total Kota" value={statistik.jumlah_kota} icon={<IconBuilding size={18} />} color="blue" />
-                    <StatsCard label="Total Stasiun" value={statistik.jumlah_stasiun} icon={<IconTrain size={18} />} color="emerald" />
-                    <StatsCard
+                <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                    <StatCard
+                        icon={<IconBuilding size={16} />}
+                        label="Kota"
+                        value={statistik.jumlah_kota}
+                        tone="emerald"
+                    />
+                    <StatCard
+                        icon={<IconTrain size={16} />}
+                        label="Stasiun"
+                        value={statistik.jumlah_stasiun}
+                        tone="sky"
+                    />
+                    <StatCard
+                        icon={<IconMapPin size={16} />}
                         label="Destinasi"
                         value={statistik.jumlah_destinasi}
-                        icon={<IconMapPin size={18} />}
-                        color="amber"
-                        description={`${statistik.destinasi_verified} terverifikasi · ${statistik.destinasi_pending} pending`}
-                    />
-                    <StatsCard label="Pengguna" value={statistik.jumlah_pengguna} icon={<IconUsers size={18} />} color="purple" />
-                    <StatsCard label="Total Ulasan" value={statistik.jumlah_ulasan} icon={<IconMessageCircle size={18} />} color="blue" />
-                    <StatsCard label="Pesan AI Hari Ini" value={statistik.ai_pesan_hari_ini} icon={<IconRobot size={18} />} color="emerald" />
-                </div>
-
-                <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-                    {/* Destinasi pending */}
-                    <div className="rounded-xl border border-stone-100 bg-white p-5">
-                        <div className="mb-4 flex items-center justify-between">
-                            <h2 className="text-sm font-semibold text-stone-800">Destinasi Menunggu Verifikasi</h2>
-                            {statistik.destinasi_pending > 0 && (
-                                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                        tone="amber"
+                        sub={
+                            <>
+                                <span className="font-medium text-emerald-700">
+                                    {statistik.destinasi_verified} verified
+                                </span>
+                                {' · '}
+                                <span className="font-medium text-amber-700">
                                     {statistik.destinasi_pending} pending
                                 </span>
-                            )}
+                            </>
+                        }
+                    />
+                    <StatCard
+                        icon={<IconUsers size={16} />}
+                        label="Pengguna"
+                        value={statistik.jumlah_pengguna}
+                        tone="indigo"
+                    />
+                    <StatCard
+                        icon={<IconStar size={16} />}
+                        label="Ulasan"
+                        value={statistik.jumlah_ulasan}
+                        tone="rose"
+                    />
+                    <StatCard
+                        icon={<IconRobot size={16} />}
+                        label="AI pesan hari ini"
+                        value={statistik.ai_pesan_hari_ini}
+                        tone="stone"
+                    />
+                </div>
+
+                {/* Pending + Reviews */}
+                <div className="grid gap-6 xl:grid-cols-2">
+                    {/* Destinasi pending */}
+                    <div className="overflow-hidden rounded-xl border border-stone-200 bg-white">
+                        <div className="flex items-center justify-between border-b border-stone-100 px-5 py-4">
+                            <div>
+                                <h3 className="text-sm font-semibold text-stone-900">
+                                    Destinasi Menunggu Verifikasi
+                                </h3>
+                                <p className="text-xs text-stone-500">
+                                    {statistik.destinasi_pending} antri menunggu moderator.
+                                </p>
+                            </div>
+                            <Link
+                                href="/admin/destinasi"
+                                className="text-xs font-medium text-emerald-700 no-underline hover:text-emerald-800"
+                            >
+                                Semua →
+                            </Link>
                         </div>
+
                         {destinasiPending.length === 0 ? (
-                            <p className="text-sm text-stone-400">Tidak ada destinasi pending.</p>
+                            <div className="px-5 py-10 text-center">
+                                <IconCheck
+                                    size={32}
+                                    className="mx-auto text-emerald-400"
+                                />
+                                <p className="mt-2 text-sm text-stone-500">
+                                    Tidak ada destinasi yang menunggu verifikasi.
+                                </p>
+                            </div>
                         ) : (
-                            <div className="space-y-2">
-                                {destinasiPending.map((d) => (
-                                    <div key={d.id} className="flex items-center justify-between gap-3 rounded-lg border border-stone-50 bg-stone-50 px-3 py-2.5">
+                            <div className="divide-y divide-stone-100">
+                                {destinasiPending.slice(0, 4).map((d) => (
+                                    <div
+                                        key={d.id}
+                                        className="flex items-center gap-3 px-5 py-3 hover:bg-stone-50"
+                                    >
                                         <div className="min-w-0 flex-1">
-                                            <p className="truncate text-sm font-medium text-stone-800">{d.nama}</p>
-                                            <p className="text-xs text-stone-400">{d.kota} · {d.created_at}</p>
+                                            <p className="truncate text-sm font-medium text-stone-800">
+                                                {d.nama}
+                                            </p>
+                                            <p className="flex items-center gap-1.5 text-xs text-stone-500">
+                                                <span
+                                                    className={cn(
+                                                        'rounded-full px-1.5 py-0.5 text-[10px] font-medium',
+                                                        KATEGORI_COLOR[d.kategori] ??
+                                                            'bg-stone-100 text-stone-600',
+                                                    )}
+                                                >
+                                                    {d.kategori}
+                                                </span>
+                                                <span>{d.kota}</span>
+                                            </p>
                                         </div>
-                                        <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-xs font-medium', KATEGORI_COLOR[d.kategori] ?? 'bg-stone-100 text-stone-600')}>
-                                            {d.kategori}
-                                        </span>
-                                        <Link href={`/admin/destinasi/${d.id}/edit`} className="shrink-0 text-xs text-emerald-700 hover:underline">
+                                        <Link
+                                            href={`/admin/destinasi/${d.id}/edit`}
+                                            className="shrink-0 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 no-underline transition-colors hover:bg-emerald-100"
+                                        >
                                             Verifikasi
                                         </Link>
                                     </div>
                                 ))}
-                                {statistik.destinasi_pending > 5 && (
-                                    <Link href="/admin/destinasi" className="block text-center text-xs text-stone-400 hover:text-stone-600">
-                                        Lihat semua ({statistik.destinasi_pending}) →
-                                    </Link>
+                                {statistik.destinasi_pending > 4 && (
+                                    <div className="px-5 py-2.5">
+                                        <Link
+                                            href="/admin/destinasi"
+                                            className="text-xs text-stone-400 no-underline hover:text-stone-600"
+                                        >
+                                            Lihat semua ({statistik.destinasi_pending}) →
+                                        </Link>
+                                    </div>
                                 )}
                             </div>
                         )}
                     </div>
 
                     {/* Ulasan terbaru */}
-                    <div className="rounded-xl border border-stone-100 bg-white p-5">
-                        <div className="mb-4 flex items-center justify-between">
-                            <h2 className="text-sm font-semibold text-stone-800">Ulasan Terbaru</h2>
-                            <Link href="/admin/ulasan" className="text-xs text-stone-400 hover:text-stone-600">Lihat semua →</Link>
+                    <div className="overflow-hidden rounded-xl border border-stone-200 bg-white">
+                        <div className="flex items-center justify-between border-b border-stone-100 px-5 py-4">
+                            <div>
+                                <h3 className="text-sm font-semibold text-stone-900">
+                                    Ulasan Terbaru
+                                </h3>
+                                <p className="text-xs text-stone-500">
+                                    Pantau aktivitas komunitas.
+                                </p>
+                            </div>
+                            <Link
+                                href="/admin/ulasan"
+                                className="text-xs font-medium text-emerald-700 no-underline hover:text-emerald-800"
+                            >
+                                Semua →
+                            </Link>
                         </div>
+
                         {ulasanTerbaru.length === 0 ? (
-                            <p className="text-sm text-stone-400">Belum ada ulasan.</p>
+                            <div className="px-5 py-10 text-center">
+                                <IconMessageCircle
+                                    size={32}
+                                    className="mx-auto text-stone-300"
+                                />
+                                <p className="mt-2 text-sm text-stone-500">
+                                    Belum ada ulasan.
+                                </p>
+                            </div>
                         ) : (
-                            <div className="space-y-2">
+                            <div className="divide-y divide-stone-100">
                                 {ulasanTerbaru.map((u) => (
-                                    <div key={u.id} className="flex items-center gap-3 rounded-lg bg-stone-50 px-3 py-2.5">
-                                        <div className="min-w-0 flex-1">
-                                            <p className="truncate text-sm font-medium text-stone-800">{u.destinasi_nama}</p>
-                                            <p className="text-xs text-stone-400">{u.user_name} · {u.created_at}</p>
+                                    <div
+                                        key={u.id}
+                                        className="px-5 py-3 hover:bg-stone-50"
+                                    >
+                                        <div className="flex items-center justify-between gap-3">
+                                            <p className="truncate text-sm font-medium text-stone-800">
+                                                {u.destinasi_nama}
+                                            </p>
+                                            <div className="flex shrink-0 items-center gap-1 text-xs font-medium text-amber-600">
+                                                <IconStar
+                                                    size={11}
+                                                    className="fill-current"
+                                                />
+                                                {u.rating}
+                                            </div>
                                         </div>
-                                        <div className="flex shrink-0 items-center gap-0.5 text-xs text-amber-500">
-                                            <IconStar size={11} className="fill-current" />
-                                            {u.rating}
-                                        </div>
+                                        <p className="mt-0.5 text-xs text-stone-500">
+                                            {u.user_name} · {u.created_at}
+                                        </p>
                                     </div>
                                 ))}
                             </div>
@@ -141,31 +302,43 @@ export default function Dashboard({ statistik: stat, destinasiPending = [], ulas
                 </div>
 
                 {/* Quick actions */}
-                <div>
-                    <h2 className="mb-3 text-sm font-semibold tracking-wide text-stone-600 uppercase">Aksi Cepat</h2>
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                        <Link href="/admin/kota/buat" className="flex items-center gap-3 rounded-xl border border-stone-100 bg-white p-4 transition-colors hover:border-emerald-200 hover:bg-emerald-50">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-100 text-blue-700"><IconBuilding size={17} /></div>
-                            <div>
-                                <p className="text-sm font-semibold text-stone-800">Tambah Kota</p>
-                                <p className="text-xs text-stone-400">Tambah kota baru ke sistem</p>
-                            </div>
-                        </Link>
-                        <Link href="/admin/stasiun/buat" className="flex items-center gap-3 rounded-xl border border-stone-100 bg-white p-4 transition-colors hover:border-emerald-200 hover:bg-emerald-50">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700"><IconTrain size={17} /></div>
-                            <div>
-                                <p className="text-sm font-semibold text-stone-800">Tambah Stasiun</p>
-                                <p className="text-xs text-stone-400">Tambah stasiun ke kota</p>
-                            </div>
-                        </Link>
-                        <Link href="/admin/destinasi/buat" className="flex items-center gap-3 rounded-xl border border-stone-100 bg-white p-4 transition-colors hover:border-emerald-200 hover:bg-emerald-50">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-100 text-amber-700"><IconMapPin size={17} /></div>
-                            <div>
-                                <p className="text-sm font-semibold text-stone-800">Tambah Destinasi</p>
-                                <p className="text-xs text-stone-400">Tambah destinasi wisata baru</p>
-                            </div>
-                        </Link>
-                    </div>
+                <div className="grid gap-3 sm:grid-cols-3">
+                    <Link
+                        href="/admin/kota/buat"
+                        className="rounded-xl border border-stone-200 bg-white px-5 py-4 text-left no-underline transition hover:border-emerald-300 hover:bg-emerald-50/40"
+                    >
+                        <IconPlus size={16} className="text-emerald-700" />
+                        <p className="mt-2 text-sm font-semibold text-stone-800">
+                            Tambah Kota
+                        </p>
+                        <p className="text-xs text-stone-500">
+                            Daftarkan kota baru ke sistem.
+                        </p>
+                    </Link>
+                    <Link
+                        href="/admin/stasiun/buat"
+                        className="rounded-xl border border-stone-200 bg-white px-5 py-4 text-left no-underline transition hover:border-emerald-300 hover:bg-emerald-50/40"
+                    >
+                        <IconPlus size={16} className="text-emerald-700" />
+                        <p className="mt-2 text-sm font-semibold text-stone-800">
+                            Tambah Stasiun
+                        </p>
+                        <p className="text-xs text-stone-500">
+                            Hubungkan stasiun baru di jalur kereta.
+                        </p>
+                    </Link>
+                    <Link
+                        href="/admin/destinasi/buat"
+                        className="rounded-xl border border-stone-200 bg-white px-5 py-4 text-left no-underline transition hover:border-emerald-300 hover:bg-emerald-50/40"
+                    >
+                        <IconPlus size={16} className="text-emerald-700" />
+                        <p className="mt-2 text-sm font-semibold text-stone-800">
+                            Tambah Destinasi
+                        </p>
+                        <p className="text-xs text-stone-500">
+                            Catat wisata, kuliner, atau UMKM.
+                        </p>
+                    </Link>
                 </div>
             </div>
         </AdminLayout>
