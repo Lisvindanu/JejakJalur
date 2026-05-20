@@ -18,13 +18,16 @@ export type Stasiun = {
     lat?: string | null;
     lng?: string | null;
     kota?: Kota;
+    destinasi_count?: number;
 };
 
 export type Kota = {
     id: string;
     nama: string;
     kode_ibukota: string;
+    foto?: string | null;
     stasiun: Stasiun[];
+    destinasi_count?: number;
 };
 
 export type Destinasi = {

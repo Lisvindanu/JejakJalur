@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
-import { useState } from 'react';
+import { IconChevronDown } from '@tabler/icons-react';
+import { useEffect, useRef, useState } from 'react';
 import SearchBar from '@/components/fragments/Destinasi/SearchBar';
 import type { Kota } from '@/types';
 
@@ -31,6 +32,87 @@ function applyFilter(params: Filter) {
     router.get('/destinasi', clean, { preserveState: true, replace: true });
 }
 
+/* ─── Custom dropdown ─── */
+interface DropdownOption {
+    value: string;
+    label: string;
+}
+
+function FilterDropdown({
+    value,
+    onChange,
+    options,
+    placeholder,
+}: {
+    value: string;
+    onChange: (v: string) => void;
+    options: DropdownOption[];
+    placeholder: string;
+}) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!open) return;
+        function onDown(e: MouseEvent) {
+            if (ref.current && !ref.current.contains(e.target as Node)) {
+                setOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', onDown);
+        return () => document.removeEventListener('mousedown', onDown);
+    }, [open]);
+
+    const selectedLabel =
+        options.find((o) => o.value === value)?.label ?? placeholder;
+    const isActive = !!value;
+
+    return (
+        <div ref={ref} className="relative">
+            <button
+                type="button"
+                onClick={() => setOpen((v) => !v)}
+                className={`flex items-center gap-1.5 rounded-xl border px-3 py-[7px] text-sm font-medium transition-colors ${
+                    isActive
+                        ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
+                        : 'border-stone-200 bg-white text-stone-600 hover:border-emerald-400 hover:text-emerald-700'
+                }`}
+            >
+                {selectedLabel}
+                <IconChevronDown
+                    size={14}
+                    className={`shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+                />
+            </button>
+
+            {open && (
+                <div className="absolute top-full left-0 z-50 mt-1.5 min-w-[180px] origin-top animate-[scaleIn_0.18s_ease_both] overflow-hidden rounded-2xl border border-stone-100 bg-white shadow-[0_16px_48px_rgba(0,0,0,0.16)]">
+                    <div className="max-h-[280px] overflow-y-auto p-1.5">
+                        {options.map((opt) => (
+                            <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => {
+                                    onChange(opt.value);
+                                    setOpen(false);
+                                }}
+                                className={`flex w-full items-center rounded-xl px-3 py-2 text-left text-sm transition-colors ${
+                                    opt.value === value
+                                        ? 'bg-emerald-50 font-semibold text-emerald-700'
+                                        : 'text-stone-700 hover:bg-stone-50 hover:text-emerald-700'
+                                }`}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+/* ─── Main filter bar ─── */
 export default function DestinasiFilter({
     semuaKota,
     filter,
@@ -68,6 +150,16 @@ export default function DestinasiFilter({
     const selectedKota = semuaKota.find((k) => k.id === filter.kota_id);
     const stasiunOptions = selectedKota?.stasiun ?? [];
 
+    const kotaOptions: DropdownOption[] = [
+        { value: '', label: 'Semua Kota' },
+        ...semuaKota.map((k) => ({ value: k.id, label: k.nama })),
+    ];
+
+    const stasiunDropdownOptions: DropdownOption[] = [
+        { value: '', label: 'Semua Stasiun' },
+        ...stasiunOptions.map((s) => ({ value: s.id, label: s.nama })),
+    ];
+
     return (
         <div className="flex flex-wrap items-center gap-3">
             <SearchBar
@@ -77,51 +169,28 @@ export default function DestinasiFilter({
                 className="min-w-[200px] flex-1"
             />
 
-            <div className="relative">
-                <select
-                    value={filter.kota_id ?? ''}
-                    onChange={(e) => handleKota(e.target.value)}
-                    className="appearance-none rounded-xl border border-stone-200 bg-white py-2 pr-8 pl-3 text-sm text-stone-700 transition-colors focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
-                >
-                    <option value="">Semua Kota</option>
-                    {semuaKota.map((k) => (
-                        <option key={k.id} value={k.id}>
-                            {k.nama}
-                        </option>
-                    ))}
-                </select>
-            </div>
+            <FilterDropdown
+                value={filter.kota_id ?? ''}
+                onChange={handleKota}
+                options={kotaOptions}
+                placeholder="Semua Kota"
+            />
 
             {stasiunOptions.length > 0 && (
-                <div className="relative">
-                    <select
-                        value={filter.stasiun_id ?? ''}
-                        onChange={(e) => handleStasiun(e.target.value)}
-                        className="appearance-none rounded-xl border border-stone-200 bg-white py-2 pr-8 pl-3 text-sm text-stone-700 transition-colors focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
-                    >
-                        <option value="">Semua Stasiun</option>
-                        {stasiunOptions.map((s) => (
-                            <option key={s.id} value={s.id}>
-                                {s.nama}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                <FilterDropdown
+                    value={filter.stasiun_id ?? ''}
+                    onChange={handleStasiun}
+                    options={stasiunDropdownOptions}
+                    placeholder="Semua Stasiun"
+                />
             )}
 
-            <div className="relative">
-                <select
-                    value={filter.kategori ?? ''}
-                    onChange={(e) => handleKategori(e.target.value)}
-                    className="appearance-none rounded-xl border border-stone-200 bg-white py-2 pr-8 pl-3 text-sm text-stone-700 transition-colors focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
-                >
-                    {KATEGORI_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                        </option>
-                    ))}
-                </select>
-            </div>
+            <FilterDropdown
+                value={filter.kategori ?? ''}
+                onChange={handleKategori}
+                options={KATEGORI_OPTIONS}
+                placeholder="Semua Kategori"
+            />
 
             {hasFilter && (
                 <button

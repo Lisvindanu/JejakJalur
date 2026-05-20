@@ -42,7 +42,7 @@ export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
         <div>
             {/* Image */}
             <div
-                className={`flex h-[360px] w-full items-center justify-center overflow-hidden bg-gradient-to-br ${placeholder.gradient}`}
+                className={`flex h-[200px] w-full items-center justify-center overflow-hidden bg-gradient-to-br sm:h-[240px] ${placeholder.gradient}`}
             >
                 {destinasi.foto_url ? (
                     <img
@@ -56,18 +56,18 @@ export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
             </div>
 
             {/* Content */}
-            <div className="px-[max(24px,calc(50%-576px))] py-10">
+            <div className="px-[max(24px,calc(50%-576px))] py-7">
                 {/* Back link */}
                 <Link
                     href="/destinasi"
-                    className="mb-6 inline-flex items-center gap-1.5 text-sm text-stone-500 no-underline transition-colors hover:text-emerald-700"
+                    className="mb-4 inline-flex items-center gap-1.5 text-sm text-stone-500 no-underline transition-colors hover:text-emerald-700"
                 >
                     <IconArrowLeft size={15} />
                     Kembali ke semua destinasi
                 </Link>
 
                 {/* Badges */}
-                <div className="mb-3 flex flex-wrap gap-2">
+                <div className="mb-2.5 flex flex-wrap gap-2">
                     <Badge kategori={destinasi.kategori}>
                         {destinasi.kategori}
                     </Badge>
@@ -78,14 +78,14 @@ export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
 
                 {/* Heading */}
                 <h1
-                    className="mb-4 font-serif leading-tight font-normal text-stone-800"
-                    style={{ fontSize: 'clamp(28px,4vw,40px)' }}
+                    className="mb-3 font-serif leading-tight font-normal text-stone-800"
+                    style={{ fontSize: 'clamp(24px,3vw,34px)' }}
                 >
                     {destinasi.nama}
                 </h1>
 
                 {/* Meta row */}
-                <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-stone-500">
+                <div className="mb-3 flex flex-wrap items-center gap-4 text-sm text-stone-500">
                     <span className="flex items-center gap-1.5">
                         <IconTrain size={15} className="text-stone-400" />
                         {destinasi.stasiun.nama} — {destinasi.stasiun.kota.nama}
@@ -97,7 +97,7 @@ export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
                 </div>
 
                 {/* Rating */}
-                <div className="mb-6 flex items-center gap-2">
+                <div className="mb-4 flex items-center gap-2">
                     <RatingDisplay value={Number(destinasi.rating)} size={16} />
                     {ulasanCount > 0 && (
                         <span className="text-sm text-stone-400">
@@ -107,7 +107,7 @@ export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
                 </div>
 
                 {/* Description */}
-                <p className="max-w-[680px] text-base leading-relaxed text-stone-600">
+                <p className="max-w-[680px] text-[15px] leading-relaxed text-stone-600">
                     {destinasi.deskripsi}
                 </p>
             </div>

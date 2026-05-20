@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Kota extends Model
 {
@@ -18,5 +19,10 @@ class Kota extends Model
     public function stasiun(): HasMany
     {
         return $this->hasMany(Stasiun::class);
+    }
+
+    public function destinasi(): HasManyThrough
+    {
+        return $this->hasManyThrough(Destinasi::class, Stasiun::class);
     }
 }

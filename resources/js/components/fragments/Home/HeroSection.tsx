@@ -261,7 +261,7 @@ function HeroCardDeck({ destinations }: { destinations: Destinasi[] }) {
 export default function HeroSection({ destinations }: HeroSectionProps) {
     return (
         <section
-            className="relative grid min-h-screen px-[max(24px,calc(50%-576px))] lg:min-h-0 lg:grid-cols-2"
+            className="relative grid min-h-screen px-[max(24px,calc(50%-576px))] lg:grid-cols-2"
             style={{ background: '#065f46' }}
         >
             {/* Track pattern */}
@@ -275,7 +275,7 @@ export default function HeroSection({ destinations }: HeroSectionProps) {
             />
 
             {/* Left column */}
-            <div className="relative z-[2] flex animate-[fadeUp_0.7s_ease_both] flex-col self-center py-20 lg:py-14">
+            <div className="relative z-[2] flex animate-[fadeUp_0.7s_ease_both] flex-col self-center pt-32 pb-20 lg:pt-24 lg:pb-16">
                 <div className="mb-7 flex w-fit items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-[5px] text-[11px] font-semibold tracking-[0.12em] text-white/70 uppercase">
                     <IconRoute size={14} />
                     Wisata &amp; Kuliner via Kereta Api
