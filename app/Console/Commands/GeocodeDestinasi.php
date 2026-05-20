@@ -40,36 +40,34 @@ class GeocodeDestinasi extends Command
 
         foreach ($destinasi as $dest) {
             $kota = $dest->stasiun?->kota?->nama ?? '';
-            $query = trim("{$dest->alamat}, {$kota}, Indonesia");
+            $koordinat = null;
 
-            try {
-                $response = Http::withHeaders([
-                    'User-Agent' => 'JejakJalur/1.0 (jejakjalur@project-n.site)',
-                ])->get('https://nominatim.openstreetmap.org/search', [
-                    'q' => $query,
-                    'format' => 'json',
-                    'limit' => 1,
-                    'countrycodes' => 'id',
-                ]);
+            // Coba 3 query dari spesifik ke umum
+            $queries = array_filter([
+                $dest->alamat ? trim("{$dest->alamat}, {$kota}, Indonesia") : null,
+                $kota ? trim("{$dest->nama}, {$kota}, Indonesia") : null,
+                trim("{$dest->nama}, Indonesia"),
+            ]);
 
-                $results = $response->json();
-
-                if (! empty($results[0])) {
-                    $dest->update([
-                        'lat' => (float) $results[0]['lat'],
-                        'lng' => (float) $results[0]['lon'],
-                    ]);
-                    $berhasil++;
-                } else {
-                    $gagal++;
+            foreach ($queries as $q) {
+                $koordinat = $this->nominatim($q);
+                if ($koordinat) {
+                    break;
                 }
-            } catch (\Throwable $e) {
-                Log::warning("Geocode gagal untuk {$dest->nama}: {$e->getMessage()}");
+                usleep(1_100_000);
+            }
+
+            if ($koordinat) {
+                $dest->update($koordinat);
+                $berhasil++;
+            } elseif ($dest->stasiun?->lat && $dest->stasiun?->lng) {
+                $dest->update(['lat' => $dest->stasiun->lat, 'lng' => $dest->stasiun->lng]);
+                $berhasil++;
+            } else {
                 $gagal++;
             }
 
             $bar->advance();
-            // Nominatim rate limit: 1 req/sec
             usleep(1_100_000);
         }
 
@@ -78,5 +76,27 @@ class GeocodeDestinasi extends Command
         $this->info("Selesai: {$berhasil} berhasil, {$gagal} gagal.");
 
         return self::SUCCESS;
+    }
+
+    private function nominatim(string $q): ?array
+    {
+        try {
+            $results = Http::timeout(10)->withHeaders([
+                'User-Agent' => 'JejakJalur/1.0 (jejakjalur@project-n.site)',
+            ])->get('https://nominatim.openstreetmap.org/search', [
+                'q' => $q,
+                'format' => 'json',
+                'limit' => 1,
+                'countrycodes' => 'id',
+            ])->json();
+
+            if (! empty($results[0])) {
+                return ['lat' => (float) $results[0]['lat'], 'lng' => (float) $results[0]['lon']];
+            }
+        } catch (\Throwable $e) {
+            Log::warning("Nominatim gagal [{$q}]: {$e->getMessage()}");
+        }
+
+        return null;
     }
 }
