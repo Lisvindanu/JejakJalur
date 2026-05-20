@@ -101,22 +101,35 @@ class JejakAiService
         })->withCount('stasiun')->limit(5)->get();
 
         if ($kotas->isNotEmpty()) {
-            $kotaList = $kotas->map(fn ($k) => "- {$k->nama} ({$k->stasiun_count} stasiun)")->join("\n");
-            $parts[] = "KOTA YANG RELEVAN:\n{$kotaList}";
+            $kotaIds = $kotas->pluck('id');
+            $stasiunDiKota = Stasiun::whereIn('kota_id', $kotaIds)->get()->groupBy('kota_id');
+
+            $kotaList = $kotas->map(function ($k) use ($stasiunDiKota) {
+                $list = ($stasiunDiKota[$k->id] ?? collect())
+                    ->map(fn ($s) => "  · {$s->nama} [{$s->kode_stasiun}]")
+                    ->join("\n");
+
+                return "- {$k->nama}:\n{$list}";
+            })->join("\n");
+
+            $parts[] = "STASIUN DI KOTA YANG RELEVAN:\n{$kotaList}";
         }
 
-        // Search stasiun
+        // Search stasiun by keyword (name/code) — skip if already covered via kota
+        $coveredKotaIds = $kotas->pluck('id');
         $stasiuns = Stasiun::with('kota')
             ->where(function ($q) use ($keywords) {
                 foreach ($keywords as $kw) {
                     $q->orWhere('nama', 'ILIKE', "%{$kw}%")
                         ->orWhere('kode_stasiun', 'ILIKE', "%{$kw}%");
                 }
-            })->limit(10)->get();
+            })
+            ->when($coveredKotaIds->isNotEmpty(), fn ($q) => $q->whereNotIn('kota_id', $coveredKotaIds))
+            ->limit(10)->get();
 
         if ($stasiuns->isNotEmpty()) {
             $stasiunList = $stasiuns->map(fn ($s) => "- Stasiun {$s->nama} [{$s->kode_stasiun}] di {$s->kota->nama}")->join("\n");
-            $parts[] = "STASIUN YANG RELEVAN:\n{$stasiunList}";
+            $parts[] = "STASIUN LAIN YANG RELEVAN:\n{$stasiunList}";
         }
 
         // Search destinasi
@@ -166,7 +179,7 @@ class JejakAiService
     private function extractKeywords(string $query): array
     {
         // Strip common stop words and extract meaningful keywords
-        $stopWords = ['apa', 'ada', 'di', 'ke', 'dari', 'yang', 'dan', 'atau', 'saya', 'mau', 'bisa', 'tolong', 'info', 'tentang', 'gimana', 'cara', 'adalah', 'bagaimana', 'berapa', 'kapan', 'untuk', 'dengan'];
+        $stopWords = ['apa', 'ada', 'di', 'ke', 'dari', 'yang', 'dan', 'atau', 'saya', 'mau', 'bisa', 'tolong', 'info', 'tentang', 'gimana', 'cara', 'adalah', 'bagaimana', 'berapa', 'kapan', 'untuk', 'dengan', 'stasiun', 'kereta', 'ada', 'tahu', 'tau', 'saja', 'aja', 'dong', 'deh', 'yuk', 'kamu', 'aku', 'ingin', 'minta', 'cari', 'tunjukkan', 'list', 'daftar'];
 
         $words = preg_split('/\s+/', strtolower(trim($query)));
         $keywords = array_filter($words, fn ($w) => strlen($w) >= 3 && ! in_array($w, $stopWords));
@@ -184,12 +197,17 @@ PERANMU:
 - Memberikan informasi tentang kota, stasiun, dan rute kereta di Indonesia
 - Membantu navigasi aplikasi JejakJalur
 
-BATASAN KETAT:
-- Kamu HANYA boleh menjawab pertanyaan seputar: kereta api Indonesia, stasiun, rute, kota-kota di jalur kereta, destinasi wisata/kuliner/UMKM di sekitar stasiun
-- Jika pertanyaan di luar topik (politik, matematika, coding, dll), tolak dengan sopan: "Maaf, aku hanya bisa membantu seputar perjalanan kereta dan destinasi wisata di JejakJalur 🚂"
-- Jangan mengarang data. Gunakan HANYA data di bawah ini sebagai referensi
+BATASAN TOPIK:
+- Hanya jawab pertanyaan seputar: kereta api Indonesia, stasiun, rute, kota jalur kereta, destinasi wisata/kuliner/UMKM di sekitar stasiun
+- Jika di luar topik, tolak sopan: "Maaf, aku hanya bisa membantu seputar perjalanan kereta dan destinasi wisata di JejakJalur 🚂"
 
-DATA AKTUAL JEJAKJALUR (gunakan ini sebagai sumber jawaban):
+ATURAN ANTI-HALUSINASI (WAJIB):
+- HANYA sebutkan nama stasiun, kota, dan destinasi yang PERSIS TERTULIS dalam data di bawah
+- Jika data tidak ada dalam konteks, jawab: "Maaf, data ini belum tersedia di JejakJalur saat ini."
+- DILARANG menambahkan atau mengarang nama stasiun/destinasi yang tidak ada dalam data
+- Jika ditanya daftar stasiun di suatu kota, sebutkan HANYA yang tercantum di bawah
+
+DATA AKTUAL JEJAKJALUR (SATU-SATUNYA sumber kebenaran, jangan tambahkan apapun di luar ini):
 {$knowledge}
 
 GAYA KOMUNIKASI:
