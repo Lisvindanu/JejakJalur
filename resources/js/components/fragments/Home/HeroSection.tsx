@@ -105,47 +105,79 @@ function HeroCardDeck({ destinations }: { destinations: Destinasi[] }) {
         B: { dataIdx: 1, pos: 'mid' },
         C: { dataIdx: 2, pos: 'back' },
     });
+    const [dragX, setDragX] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
     const [noTx, setNoTx] = useState(false);
     const busy = useRef(false);
     const nextData = useRef(3);
+    const startX = useRef(0);
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    useEffect(() => {
-        const tick = () => {
-            if (busy.current) return;
-            busy.current = true;
+    const advance = () => {
+        if (busy.current) return;
+        busy.current = true;
+        setSlots((prev) => {
+            const n = { ...prev } as typeof prev;
+            (Object.keys(n) as SlotId[]).forEach((id) => {
+                n[id] = { ...n[id], pos: NEXT[n[id].pos] };
+            });
+            return n;
+        });
+        setTimeout(() => {
+            setNoTx(true);
             setSlots((prev) => {
                 const n = { ...prev } as typeof prev;
-                (Object.keys(n) as SlotId[]).forEach((id) => {
-                    n[id] = { ...n[id], pos: NEXT[n[id].pos] };
-                });
+                const backId = (Object.keys(n) as SlotId[]).find(
+                    (id) => n[id].pos === 'back',
+                )!;
+                n[backId] = {
+                    ...n[backId],
+                    dataIdx: nextData.current % total,
+                };
+                nextData.current++;
                 return n;
             });
-            setTimeout(() => {
-                setNoTx(true);
-                setSlots((prev) => {
-                    const n = { ...prev } as typeof prev;
-                    const backId = (Object.keys(n) as SlotId[]).find(
-                        (id) => n[id].pos === 'back',
-                    )!;
-                    n[backId] = {
-                        ...n[backId],
-                        dataIdx: nextData.current % total,
-                    };
-                    nextData.current++;
-                    return n;
-                });
-                requestAnimationFrame(() =>
-                    requestAnimationFrame(() => {
-                        setNoTx(false);
-                        busy.current = false;
-                    }),
-                );
-            }, 440);
-        };
+            requestAnimationFrame(() =>
+                requestAnimationFrame(() => {
+                    setNoTx(false);
+                    busy.current = false;
+                }),
+            );
+        }, 440);
+    };
 
-        const id = setInterval(tick, 3500);
-        return () => clearInterval(id);
-    }, [total]);
+    const resetInterval = () => {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        intervalRef.current = setInterval(advance, 6000);
+    };
+
+    useEffect(() => {
+        intervalRef.current = setInterval(advance, 6000);
+        return () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+        };
+    }, [total]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const onDown = (x: number) => {
+        if (busy.current) return;
+        startX.current = x;
+        setIsDragging(true);
+    };
+    const onMove = (x: number) => {
+        if (!isDragging) return;
+        setDragX(x - startX.current);
+    };
+    const onUp = () => {
+        if (!isDragging) return;
+        setIsDragging(false);
+        if (Math.abs(dragX) > 60) {
+            setDragX(0);
+            advance();
+            resetInterval();
+        } else {
+            setDragX(0);
+        }
+    };
 
     const BASE: React.CSSProperties = {
         position: 'absolute',
@@ -159,10 +191,15 @@ function HeroCardDeck({ destinations }: { destinations: Destinasi[] }) {
         <div
             className="select-none"
             style={{ position: 'relative', width: 420, height: 480 }}
+            onMouseLeave={onUp}
         >
             {(Object.entries(slots) as [SlotId, typeof slots.A][]).map(
                 ([id, { dataIdx, pos }]) => {
                     const s = POS[pos];
+                    const isFront = pos === 'front';
+                    const tx = isFront ? dragX : 0;
+                    const rot = isFront ? s.rot + dragX / 20 : s.rot;
+
                     return (
                         <div
                             key={id}
@@ -174,10 +211,23 @@ function HeroCardDeck({ destinations }: { destinations: Destinasi[] }) {
                                 left: s.l,
                                 opacity: s.op,
                                 zIndex: s.z,
-                                boxShadow: s.sh,
-                                transform: `rotate(${s.rot}deg)`,
-                                transition: noTx ? 'none' : EASE,
+                                boxShadow: isFront && isDragging
+                                    ? '0 32px 80px rgba(0,0,0,0.40)'
+                                    : s.sh,
+                                transform: `translateX(${tx}px) rotate(${rot}deg)`,
+                                transition: (isDragging && isFront) || noTx
+                                    ? 'none'
+                                    : EASE,
+                                cursor: isFront
+                                    ? isDragging ? 'grabbing' : 'grab'
+                                    : 'default',
                             }}
+                            onMouseDown={isFront ? (e) => onDown(e.clientX) : undefined}
+                            onMouseMove={isFront ? (e) => onMove(e.clientX) : undefined}
+                            onMouseUp={isFront ? onUp : undefined}
+                            onTouchStart={isFront ? (e) => onDown(e.touches[0].clientX) : undefined}
+                            onTouchMove={isFront ? (e) => { e.preventDefault(); onMove(e.touches[0].clientX); } : undefined}
+                            onTouchEnd={isFront ? onUp : undefined}
                         >
                             <HeroCardFace d={destinations[dataIdx % total]} />
                         </div>
