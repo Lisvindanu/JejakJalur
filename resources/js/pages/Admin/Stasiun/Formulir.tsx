@@ -13,7 +13,10 @@ interface Props {
     semuaKota?: Kota[];
 }
 
-export default function StasiunFormulir({ stasiun, semuaKota: kotaProp }: Props) {
+export default function StasiunFormulir({
+    stasiun,
+    semuaKota: kotaProp,
+}: Props) {
     const semuaKota = kotaProp ?? MOCK_KOTA;
     const isEdit = !!stasiun;
 

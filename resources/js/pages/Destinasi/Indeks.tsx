@@ -19,7 +19,11 @@ interface Props {
     filter?: Filter;
 }
 
-export default function Indeks({ destinasi: dest, semuaKota: kota, filter: fil }: Props) {
+export default function Indeks({
+    destinasi: dest,
+    semuaKota: kota,
+    filter: fil,
+}: Props) {
     const destinasi = dest ?? mockPaginate(MOCK_DESTINASI);
     const semuaKota = kota ?? MOCK_KOTA;
     const filter = fil ?? {};
