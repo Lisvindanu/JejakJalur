@@ -150,7 +150,9 @@ export default function DestinasiFormulir({
                                 <Input
                                     label="Latitude (opsional)"
                                     value={data.lat}
-                                    onChange={(e) => setData('lat', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('lat', e.target.value)
+                                    }
                                     error={errors.lat}
                                     placeholder="cth. -7.8888"
                                     type="number"
@@ -159,7 +161,9 @@ export default function DestinasiFormulir({
                                 <Input
                                     label="Longitude (opsional)"
                                     value={data.lng}
-                                    onChange={(e) => setData('lng', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('lng', e.target.value)
+                                    }
                                     error={errors.lng}
                                     placeholder="cth. 110.3333"
                                     type="number"
