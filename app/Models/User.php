@@ -30,7 +30,7 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function sendPasswordResetNotification(string $token): void
+    public function sendPasswordResetNotification($token): void
     {
         $this->notify(new ResetPasswordNotification($token));
     }
