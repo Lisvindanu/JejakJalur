@@ -63,17 +63,23 @@ export default function RegisterForm() {
                     <input
                         type="checkbox"
                         checked={data.consent_given}
-                        onChange={(e) => setData('consent_given', e.target.checked)}
+                        onChange={(e) =>
+                            setData('consent_given', e.target.checked)
+                        }
                         className="mt-0.5 h-4 w-4 rounded border-stone-300 accent-emerald-600"
                     />
                     <span>
                         Saya menyetujui{' '}
-                        <span className="font-medium text-stone-800">syarat & ketentuan</span>{' '}
+                        <span className="font-medium text-stone-800">
+                            syarat & ketentuan
+                        </span>{' '}
                         dan pemrosesan data pribadi sesuai UU PDP.
                     </span>
                 </label>
                 {errors.consent_given && (
-                    <p className="text-xs text-red-500">{errors.consent_given}</p>
+                    <p className="text-xs text-red-500">
+                        {errors.consent_given}
+                    </p>
                 )}
             </div>
 
