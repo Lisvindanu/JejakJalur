@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Observers\KotaObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
+#[ObservedBy(KotaObserver::class)]
 class Kota extends Model
 {
     protected $table = 'kota';

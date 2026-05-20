@@ -195,7 +195,11 @@ export default function JejakAiWidget() {
     /* Load status + history on mount */
     useEffect(() => {
         apiGet<
-            Usage & { history?: { role: string; content: string; links?: AiLink[] }[] | null }
+            Usage & {
+                history?:
+                    | { role: string; content: string; links?: AiLink[] }[]
+                    | null;
+            }
         >('/ai/status')
             .then((data) => {
                 setUsage(data);

@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Observers\StasiunObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[ObservedBy(StasiunObserver::class)]
 class Stasiun extends Model
 {
     protected $table = 'stasiun';

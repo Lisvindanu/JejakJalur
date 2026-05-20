@@ -4,7 +4,10 @@ import {
     IconBuilding,
     IconLayoutDashboard,
     IconMapPin,
+    IconMessageCircle,
+    IconRobot,
     IconTrain,
+    IconUsers,
 } from '@tabler/icons-react';
 import { Link, router, usePage } from '@inertiajs/react';
 
@@ -12,21 +15,17 @@ interface NavItem {
     label: string;
     href: string;
     icon: React.ReactNode;
+    separator?: boolean;
 }
 
 const navItems: NavItem[] = [
-    {
-        label: 'Dashboard',
-        href: '/admin',
-        icon: <IconLayoutDashboard size={18} />,
-    },
-    { label: 'Kota', href: '/admin/kota', icon: <IconBuilding size={18} /> },
+    { label: 'Dashboard', href: '/admin', icon: <IconLayoutDashboard size={18} /> },
+    { label: 'Kota', href: '/admin/kota', icon: <IconBuilding size={18} />, separator: true },
     { label: 'Stasiun', href: '/admin/stasiun', icon: <IconTrain size={18} /> },
-    {
-        label: 'Destinasi',
-        href: '/admin/destinasi',
-        icon: <IconMapPin size={18} />,
-    },
+    { label: 'Destinasi', href: '/admin/destinasi', icon: <IconMapPin size={18} />, separator: true },
+    { label: 'Pengguna', href: '/admin/pengguna', icon: <IconUsers size={18} /> },
+    { label: 'Ulasan', href: '/admin/ulasan', icon: <IconMessageCircle size={18} /> },
+    { label: 'Sesi AI', href: '/admin/ai-session', icon: <IconRobot size={18} /> },
 ];
 
 export default function Sidebar() {
@@ -56,19 +55,21 @@ export default function Sidebar() {
             {/* Nav */}
             <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
                 {navItems.map((item) => (
-                    <Link
-                        key={item.href}
-                        href={item.href}
-                        className={
-                            'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ' +
-                            (isActive(item.href)
-                                ? 'bg-emerald-700 text-white'
-                                : 'text-stone-400 hover:bg-stone-800 hover:text-white')
-                        }
-                    >
-                        {item.icon}
-                        {item.label}
-                    </Link>
+                    <div key={item.href}>
+                        {item.separator && <div className="my-1.5 border-t border-stone-800" />}
+                        <Link
+                            href={item.href}
+                            className={
+                                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ' +
+                                (isActive(item.href)
+                                    ? 'bg-emerald-700 text-white'
+                                    : 'text-stone-400 hover:bg-stone-800 hover:text-white')
+                            }
+                        >
+                            {item.icon}
+                            {item.label}
+                        </Link>
+                    </div>
                 ))}
             </nav>
 
