@@ -395,10 +395,10 @@ export default function PerencanaRute({
                     </p>
                 </div>
 
-                {/* 3-column picker grid */}
-                <div className="grid items-end gap-4 md:grid-cols-[1fr,auto,1fr] md:gap-3">
+                {/* 3-column picker row */}
+                <div className="flex items-stretch gap-3">
                     {/* ── DARI (left) ── */}
-                    <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
+                    <div className="min-w-0 flex-1 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
                         <div className="mb-2 flex items-center justify-between">
                             <span className="text-xs font-semibold tracking-wider text-emerald-700 uppercase">
                                 Dari
@@ -433,17 +433,15 @@ export default function PerencanaRute({
                     </div>
 
                     {/* ── Separator ── */}
-                    <div className="flex items-center justify-center md:flex-col md:pb-2">
-                        <div className="hidden h-5 w-px bg-stone-200 md:block" />
+                    <div className="flex shrink-0 flex-col items-center justify-center gap-1 self-center">
                         <IconChevronRight
-                            size={20}
+                            size={18}
                             className="text-stone-300"
                         />
-                        <div className="hidden h-5 w-px bg-stone-200 md:block" />
                     </div>
 
                     {/* ── KE (right) ── */}
-                    <div className="rounded-xl border border-amber-100 bg-amber-50/50 p-4">
+                    <div className="min-w-0 flex-1 rounded-xl border border-amber-100 bg-amber-50/50 p-4">
                         <div className="mb-2">
                             <span className="text-xs font-semibold tracking-wider text-amber-700 uppercase">
                                 Ke
