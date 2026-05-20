@@ -319,7 +319,6 @@ export default function PerencanaRute({
                         resetRute();
                     }}
                     semuaKota={semuaKota}
-                    excludeKotaId={tujuan?.kotaId}
                 />
                 <div className="hidden shrink-0 items-center pb-1 sm:flex">
                     <IconArrowRight size={16} className="text-stone-300" />
@@ -332,7 +331,6 @@ export default function PerencanaRute({
                         resetRute();
                     }}
                     semuaKota={semuaKota}
-                    excludeKotaId={asal?.kotaId}
                 />
                 <button
                     onClick={handleCari}

@@ -54,30 +54,45 @@ class RuteController extends Controller
             return response()->json(['error' => 'Stasiun asal dan tujuan harus berbeda.'], 422);
         }
 
-        // Build adjacency list
-        $koneksi = KoneksiStasiun::select('stasiun_dari_id', 'stasiun_ke_id')->get();
+        // Build undirected weighted adjacency list (kedua arah)
+        $koneksi = KoneksiStasiun::select('stasiun_dari_id', 'stasiun_ke_id', 'jarak_km')->get();
         $graph = [];
         foreach ($koneksi as $k) {
-            $graph[$k->stasiun_dari_id][] = $k->stasiun_ke_id;
+            $w = $k->jarak_km ?? 1;
+            $graph[$k->stasiun_dari_id][$k->stasiun_ke_id] = $w;
+            $graph[$k->stasiun_ke_id][$k->stasiun_dari_id] = $w;
         }
 
-        // BFS with parent tracking
+        // Dijkstra — jalur terpendek berdasarkan jarak (bukan jumlah hop)
+        $dist = [$dariId => 0.0];
         $parent = [$dariId => null];
-        $queue = [$dariId];
+        $visited = [];
+        $pq = [[$dariId, 0.0]];
         $found = false;
 
-        while (! empty($queue)) {
-            $current = array_shift($queue);
+        while (! empty($pq)) {
+            usort($pq, fn ($a, $b) => $a[1] <=> $b[1]);
+            [$current, $currentDist] = array_shift($pq);
+
+            if (isset($visited[$current])) {
+                continue;
+            }
+            $visited[$current] = true;
 
             if ($current === $keId) {
                 $found = true;
                 break;
             }
 
-            foreach ($graph[$current] ?? [] as $neighbor) {
-                if (! array_key_exists($neighbor, $parent)) {
+            foreach ($graph[$current] ?? [] as $neighbor => $weight) {
+                if (isset($visited[$neighbor])) {
+                    continue;
+                }
+                $newDist = $currentDist + $weight;
+                if (! isset($dist[$neighbor]) || $newDist < $dist[$neighbor]) {
+                    $dist[$neighbor] = $newDist;
                     $parent[$neighbor] = $current;
-                    $queue[] = $neighbor;
+                    $pq[] = [$neighbor, $newDist];
                 }
             }
         }
