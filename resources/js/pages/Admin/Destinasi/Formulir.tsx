@@ -20,8 +20,15 @@ const kategoriOptions = [
     { value: 'UMKM', label: 'UMKM' },
 ];
 
-export default function DestinasiFormulir({ destinasi, semuaStasiun: stasiunProp }: Props) {
-    const semuaStasiun = (stasiunProp ?? MOCK_STASIUN) as Array<{ id: string; nama: string; kota: { nama: string } }>;
+export default function DestinasiFormulir({
+    destinasi,
+    semuaStasiun: stasiunProp,
+}: Props) {
+    const semuaStasiun = (stasiunProp ?? MOCK_STASIUN) as Array<{
+        id: string;
+        nama: string;
+        kota: { nama: string };
+    }>;
     const isEdit = !!destinasi;
 
     const { data, setData, post, processing, errors } = useForm<{

@@ -29,11 +29,12 @@ interface Props {
 }
 
 export default function Welcome({ destinasiFeatured, semuaKota }: Props) {
-    const featured = (destinasiFeatured && destinasiFeatured.length > 0)
-        ? destinasiFeatured
-        : MOCK_DESTINASI;
+    const featured =
+        destinasiFeatured && destinasiFeatured.length > 0
+            ? destinasiFeatured
+            : MOCK_DESTINASI;
 
-    const kota = ((semuaKota && semuaKota.length > 0) ? semuaKota : MOCK_KOTA)
+    const kota = (semuaKota && semuaKota.length > 0 ? semuaKota : MOCK_KOTA)
         .slice()
         .sort((a, b) => {
             const pa = PRIORITY_CITIES.findIndex((n) =>

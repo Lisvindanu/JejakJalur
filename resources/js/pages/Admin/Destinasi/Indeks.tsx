@@ -39,7 +39,11 @@ export default function DestinasiIndeks({
     filter: fil,
 }: Props) {
     const destinasi = destProp ?? mockPaginate(MOCK_DESTINASI);
-    const semuaStasiun = (stasiunProp ?? MOCK_STASIUN) as Array<{ id: string; nama: string; kota: { nama: string } }>;
+    const semuaStasiun = (stasiunProp ?? MOCK_STASIUN) as Array<{
+        id: string;
+        nama: string;
+        kota: { nama: string };
+    }>;
     const filter = fil ?? {};
     const { isOpen, confirm, handleConfirm, handleCancel } = useConfirm();
 
