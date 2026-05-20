@@ -9,10 +9,17 @@ use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\DestinasiController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\JejakAiController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\RuteController;
 use App\Http\Controllers\UlasanController;
 use Illuminate\Support\Facades\Route;
+
+// Jejak AI
+Route::prefix('ai')->name('ai.')->group(function () {
+    Route::post('/chat', [JejakAiController::class, 'chat'])->name('chat')->middleware('throttle:30,1');
+    Route::get('/status', [JejakAiController::class, 'status'])->name('status');
+});
 
 // Publik
 Route::get('/', [HomeController::class, 'tampilkan'])->name('home');
