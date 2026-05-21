@@ -22,9 +22,30 @@ class KoneksiStasiunSeeder extends Seeder
             ],
 
             // ── KRL BEKASI LINE ──────────────────────────────────────────
-            // Pasar Senen → Jatinegara → Bekasi → Cikarang
+            // Pasar Senen → Jatinegara → Klender → Buaran → Klender Baru → Cakung
+            // → Rawabebek → Kranji → Bekasi → Bekasi Timur → Tambun → Cibitung → Cikarang → Lemahabang
             'KRL Bekasi' => [
-                'PSE', 'JNG', 'BUA', 'TB', 'RWB', 'BKT', 'BKS', 'LMB', 'CKR',
+                'PSE', 'JNG', 'KLD', 'BUA', 'KLDB', 'CUK', 'RWB', 'KRI',
+                'BKS', 'BKT', 'TB', 'CIT', 'CKR', 'LMB',
+            ],
+
+            // ── KRL TANAH ABANG LINE ─────────────────────────────────────
+            // Manggarai → Sudirman → Karet → Tanah Abang → Duri
+            'KRL Tanah Abang' => [
+                'MRI', 'SUD', 'KAT', 'THB', 'DU',
+            ],
+
+            // ── KRL JAKARTA KOTA LOOP ────────────────────────────────────
+            // Manggarai → Cikini → Gondangdia → Juanda → Sawah Besar → Mangga Besar
+            // → Jayakarta → Jakarta Kota → Kampung Bandan
+            'KRL Jakarta Kota' => [
+                'MRI', 'CKI', 'GDD', 'JUA', 'SW', 'MGB', 'JAY', 'JAKK', 'KPB',
+            ],
+
+            // ── KRL DURI-ANGKE ───────────────────────────────────────────
+            // Duri → Angke → Kampung Bandan
+            'KRL Duri-Angke' => [
+                'DU', 'AK', 'KPB',
             ],
 
             // ── KRL TANGERANG LINE ───────────────────────────────────────
@@ -60,8 +81,8 @@ class KoneksiStasiunSeeder extends Seeder
                 'RK', 'MJA', 'CTR', 'TNG',
             ],
 
-            // ── JALUR PANTURA ─────────────────────────────────────────────
-            // Jakarta → Cikampek → Cirebon → Semarang → Solo → Surabaya
+            // ── JALUR PANTURA (BARAT) ─────────────────────────────────────
+            // Jakarta → Cikampek → Cirebon → Semarang
             'Pantura' => [
                 'GMR', 'PSE', 'JNG', 'BKS', 'KW', 'CKP',
                 'CRA', 'PAB', 'PGB', 'PAS', 'PRI', 'HGL', 'TLS', 'KAB', 'CLH',
@@ -70,31 +91,29 @@ class KoneksiStasiunSeeder extends Seeder
                 'BB', 'LRA', 'KRT', 'SGG', 'BMA', 'PPK', 'LG', 'PAT', 'TG', 'LR',
                 'SD', 'PTA', 'CO', 'PML', 'KNS', 'PLB', 'UJN', 'BTG', 'PK',
                 'SRI', 'KBD', 'WLR', 'KLN', 'MKG', 'ATA', 'SMT', 'SMC',
-                'JRK', 'BBG', 'TGW', 'GUB', 'NBO', 'TGG', 'GBN', 'TRH',
+            ],
+
+            // ── JALUR PANTURA TENGAH-TIMUR (Lintas Tengah) ────────────────
+            // Semarang → Gambringan → Doplang → Cepu → Bojonegoro → Babat → Lamongan → Surabaya Pasarturi
+            'Pantura Timur' => [
+                'SMT', 'JRK', 'BBG', 'TGW', 'GUB', 'NBO', 'TGG', 'GBN', 'TRH',
                 'SDI', 'PNL', 'KSO', 'JTS', 'KNN', 'PDS', 'JBN', 'GN', 'KEJ',
                 'KGT', 'GD', 'SL', 'GPK', 'DPL',
-                'TW', 'JBN1', 'CE', 'KT', 'BBN', 'SWT',
-                'SLO', 'SK', 'SK', 'PWS', 'STA',
-                'KMR', 'KO', 'PL', 'KDB', 'MSR', 'SLM', 'SUM', 'SR', 'KRO',
-                'WK', 'KG', 'PA', 'GG', 'NGW',
-                'MAG', 'BAT', 'TAL', 'MN', 'BBD', 'SRD', 'CRB',
-                'NJ', 'SKM', 'BGR', 'WLG', 'KTS', 'NJG', 'NT', 'TA', 'RJ',
-                'SBL', 'KD', 'PPR', 'MGN', 'PWA', 'NDL', 'KRS',
-                'JG', 'SBO', 'SMB', 'PTR', 'CRM',
-                'MR', 'BAL', 'KRN', 'SDA', 'SPJ', 'STP', 'GDG', 'WR', 'TGA',
-                'TLN', 'BH', 'KDN', 'PWJ', 'SBI', 'SGU',
+                'RBG', 'CU', 'TBO', 'KIT', 'BJ',
+                'BWO', 'BBT', 'SBN', 'GEB', 'PC', 'SLR', 'LMG', 'KRU',
+                'DD', 'GS', 'CME', 'BNW', 'KDA', 'IDO', 'TES', 'SBI',
             ],
 
             // ── JALUR SELATAN ─────────────────────────────────────────────
             // Jakarta → Purwakarta → Bandung → Tasikmalaya → Purwokerto → Yogyakarta → Solo
             'Selatan' => [
                 'GMR', 'PSE', 'JNG', 'BKS', 'CKP',
-                'CG', 'CBR', 'SUT', 'SAD', 'PWK', 'PLD', 'CA', 'RH', 'CPT',
-                'SKT', 'PDL', 'GK', 'CLE', 'CMI', 'TAU', 'MSI', 'LBJ', 'RCK',
+                'CBR', 'SAD', 'PWK', 'PLD', 'SUT', 'CA', 'CG', 'CD', 'RH', 'CPT',
+                'SKT', 'CLE', 'CMI', 'PDL', 'GK', 'TAU', 'MSI', 'LBJ', 'RCK',
                 'BD', 'CMD', 'CIR', 'AND', 'CTH', 'CMK', 'GDB', 'KAC',
                 'HRP', 'CCL', 'NG', 'CB', 'CPD', 'WB', 'LL', 'LO', 'BMW',
                 'KRAI', 'RJP', 'CAW', 'CAA', 'MNJ', 'IH', 'TSM', 'AW',
-                'TB', 'RJP', 'CKW', 'CI', 'BJG', 'LN', 'KNP', 'BJR',
+                'CKW', 'CI', 'BJG', 'LN', 'KNP', 'BJR',
                 'SDR', 'LBG', 'CPI', 'JRL', 'GDM', 'SKP', 'RDN', 'SIL',
                 'MLW', 'KKD', 'KRL', 'GM', 'KH', 'CP', 'MA',
                 'PKW', 'KRR', 'KBS', 'KGD', 'NTG', 'SPH', 'TBK', 'LGK',
@@ -151,18 +170,11 @@ class KoneksiStasiunSeeder extends Seeder
 
             // ── JALUR SURABAYA-BANYUWANGI ─────────────────────────────────
             'Surabaya-Banyuwangi' => [
-                'SGU', 'BG', 'GNG', 'PB', 'BYM', 'JI', 'LEC', 'MLS', 'KK',
+                'SGU', 'BG', 'GNG', 'PB', 'BYM', 'LEC', 'MLS', 'KK',
                 'RDA', 'KLO', 'RN', 'JTR', 'AJ', 'TGL', 'BSS', 'KTK', 'SBB',
                 'LDO', 'SBS', 'PET', 'MI', 'RBP', 'JR', 'GRN', 'MRW',
                 'KBR', 'GLM', 'SGJ', 'RGP', 'KKL', 'KNE', 'KMP', 'KSL',
                 'SWD', 'KBT', 'TGR', 'AGO', 'BWB', 'BW', 'BWI', 'KTG',
-            ],
-
-            // ── JALUR SURABAYA-BOJONEGORO ─────────────────────────────────
-            'Surabaya-Bojonegoro' => [
-                'SBI', 'TES', 'KDA', 'BNW', 'IDO', 'GS', 'DD', 'CME',
-                'LMG', 'KRU', 'SLR', 'GEB', 'BBT', 'SBN', 'PC',
-                'KPS', 'SRJ', 'SYO', 'BWO', 'TBO', 'BJ', 'KIT',
             ],
 
             // ── JALUR SURABAYA-MOJOKERTO ──────────────────────────────────

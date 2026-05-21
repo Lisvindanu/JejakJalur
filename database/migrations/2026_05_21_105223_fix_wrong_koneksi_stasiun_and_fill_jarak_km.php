@@ -25,6 +25,12 @@ return new class extends Migration
             ['DL',  'SWT'], // Dlanggu (Mojokerto) ↔ Srowot (Klaten)
             ['CKP', 'CG'],  // Cikampek ↔ Cisomang (bikin rute Pantura belok ke Bandung)
             ['CBR', 'CG'],  // Cikarang ↔ Cisomang
+            ['TB', 'CKW'],  // Tambun (Bekasi) ↔ Cikawung (Ciamis) - kode TB salah di Selatan jalur
+            ['AW', 'TB'],   // Awipari (Tasikmalaya) ↔ Tambun (Bekasi) - efek samping kode TB di Selatan
+            ['TSM', 'TB'],  // Tasikmalaya ↔ Tambun (Bekasi) - efek samping
+            ['PB', 'JI'],   // Pasir Bungur (Banyuwangi) ↔ Jati (Jakarta) - kode JI salah di Surabaya-Banyuwangi
+            ['BYM', 'JI'],  // Bayeman ↔ Jati (Jakarta) - efek samping
+            ['DL', 'SLO'],  // Dlanggu (Mojokerto) ↔ Solo Balapan - sisa dari kode DL salah di Selatan
         ];
 
         foreach ($wrongPairs as [$a, $b]) {
