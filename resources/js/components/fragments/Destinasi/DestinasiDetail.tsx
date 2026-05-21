@@ -41,20 +41,20 @@ export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
     return (
         <div>
             {/* Image */}
-            <div className="px-[max(24px,calc(50%-576px))]">
-                <div
-                    className={`flex h-[220px] w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br sm:h-[280px] ${placeholder.gradient}`}
-                >
-                    {destinasi.foto_url ? (
-                        <img
-                            src={destinasi.foto_url}
-                            alt={destinasi.nama}
-                            className="h-full w-full object-cover"
-                        />
-                    ) : (
-                        placeholder.icon
-                    )}
-                </div>
+            <div className="px-[max(24px,calc(50%-576px))] py-5">
+                {destinasi.foto_url ? (
+                    <img
+                        src={destinasi.foto_url}
+                        alt={destinasi.nama}
+                        className="mx-auto block max-h-[340px] max-w-full rounded-2xl shadow-md ring-1 ring-stone-200"
+                    />
+                ) : (
+                    <div
+                        className={`flex h-[220px] w-full items-center justify-center rounded-2xl bg-gradient-to-br sm:h-[280px] ${placeholder.gradient}`}
+                    >
+                        {placeholder.icon}
+                    </div>
+                )}
             </div>
 
             {/* Content */}

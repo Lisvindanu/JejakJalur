@@ -1,4 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import BookmarkButton from '@/components/elements/BookmarkButton';
 import DestinasiDetail from '@/components/fragments/Destinasi/DestinasiDetail';
 import LokasiPanel from '@/components/fragments/Destinasi/LokasiPanel';
 import UlasanForm from '@/components/fragments/Ulasan/UlasanForm';
@@ -9,9 +10,13 @@ import type { Destinasi, SharedProps } from '@/types';
 
 interface Props {
     destinasi?: Destinasi;
+    is_bookmarked?: boolean;
 }
 
-export default function Detail({ destinasi: dest }: Props) {
+export default function Detail({
+    destinasi: dest,
+    is_bookmarked = false,
+}: Props) {
     const destinasi: Destinasi = dest ?? {
         ...MOCK_DESTINASI[0],
         ulasan: MOCK_ULASAN,
@@ -22,9 +27,18 @@ export default function Detail({ destinasi: dest }: Props) {
         <PublicLayout>
             <Head title={`${destinasi.nama} — JejakJalur`} />
 
-            {/* Detail view (contains its own px padding for content, but not the image) */}
             <div className="pt-[60px]">
                 <DestinasiDetail destinasi={destinasi} />
+            </div>
+
+            {/* Bookmark button */}
+            <div className="px-[max(24px,calc(50%-576px))] pb-2">
+                {auth?.user && (
+                    <BookmarkButton
+                        destinasiId={destinasi.id}
+                        isBookmarked={is_bookmarked}
+                    />
+                )}
             </div>
 
             {/* Lokasi & Akses */}
@@ -34,7 +48,6 @@ export default function Detail({ destinasi: dest }: Props) {
 
             {/* Ulasan section */}
             <div className="px-[max(24px,calc(50%-576px))] py-8">
-                {/* Write review or login prompt */}
                 {auth?.user ? (
                     <div className="mb-10">
                         <h2 className="mb-4 text-lg font-semibold text-stone-800">
@@ -58,7 +71,6 @@ export default function Detail({ destinasi: dest }: Props) {
                     </div>
                 )}
 
-                {/* Ulasan list */}
                 <UlasanList
                     ulasan={destinasi.ulasan ?? []}
                     currentUserId={auth?.user?.id}

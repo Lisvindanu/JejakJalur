@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\UlasanController as AdminUlasanController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\DestinasiController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JejakAiController;
@@ -64,6 +65,12 @@ Route::middleware('auth')->prefix('profil')->name('profil.')->group(function () 
     Route::get('/edit', [ProfilController::class, 'edit'])->name('edit');
     Route::patch('/', [ProfilController::class, 'perbarui'])->name('perbarui');
     Route::delete('/', [ProfilController::class, 'hapus'])->name('hapus');
+});
+
+// Bookmark
+Route::middleware('auth')->prefix('destinasi/{destinasi:id}')->name('bookmark.')->group(function () {
+    Route::post('/bookmark', [BookmarkController::class, 'simpan'])->name('simpan');
+    Route::delete('/bookmark', [BookmarkController::class, 'hapus'])->name('hapus');
 });
 
 // Ulasan (pengguna terautentikasi)

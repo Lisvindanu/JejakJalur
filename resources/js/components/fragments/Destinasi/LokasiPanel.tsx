@@ -82,9 +82,9 @@ export default function LokasiPanel({ destinasi }: Props) {
 
             // Pin destinasi
             const destIcon = L.divIcon({
-                html: `<div style="background:#065f46;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)">📍</div>`,
-                iconSize: [28, 28],
-                iconAnchor: [14, 28],
+                html: `<div style="background:#065f46;color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"/></svg></div>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 30],
                 className: '',
             });
             L.marker([destLat, destLng], { icon: destIcon })
@@ -96,9 +96,9 @@ export default function LokasiPanel({ destinasi }: Props) {
             // Pin stasiun
             if (stasiunLat && stasiunLng) {
                 const stasiunIcon = L.divIcon({
-                    html: `<div style="background:#1e40af;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)">🚉</div>`,
-                    iconSize: [28, 28],
-                    iconAnchor: [14, 28],
+                    html: `<div style="background:#1e40af;color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l1 1h16l1 -1v-9l-1 -3h-16l-1 3z"/><path d="M3 8h18"/><path d="M9 8v8"/><path d="M15 8v8"/><path d="M9 17l-2 3"/><path d="M15 17l2 3"/></svg></div>`,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 30],
                     className: '',
                 });
                 L.marker([stasiunLat, stasiunLng], { icon: stasiunIcon })
@@ -149,9 +149,9 @@ export default function LokasiPanel({ destinasi }: Props) {
                 if (leafletMap.current) {
                     import('leaflet').then((L) => {
                         const myIcon = L.divIcon({
-                            html: `<div style="background:#7c3aed;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)">🧑</div>`,
-                            iconSize: [28, 28],
-                            iconAnchor: [14, 28],
+                            html: `<div style="background:#7c3aed;color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M12 12m-8 0a8 8 0 1 0 16 0a8 8 0 1 0 -16 0"/><path d="M12 2l0 2"/><path d="M12 20l0 2"/><path d="M20 12l2 0"/><path d="M2 12l2 0"/></svg></div>`,
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 30],
                             className: '',
                         });
                         L.marker([pos.coords.latitude, pos.coords.longitude], {
@@ -209,8 +209,10 @@ export default function LokasiPanel({ destinasi }: Props) {
                 </p>
             </div>
 
-            {/* Map */}
-            <div ref={mapRef} style={{ height: 260 }} className="w-full" />
+            {/* Map — relative z-0 isolates Leaflet's internal z-indexes from the navbar */}
+            <div className="relative z-0 w-full">
+                <div ref={mapRef} style={{ height: 260 }} className="w-full" />
+            </div>
 
             {/* Info + actions */}
             <div className="flex flex-wrap items-center gap-3 p-4">
