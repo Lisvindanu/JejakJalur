@@ -46,7 +46,7 @@ export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
                     <img
                         src={destinasi.foto_url}
                         alt={destinasi.nama}
-                        className="mx-auto block max-h-[340px] max-w-full rounded-2xl"
+                        className="mx-auto block max-h-[340px] max-w-full rounded-2xl shadow-md ring-1 ring-stone-200"
                     />
                 ) : (
                     <div
