@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
     IconArrowRight,
+    IconBolt,
     IconChevronDown,
     IconCurrentLocation,
     IconLoader2,
@@ -11,7 +12,40 @@ import {
 } from '@tabler/icons-react';
 import type { Kota, StasiunRute } from '@/types';
 
-function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
+type Mode = 'antarkota' | 'commuter' | 'kcic';
+
+const MODES: {
+    key: Mode;
+    label: string;
+    icon: React.ReactNode;
+    desc: string;
+}[] = [
+    {
+        key: 'antarkota',
+        label: 'Antarkota',
+        icon: <IconTrain size={14} />,
+        desc: 'KA jarak jauh',
+    },
+    {
+        key: 'commuter',
+        label: 'KRL',
+        icon: <IconTrain size={14} />,
+        desc: 'Commuter Line',
+    },
+    {
+        key: 'kcic',
+        label: 'Whoosh',
+        icon: <IconBolt size={14} />,
+        desc: 'Kereta Cepat',
+    },
+];
+
+function haversine(
+    lat1: number,
+    lng1: number,
+    lat2: number,
+    lng2: number,
+): number {
     const R = 6371;
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
     const dLng = ((lng2 - lng1) * Math.PI) / 180;
@@ -278,6 +312,7 @@ export default function PerencanaRute({
     onRuteFound,
     onRuteClear,
 }: Props) {
+    const [mode, setMode] = useState<Mode>('antarkota');
     const [asal, setAsal] = useState<StasiunFlat | null>(null);
     const [tujuan, setTujuan] = useState<StasiunFlat | null>(null);
     const [rute, setRute] = useState<StasiunRute[] | null>(null);
@@ -293,8 +328,14 @@ export default function PerencanaRute({
         for (const kota of semuaKota) {
             for (const s of kota.stasiun) {
                 if (!s.lat || !s.lng) continue;
-                const sLat = typeof s.lat === 'string' ? parseFloat(s.lat as string) : (s.lat as number);
-                const sLng = typeof s.lng === 'string' ? parseFloat(s.lng as string) : (s.lng as number);
+                const sLat =
+                    typeof s.lat === 'string'
+                        ? parseFloat(s.lat as string)
+                        : (s.lat as number);
+                const sLng =
+                    typeof s.lng === 'string'
+                        ? parseFloat(s.lng as string)
+                        : (s.lng as number);
                 if (isNaN(sLat) || isNaN(sLng)) continue;
                 const d = haversine(lat, lng, sLat, sLng);
                 if (d < minDist) {
@@ -315,17 +356,26 @@ export default function PerencanaRute({
         setGpsError(null);
         navigator.geolocation.getCurrentPosition(
             (pos) => {
-                const nearest = findNearestStation(pos.coords.latitude, pos.coords.longitude);
+                const nearest = findNearestStation(
+                    pos.coords.latitude,
+                    pos.coords.longitude,
+                );
                 if (nearest) {
                     setAsal(nearest);
                     resetRute();
                 } else {
-                    setGpsError('Tidak ada stasiun dengan koordinat di database.');
+                    setGpsError(
+                        'Tidak ada stasiun dengan koordinat di database.',
+                    );
                 }
                 setLoadingGps(false);
             },
             (err) => {
-                setGpsError(err.code === 1 ? 'Izin lokasi ditolak.' : 'Gagal mendapatkan lokasi.');
+                setGpsError(
+                    err.code === 1
+                        ? 'Izin lokasi ditolak.'
+                        : 'Gagal mendapatkan lokasi.',
+                );
                 setLoadingGps(false);
             },
             { enableHighAccuracy: true, timeout: 10000 },
@@ -348,7 +398,7 @@ export default function PerencanaRute({
 
         try {
             const res = await fetch(
-                `/rute/cari-rute?dari=${asal.id}&ke=${tujuan.id}`,
+                `/rute/cari-rute?dari=${asal.id}&ke=${tujuan.id}&mode=${mode}`,
             );
             const data = await res.json();
 
@@ -384,6 +434,36 @@ export default function PerencanaRute({
                 <span className="text-xs text-stone-400">
                     — cari rute kereta dari stasiun ke stasiun
                 </span>
+            </div>
+
+            {/* Mode selector */}
+            <div className="mb-4 flex gap-1.5">
+                {MODES.map((m) => (
+                    <button
+                        key={m.key}
+                        onClick={() => {
+                            setMode(m.key);
+                            resetRute();
+                        }}
+                        className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all ${
+                            mode === m.key
+                                ? m.key === 'kcic'
+                                    ? 'border-blue-300 bg-blue-50 text-blue-700'
+                                    : m.key === 'commuter'
+                                      ? 'border-orange-300 bg-orange-50 text-orange-700'
+                                      : 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                                : 'border-stone-200 bg-white text-stone-500 hover:border-stone-300 hover:text-stone-700'
+                        }`}
+                    >
+                        {m.icon}
+                        <span>{m.label}</span>
+                        <span
+                            className={`hidden text-[10px] font-normal sm:inline ${mode === m.key ? 'opacity-70' : 'opacity-50'}`}
+                        >
+                            · {m.desc}
+                        </span>
+                    </button>
+                ))}
             </div>
 
             {gpsError && (

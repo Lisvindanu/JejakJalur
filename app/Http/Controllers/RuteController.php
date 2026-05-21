@@ -6,6 +6,7 @@ use App\Models\KoneksiStasiun;
 use App\Models\Stasiun;
 use App\Services\KotaService;
 use App\Services\StasiunService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,6 +14,24 @@ use Inertia\Response;
 
 class RuteController extends Controller
 {
+    /** @var string[] */
+    private const KRL_KODES = [
+        // Bogor line
+        'JAKK', 'JAY', 'MGB', 'SW', 'JUA', 'GDD', 'CKI', 'MRI', 'TEB', 'CW',
+        'DRN', 'PSMB', 'PSM', 'TNT', 'LNA', 'UP', 'UI', 'DPB', 'DP', 'CTA',
+        'BJD', 'CLT', 'BOO',
+        // Nambo branch
+        'PDRG', 'CBN', 'NMO',
+        // Cikarang line
+        'JNG', 'BKS', 'KRI', 'KLD', 'KLDB', 'LMB', 'TB', 'CKR',
+        // Rangkasbitung line
+        'KBY', 'PLM', 'PDR', 'SRP', 'PRP', 'TJ', 'TGS', 'MJA', 'CTR', 'RK',
+        // Tangerang line
+        'DU', 'GGL', 'RW', 'PI', 'BPR', 'THL', 'TNG',
+        // Tanjung Priok
+        'KPB',
+    ];
+
     public function __construct(
         private KotaService $kotaService,
         private StasiunService $stasiunService,
@@ -45,23 +64,29 @@ class RuteController extends Controller
         $validated = $request->validate([
             'dari' => ['required', 'string', 'uuid'],
             'ke' => ['required', 'string', 'uuid'],
+            'mode' => ['nullable', 'string', 'in:antarkota,commuter,kcic'],
         ]);
 
         $dariId = $validated['dari'];
         $keId = $validated['ke'];
+        $mode = $validated['mode'] ?? 'antarkota';
 
         if ($dariId === $keId) {
             return response()->json(['error' => 'Stasiun asal dan tujuan harus berbeda.'], 422);
         }
 
-        // Build undirected weighted adjacency list (kedua arah)
-        // Load station coords so null jarak_km can fall back to Haversine instead of 1
+        $koneksi = $this->loadKoneksi($mode, $dariId, $keId);
+
+        if ($koneksi->isEmpty()) {
+            return response()->json(['error' => 'Tidak ada koneksi tersedia untuk mode ini.'], 404);
+        }
+
+        // Load station coords so null jarak_km can fall back to Haversine
         $stasiunCoords = Stasiun::whereNotNull('lat')->whereNotNull('lng')
             ->get(['id', 'lat', 'lng'])
             ->keyBy('id')
             ->map(fn ($s) => [(float) $s->lat, (float) $s->lng]);
 
-        $koneksi = KoneksiStasiun::select('stasiun_dari_id', 'stasiun_ke_id', 'jarak_km')->get();
         $graph = [];
         foreach ($koneksi as $k) {
             if ($k->jarak_km !== null) {
@@ -71,13 +96,13 @@ class RuteController extends Controller
                 [$lat2, $lng2] = $stasiunCoords[$k->stasiun_ke_id];
                 $w = $this->haversine($lat1, $lng1, $lat2, $lng2) * 1.15;
             } else {
-                $w = 50.0; // penalty tinggi untuk koneksi tanpa koordinat — graph tetap terhubung
+                $w = 50.0;
             }
-            $graph[$k->stasiun_dari_id][$k->stasiun_ke_id] = $w;
-            $graph[$k->stasiun_ke_id][$k->stasiun_dari_id] = $w;
+            $graph[$k->stasiun_dari_id][$k->stasiun_ke_id] = min($w, $graph[$k->stasiun_dari_id][$k->stasiun_ke_id] ?? PHP_FLOAT_MAX);
+            $graph[$k->stasiun_ke_id][$k->stasiun_dari_id] = min($w, $graph[$k->stasiun_ke_id][$k->stasiun_dari_id] ?? PHP_FLOAT_MAX);
         }
 
-        // Dijkstra — jalur terpendek berdasarkan jarak (bukan jumlah hop)
+        // Dijkstra
         $dist = [$dariId => 0.0];
         $parent = [$dariId => null];
         $visited = [];
@@ -115,7 +140,6 @@ class RuteController extends Controller
             return response()->json(['error' => 'Rute tidak ditemukan antara kedua stasiun ini.'], 404);
         }
 
-        // Reconstruct path from goal to start, then reverse
         $path = [];
         $node = $keId;
         while ($node !== null) {
@@ -124,7 +148,6 @@ class RuteController extends Controller
         }
         $path = array_reverse($path);
 
-        // Load full station data in path order
         $stasiunMap = Stasiun::with('kota')
             ->withCount('destinasi')
             ->whereIn('id', $path)
@@ -134,6 +157,29 @@ class RuteController extends Controller
         $rute = array_values(array_map(fn (string $id) => $stasiunMap[$id], $path));
 
         return response()->json(['rute' => $rute]);
+    }
+
+    /**
+     * @return Collection<int, KoneksiStasiun>
+     */
+    private function loadKoneksi(string $mode, string $dariId, string $keId): Collection
+    {
+        $cols = ['stasiun_dari_id', 'stasiun_ke_id', 'jarak_km'];
+
+        if ($mode === 'kcic') {
+            return KoneksiStasiun::where('tipe', 'kcic')->get($cols);
+        }
+
+        if ($mode === 'commuter') {
+            $krlIds = Stasiun::whereIn('kode_stasiun', self::KRL_KODES)->pluck('id')->all();
+
+            return KoneksiStasiun::whereIn('stasiun_dari_id', $krlIds)
+                ->whereIn('stasiun_ke_id', $krlIds)
+                ->get($cols);
+        }
+
+        // antarkota (default)
+        return KoneksiStasiun::where('tipe', 'antarkota')->get($cols);
     }
 
     private function haversine(float $lat1, float $lng1, float $lat2, float $lng2): float
