@@ -14,6 +14,28 @@ import type { Kota, StasiunRute } from '@/types';
 
 type Mode = 'antarkota' | 'commuter' | 'kcic';
 
+const KCIC_KODES = new Set(['HAL', 'KW', 'PDL', 'TGLL']);
+
+const KRL_KODES = new Set([
+    'JAKK', 'JAY', 'MGB', 'SW', 'JUA', 'GDD', 'CKI', 'MRI', 'TEB', 'CW',
+    'DRN', 'PSMB', 'PSM', 'TNT', 'LNA', 'UP', 'UI', 'DPB', 'DP', 'CTA',
+    'BJD', 'CLT', 'BOO', 'PDRG', 'CBN', 'NMO',
+    'JNG', 'BKS', 'KRI', 'KLD', 'KLDB', 'LMB', 'TB', 'CKR',
+    'KBY', 'PLM', 'PDR', 'SRP', 'PRP', 'TJ', 'TGS', 'MJA', 'CTR', 'RK',
+    'DU', 'GGL', 'RW', 'PI', 'BPR', 'THL', 'TNG', 'KPB',
+]);
+
+function filterKotaByMode(semuaKota: Kota[], mode: Mode): Kota[] {
+    if (mode === 'antarkota') return semuaKota;
+    const allowed = mode === 'kcic' ? KCIC_KODES : KRL_KODES;
+    return semuaKota
+        .map((k) => ({
+            ...k,
+            stasiun: k.stasiun.filter((s) => allowed.has(s.kode_stasiun)),
+        }))
+        .filter((k) => k.stasiun.length > 0);
+}
+
 const MODES: {
     key: Mode;
     label: string;
@@ -315,6 +337,10 @@ export default function PerencanaRute({
     const [mode, setMode] = useState<Mode>('antarkota');
     const [asal, setAsal] = useState<StasiunFlat | null>(null);
     const [tujuan, setTujuan] = useState<StasiunFlat | null>(null);
+    const kotaFiltered = useMemo(
+        () => filterKotaByMode(semuaKota, mode),
+        [semuaKota, mode],
+    );
     const [rute, setRute] = useState<StasiunRute[] | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -443,6 +469,8 @@ export default function PerencanaRute({
                         key={m.key}
                         onClick={() => {
                             setMode(m.key);
+                            setAsal(null);
+                            setTujuan(null);
                             resetRute();
                         }}
                         className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all ${
@@ -492,7 +520,7 @@ export default function PerencanaRute({
                             setAsal(s);
                             resetRute();
                         }}
-                        semuaKota={semuaKota}
+                        semuaKota={kotaFiltered}
                     />
                 </div>
                 <div className="hidden shrink-0 items-center pb-1 sm:flex">
@@ -505,7 +533,7 @@ export default function PerencanaRute({
                         setTujuan(s);
                         resetRute();
                     }}
-                    semuaKota={semuaKota}
+                    semuaKota={kotaFiltered}
                 />
                 <button
                     onClick={handleCari}
