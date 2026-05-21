@@ -23,7 +23,12 @@ import { useConfirm } from '@/hooks/useConfirm';
 import { formatTanggal } from '@/lib/utils';
 import { MOCK_PENGGUNA } from '@/lib/mock-data';
 import * as BookmarkController from '@/actions/App/Http/Controllers/BookmarkController';
-import type { BookmarkProfil, PaginatedData, SharedProps, UlasanProfil } from '@/types';
+import type {
+    BookmarkProfil,
+    PaginatedData,
+    SharedProps,
+    UlasanProfil,
+} from '@/types';
 
 interface Pengguna {
     id: number;
@@ -208,8 +213,26 @@ export default function Tampilkan({
     ulasan,
     bookmarks,
 }: Props) {
-    const emptyUlasan: PaginatedData<UlasanProfil> = { data: [], current_page: 1, last_page: 1, per_page: 5, total: 0, from: null, to: null, links: [] };
-    const emptyBookmarks: PaginatedData<BookmarkProfil> = { data: [], current_page: 1, last_page: 1, per_page: 8, total: 0, from: null, to: null, links: [] };
+    const emptyUlasan: PaginatedData<UlasanProfil> = {
+        data: [],
+        current_page: 1,
+        last_page: 1,
+        per_page: 5,
+        total: 0,
+        from: null,
+        to: null,
+        links: [],
+    };
+    const emptyBookmarks: PaginatedData<BookmarkProfil> = {
+        data: [],
+        current_page: 1,
+        last_page: 1,
+        per_page: 8,
+        total: 0,
+        from: null,
+        to: null,
+        links: [],
+    };
     const ulasanData = ulasan ?? emptyUlasan;
     const bookmarksData = bookmarks ?? emptyBookmarks;
     const pengguna = penggunaProp ?? MOCK_PENGGUNA;
