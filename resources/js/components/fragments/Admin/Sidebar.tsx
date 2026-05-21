@@ -1,6 +1,5 @@
-import Avatar from '@/components/elements/Avatar';
-import type { SharedProps } from '@/types';
 import {
+    IconArrowLeft,
     IconBuilding,
     IconLayoutDashboard,
     IconMapPin,
@@ -9,7 +8,8 @@ import {
     IconTrain,
     IconUsers,
 } from '@tabler/icons-react';
-import { Link, router, usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
+import type { SharedProps } from '@/types';
 
 interface NavItem {
     label: string;
@@ -19,51 +19,70 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-    { label: 'Dashboard', href: '/admin', icon: <IconLayoutDashboard size={18} /> },
-    { label: 'Kota', href: '/admin/kota', icon: <IconBuilding size={18} />, separator: true },
-    { label: 'Stasiun', href: '/admin/stasiun', icon: <IconTrain size={18} /> },
-    { label: 'Destinasi', href: '/admin/destinasi', icon: <IconMapPin size={18} />, separator: true },
-    { label: 'Pengguna', href: '/admin/pengguna', icon: <IconUsers size={18} /> },
-    { label: 'Ulasan', href: '/admin/ulasan', icon: <IconMessageCircle size={18} /> },
-    { label: 'Sesi AI', href: '/admin/ai-session', icon: <IconRobot size={18} /> },
+    {
+        label: 'Dashboard',
+        href: '/admin',
+        icon: <IconLayoutDashboard size={16} />,
+    },
+    {
+        label: 'Kota',
+        href: '/admin/kota',
+        icon: <IconBuilding size={16} />,
+        separator: true,
+    },
+    { label: 'Stasiun', href: '/admin/stasiun', icon: <IconTrain size={16} /> },
+    {
+        label: 'Destinasi',
+        href: '/admin/destinasi',
+        icon: <IconMapPin size={16} />,
+        separator: true,
+    },
+    {
+        label: 'Pengguna',
+        href: '/admin/pengguna',
+        icon: <IconUsers size={16} />,
+    },
+    {
+        label: 'Ulasan',
+        href: '/admin/ulasan',
+        icon: <IconMessageCircle size={16} />,
+    },
+    {
+        label: 'Sesi AI',
+        href: '/admin/ai-session',
+        icon: <IconRobot size={16} />,
+    },
 ];
 
 export default function Sidebar() {
-    const { url, props } = usePage<SharedProps>();
-    const user = props.auth?.user;
+    const { url } = usePage<SharedProps>();
 
     const isActive = (href: string) => {
-        if (href === '/admin') {
-            return url === '/admin' || url === '/admin/';
-        }
+        if (href === '/admin') return url === '/admin' || url === '/admin/';
         return url.startsWith(href);
     };
 
     return (
-        <aside className="flex min-h-screen w-60 flex-col bg-stone-900">
-            {/* Logo */}
-            <div className="flex items-center gap-2 border-b border-stone-800 px-4 py-4">
-                <IconTrain size={20} className="shrink-0 text-emerald-400" />
-                <span className="font-serif text-[17px] font-bold text-white">
-                    JejakJalur
-                </span>
-                <span className="rounded bg-emerald-700 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-                    Admin
-                </span>
+        <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-60 shrink-0 flex-col border-r border-stone-200 bg-white md:flex">
+            <div className="px-3 pt-4 pb-1">
+                <p className="px-2 text-[11px] font-semibold tracking-wider text-stone-400 uppercase">
+                    Manajemen
+                </p>
             </div>
 
-            {/* Nav */}
-            <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
+            <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-1">
                 {navItems.map((item) => (
                     <div key={item.href}>
-                        {item.separator && <div className="my-1.5 border-t border-stone-800" />}
+                        {item.separator && (
+                            <div className="my-2 border-t border-stone-100" />
+                        )}
                         <Link
                             href={item.href}
                             className={
-                                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ' +
+                                'flex h-9 items-center gap-2.5 rounded-lg px-3 text-sm no-underline transition-colors ' +
                                 (isActive(item.href)
-                                    ? 'bg-emerald-700 text-white'
-                                    : 'text-stone-400 hover:bg-stone-800 hover:text-white')
+                                    ? 'bg-emerald-700 font-medium text-white'
+                                    : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900')
                             }
                         >
                             {item.icon}
@@ -73,29 +92,14 @@ export default function Sidebar() {
                 ))}
             </nav>
 
-            {/* Bottom user section */}
-            <div className="border-t border-stone-800 p-3">
-                <div className="flex items-center gap-3 rounded-lg px-2 py-2">
-                    <Avatar
-                        name={user?.name ?? 'Admin'}
-                        src={user?.avatar ?? null}
-                        size="sm"
-                    />
-                    <div className="min-w-0 flex-1">
-                        <p className="truncate text-xs font-medium text-white">
-                            {user?.name ?? 'Admin'}
-                        </p>
-                        <p className="truncate text-[10px] text-stone-500">
-                            {user?.email ?? ''}
-                        </p>
-                    </div>
-                </div>
-                <button
-                    onClick={() => router.post('/keluar')}
-                    className="mt-1 w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-stone-400 transition-colors hover:bg-stone-800 hover:text-white"
+            <div className="border-t border-stone-100 px-2 py-3">
+                <Link
+                    href="/"
+                    className="flex h-9 items-center gap-2.5 rounded-lg px-3 text-sm text-stone-500 no-underline hover:bg-stone-50 hover:text-stone-700"
                 >
-                    Keluar
-                </button>
+                    <IconArrowLeft size={16} />
+                    Kembali ke Situs
+                </Link>
             </div>
         </aside>
     );
