@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+    IconBolt,
     IconChevronRight,
     IconCurrentLocation,
     IconLoader2,
@@ -9,6 +10,149 @@ import {
     IconX,
 } from '@tabler/icons-react';
 import type { Kota, StasiunRute } from '@/types';
+
+// ── Types & Constants ─────────────────────────────────────────────────────────
+
+type Mode = 'antarkota' | 'commuter' | 'kcic';
+
+const KCIC_KODES = new Set(['HAL', 'KW', 'PDL', 'TGLL']);
+
+const KRL_KODES = new Set([
+    'JAKK',
+    'JAY',
+    'MGB',
+    'SW',
+    'JUA',
+    'GDD',
+    'CKI',
+    'MRI',
+    'TEB',
+    'CW',
+    'DRN',
+    'PSMB',
+    'PSM',
+    'TNT',
+    'LNA',
+    'UP',
+    'UI',
+    'DPB',
+    'DP',
+    'CTA',
+    'BJD',
+    'CLT',
+    'BOO',
+    'PDRG',
+    'CBN',
+    'NMO',
+    'JNG',
+    'BKS',
+    'KRI',
+    'KLD',
+    'KLDB',
+    'CUK',
+    'LMB',
+    'TB',
+    'CKR',
+    'KBY',
+    'PLM',
+    'PDR',
+    'SRP',
+    'PRP',
+    'CJT',
+    'DAR',
+    'TJ',
+    'TGS',
+    'MJA',
+    'CTR',
+    'RK',
+    'DU',
+    'GGL',
+    'RW',
+    'PI',
+    'BPR',
+    'THL',
+    'TNG',
+    'KPB',
+]);
+
+const ANTARKOTA_EXCLUDED = new Set([
+    'HAL',
+    'TGLL',
+    'JAY',
+    'MGB',
+    'SW',
+    'JUA',
+    'GDD',
+    'CKI',
+    'TEB',
+    'CW',
+    'DRN',
+    'PSMB',
+    'PSM',
+    'TNT',
+    'LNA',
+    'UP',
+    'UI',
+    'DPB',
+    'CTA',
+    'BJD',
+    'CLT',
+    'PDRG',
+    'CBN',
+    'NMO',
+    'KRI',
+    'KLD',
+    'KLDB',
+    'CUK',
+    'LMB',
+    'TB',
+    'KBY',
+    'PDR',
+    'PRP',
+    'CJT',
+    'DAR',
+    'TJ',
+    'TGS',
+    'MJA',
+    'CTR',
+    'RK',
+    'DU',
+    'GGL',
+    'RW',
+    'PI',
+    'BPR',
+    'THL',
+    'TNG',
+    'KPB',
+]);
+
+const MODES: {
+    key: Mode;
+    label: string;
+    icon: React.ReactNode;
+    desc: string;
+}[] = [
+    {
+        key: 'antarkota',
+        label: 'Antarkota',
+        icon: <IconTrain size={13} />,
+        desc: 'KA jarak jauh',
+    },
+    {
+        key: 'commuter',
+        label: 'KRL',
+        icon: <IconTrain size={13} />,
+        desc: 'Commuter Line',
+    },
+    {
+        key: 'kcic',
+        label: 'Whoosh',
+        icon: <IconBolt size={13} />,
+        desc: 'Kereta Cepat',
+    },
+];
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
 
 function haversine(
     lat1: number,
@@ -27,6 +171,24 @@ function haversine(
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+function filterKotaByMode(semuaKota: Kota[], mode: Mode): Kota[] {
+    const filterFn =
+        mode === 'kcic'
+            ? (kode: string) => KCIC_KODES.has(kode)
+            : mode === 'commuter'
+              ? (kode: string) => KRL_KODES.has(kode)
+              : (kode: string) => !ANTARKOTA_EXCLUDED.has(kode);
+
+    return semuaKota
+        .map((k) => ({
+            ...k,
+            stasiun: k.stasiun.filter((s) => filterFn(s.kode_stasiun)),
+        }))
+        .filter((k) => k.stasiun.length > 0);
+}
+
+// ── Interfaces ────────────────────────────────────────────────────────────────
+
 interface StasiunFlat {
     id: string;
     nama: string;
@@ -35,6 +197,8 @@ interface StasiunFlat {
     kotaNama: string;
     kotaId: string;
 }
+
+// ── Atom: SimpleDropdown ──────────────────────────────────────────────────────
 
 function SimpleDropdown<T extends { id: string }>({
     placeholder,
@@ -143,6 +307,46 @@ function SimpleDropdown<T extends { id: string }>({
     );
 }
 
+// ── Molecule: ModeSelector ────────────────────────────────────────────────────
+
+function ModeSelector({
+    mode,
+    onChange,
+}: {
+    mode: Mode;
+    onChange: (m: Mode) => void;
+}) {
+    return (
+        <div className="mb-5 flex gap-1.5">
+            {MODES.map((m) => (
+                <button
+                    key={m.key}
+                    onClick={() => onChange(m.key)}
+                    className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all ${
+                        mode === m.key
+                            ? m.key === 'kcic'
+                                ? 'border-blue-300 bg-blue-50 text-blue-700'
+                                : m.key === 'commuter'
+                                  ? 'border-orange-300 bg-orange-50 text-orange-700'
+                                  : 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                            : 'border-stone-200 bg-white text-stone-500 hover:border-stone-300 hover:text-stone-700'
+                    }`}
+                >
+                    {m.icon}
+                    <span>{m.label}</span>
+                    <span
+                        className={`hidden text-[10px] font-normal sm:inline ${mode === m.key ? 'opacity-70' : 'opacity-50'}`}
+                    >
+                        · {m.desc}
+                    </span>
+                </button>
+            ))}
+        </div>
+    );
+}
+
+// ── Molecule: KotaStasiunPicker ───────────────────────────────────────────────
+
 function KotaStasiunPicker({
     accent = 'emerald',
     value,
@@ -160,7 +364,6 @@ function KotaStasiunPicker({
         value ? (semuaKota.find((k) => k.id === value.kotaId) ?? null) : null,
     );
 
-    // Sync kotaAktif jika value berubah dari luar (mis. GPS auto-select)
     useEffect(() => {
         if (value) {
             setKotaAktif((prev) =>
@@ -258,6 +461,119 @@ function KotaStasiunPicker({
     );
 }
 
+// ── Molecule: EndpointCard ────────────────────────────────────────────────────
+
+function EndpointCard({
+    label,
+    stasiun,
+    variant,
+}: {
+    label: string;
+    stasiun: StasiunRute;
+    variant: 'departure' | 'arrival';
+}) {
+    const isDeparture = variant === 'departure';
+    return (
+        <div
+            className={`rounded-xl border p-4 ${
+                isDeparture
+                    ? 'border-emerald-700 bg-emerald-700 text-white'
+                    : 'border-amber-200 bg-amber-50'
+            }`}
+        >
+            <div
+                className={`text-[10px] font-bold tracking-widest uppercase ${
+                    isDeparture ? 'text-emerald-100' : 'text-amber-700'
+                }`}
+            >
+                {label}
+            </div>
+            <div
+                className={`mt-2 text-xl leading-tight font-bold ${isDeparture ? '' : 'text-stone-800'}`}
+            >
+                {stasiun.nama}
+            </div>
+            <div
+                className={`mt-1 text-sm ${isDeparture ? 'text-emerald-100' : 'text-amber-700'}`}
+            >
+                {stasiun.kota.nama} ·{' '}
+                <span className="font-mono">{stasiun.kode_stasiun}</span>
+            </div>
+            {(stasiun.destinasi_count ?? 0) > 0 && (
+                <div
+                    className={`mt-3 inline-flex items-center gap-1.5 text-xs ${
+                        isDeparture ? 'text-emerald-100' : 'text-amber-600'
+                    }`}
+                >
+                    <IconMapPin size={12} />
+                    {stasiun.destinasi_count} destinasi terdekat
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ── Molecule: PemberhentianList ───────────────────────────────────────────────
+
+function PemberhentianList({ stops }: { stops: StasiunRute[] }) {
+    const [expandAll, setExpandAll] = useState(false);
+    const visible = expandAll ? stops : stops.slice(0, 6);
+
+    if (stops.length === 0) return null;
+
+    return (
+        <div className="mt-6">
+            <div className="mb-3 text-sm font-semibold text-stone-700">
+                Pemberhentian
+            </div>
+            <div className="relative pl-7">
+                <div className="absolute top-2 bottom-2 left-2.5 w-px bg-emerald-200" />
+                {visible.map((s, i) => (
+                    <div
+                        key={s.id}
+                        className="group relative flex items-center gap-4 py-2"
+                    >
+                        <span className="absolute top-1/2 -left-7 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full border-2 border-emerald-600 bg-white text-[10px] font-semibold text-emerald-700">
+                            {i + 1}
+                        </span>
+                        <div className="flex flex-1 items-center justify-between gap-2">
+                            <div>
+                                <div className="text-sm font-medium text-stone-800">
+                                    {s.nama}{' '}
+                                    <span className="font-mono text-xs text-stone-400">
+                                        ({s.kode_stasiun})
+                                    </span>
+                                </div>
+                                <div className="text-xs text-stone-500">
+                                    {s.kota.nama}
+                                </div>
+                            </div>
+                            {(s.destinasi_count ?? 0) > 0 && (
+                                <div className="flex shrink-0 items-center gap-1.5 text-xs text-stone-400">
+                                    <IconMapPin size={12} />
+                                    {s.destinasi_count} destinasi
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ))}
+                {stops.length > 6 && (
+                    <button
+                        onClick={() => setExpandAll((v) => !v)}
+                        className="mt-2 ml-1 text-sm font-medium text-emerald-700 hover:text-emerald-800"
+                    >
+                        {expandAll
+                            ? 'Sembunyikan'
+                            : `Tampilkan semua (${stops.length}) →`}
+                    </button>
+                )}
+            </div>
+        </div>
+    );
+}
+
+// ── Organism: PerencanaRute ───────────────────────────────────────────────────
+
 interface Props {
     semuaKota: Kota[];
     onRuteFound: (rute: StasiunRute[]) => void;
@@ -269,12 +585,16 @@ export default function PerencanaRute({
     onRuteFound,
     onRuteClear,
 }: Props) {
+    const [mode, setMode] = useState<Mode>('antarkota');
     const [asal, setAsal] = useState<StasiunFlat | null>(null);
     const [tujuan, setTujuan] = useState<StasiunFlat | null>(null);
+    const kotaFiltered = useMemo(
+        () => filterKotaByMode(semuaKota, mode),
+        [semuaKota, mode],
+    );
     const [rute, setRute] = useState<StasiunRute[] | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [expandAll, setExpandAll] = useState(false);
     const [loadingGps, setLoadingGps] = useState(false);
     const [gpsError, setGpsError] = useState<string | null>(null);
 
@@ -341,8 +661,14 @@ export default function PerencanaRute({
     function resetRute() {
         setRute(null);
         setError(null);
-        setExpandAll(false);
         onRuteClear();
+    }
+
+    function handleModeChange(newMode: Mode) {
+        setMode(newMode);
+        setAsal(null);
+        setTujuan(null);
+        resetRute();
     }
 
     async function handleCari() {
@@ -354,7 +680,7 @@ export default function PerencanaRute({
 
         try {
             const res = await fetch(
-                `/rute/cari-rute?dari=${asal.id}&ke=${tujuan.id}`,
+                `/rute/cari-rute?dari=${asal.id}&ke=${tujuan.id}&mode=${mode}`,
             );
             const data = await res.json();
 
@@ -378,9 +704,6 @@ export default function PerencanaRute({
     }
 
     const pemberhentian = rute ? rute.slice(1, -1) : [];
-    const visiblePemberhentian = expandAll
-        ? pemberhentian
-        : pemberhentian.slice(0, 6);
 
     return (
         <div className="bg-stone-50 px-[max(24px,calc(50%-576px))] py-8">
@@ -394,6 +717,9 @@ export default function PerencanaRute({
                         Pilih stasiun asal dan tujuan untuk melihat rute.
                     </p>
                 </div>
+
+                {/* Mode selector */}
+                <ModeSelector mode={mode} onChange={handleModeChange} />
 
                 {/* Picker row: stacked on mobile, side-by-side on md+ */}
                 <div className="flex flex-col gap-3 md:flex-row md:items-stretch">
@@ -427,8 +753,7 @@ export default function PerencanaRute({
                                 setAsal(s);
                                 resetRute();
                             }}
-                            semuaKota={semuaKota}
-                            excludeKotaId={tujuan?.kotaId}
+                            semuaKota={kotaFiltered}
                         />
                     </div>
 
@@ -454,8 +779,7 @@ export default function PerencanaRute({
                                 setTujuan(s);
                                 resetRute();
                             }}
-                            semuaKota={semuaKota}
-                            excludeKotaId={asal?.kotaId}
+                            semuaKota={kotaFiltered}
                         />
                     </div>
                 </div>
@@ -498,7 +822,7 @@ export default function PerencanaRute({
                 {/* ── Results ── */}
                 {rute && rute.length >= 2 && (
                     <div className="mt-6 border-t border-stone-200 pt-6">
-                        {/* Label + summary bar */}
+                        {/* Summary bar */}
                         <div className="mb-3 text-xs font-semibold tracking-wider text-stone-500 uppercase">
                             Hasil Pencarian
                         </div>
@@ -519,111 +843,20 @@ export default function PerencanaRute({
 
                         {/* Endpoint cards */}
                         <div className="grid gap-4 sm:grid-cols-2">
-                            {/* Departure — solid emerald */}
-                            <div className="rounded-xl border border-emerald-700 bg-emerald-700 p-4 text-white">
-                                <div className="text-[10px] font-bold tracking-widest text-emerald-100 uppercase">
-                                    Berangkat
-                                </div>
-                                <div className="mt-2 text-xl leading-tight font-bold">
-                                    {rute[0].nama}
-                                </div>
-                                <div className="mt-1 text-sm text-emerald-100">
-                                    {rute[0].kota.nama} ·{' '}
-                                    <span className="font-mono">
-                                        {rute[0].kode_stasiun}
-                                    </span>
-                                </div>
-                                {(rute[0].destinasi_count ?? 0) > 0 && (
-                                    <div className="mt-3 inline-flex items-center gap-1.5 text-xs text-emerald-100">
-                                        <IconMapPin size={12} />
-                                        {rute[0].destinasi_count} destinasi
-                                        terdekat
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Arrival — amber tint */}
-                            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-                                <div className="text-[10px] font-bold tracking-widest text-amber-700 uppercase">
-                                    Tiba
-                                </div>
-                                <div className="mt-2 text-xl leading-tight font-bold text-stone-800">
-                                    {rute[rute.length - 1].nama}
-                                </div>
-                                <div className="mt-1 text-sm text-amber-700">
-                                    {rute[rute.length - 1].kota.nama} ·{' '}
-                                    <span className="font-mono">
-                                        {rute[rute.length - 1].kode_stasiun}
-                                    </span>
-                                </div>
-                                {(rute[rute.length - 1].destinasi_count ?? 0) >
-                                    0 && (
-                                    <div className="mt-3 inline-flex items-center gap-1.5 text-xs text-amber-600">
-                                        <IconMapPin size={12} />
-                                        {
-                                            rute[rute.length - 1]
-                                                .destinasi_count
-                                        }{' '}
-                                        destinasi terdekat
-                                    </div>
-                                )}
-                            </div>
+                            <EndpointCard
+                                label="Berangkat"
+                                stasiun={rute[0]}
+                                variant="departure"
+                            />
+                            <EndpointCard
+                                label="Tiba"
+                                stasiun={rute[rute.length - 1]}
+                                variant="arrival"
+                            />
                         </div>
 
-                        {/* Pemberhentian — vertical timeline */}
-                        {pemberhentian.length > 0 && (
-                            <div className="mt-6">
-                                <div className="mb-3 text-sm font-semibold text-stone-700">
-                                    Pemberhentian
-                                </div>
-                                <div className="relative pl-7">
-                                    <div className="absolute top-2 bottom-2 left-2.5 w-px bg-emerald-200" />
-                                    {visiblePemberhentian.map((s, i) => (
-                                        <div
-                                            key={s.id}
-                                            className="group relative flex items-center gap-4 py-2"
-                                        >
-                                            <span className="absolute top-1/2 -left-7 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full border-2 border-emerald-600 bg-white text-[10px] font-semibold text-emerald-700">
-                                                {i + 1}
-                                            </span>
-                                            <div className="flex flex-1 items-center justify-between gap-2">
-                                                <div>
-                                                    <div className="text-sm font-medium text-stone-800">
-                                                        {s.nama}{' '}
-                                                        <span className="font-mono text-xs text-stone-400">
-                                                            ({s.kode_stasiun})
-                                                        </span>
-                                                    </div>
-                                                    <div className="text-xs text-stone-500">
-                                                        {s.kota.nama}
-                                                    </div>
-                                                </div>
-                                                {(s.destinasi_count ?? 0) >
-                                                    0 && (
-                                                    <div className="flex shrink-0 items-center gap-1.5 text-xs text-stone-400">
-                                                        <IconMapPin size={12} />
-                                                        {s.destinasi_count}{' '}
-                                                        destinasi
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {pemberhentian.length > 6 && (
-                                        <button
-                                            onClick={() =>
-                                                setExpandAll((v) => !v)
-                                            }
-                                            className="mt-2 ml-1 text-sm font-medium text-emerald-700 hover:text-emerald-800"
-                                        >
-                                            {expandAll
-                                                ? 'Sembunyikan'
-                                                : `Tampilkan semua (${pemberhentian.length}) →`}
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        )}
+                        {/* Pemberhentian */}
+                        <PemberhentianList stops={pemberhentian} />
                     </div>
                 )}
             </div>
