@@ -5,12 +5,25 @@ on:
     branches:
       - main
       - dev
+  workflow_dispatch:
+    inputs:
+      run_seeders:
+        description: 'Run db:seed --force (CAUTION: overwrites stasiun/koneksi data)'
+        type: boolean
+        default: false
+      target:
+        description: 'Target environment'
+        type: choice
+        default: 'staging'
+        options:
+          - staging
+          - production
 
 jobs:
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/dev' || (github.event_name == 'workflow_dispatch' && inputs.target == 'staging')
     steps:
       - name: Deploy to VPS (Staging)
         uses: appleboy/ssh-action@v1.0.3
@@ -18,6 +31,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          envs: RUN_SEEDERS
           script: |
             set -e
             cd /var/www/jejakjalur-staging
@@ -27,7 +41,12 @@ jobs:
             npm ci
             npm run build
             php artisan migrate --force
-            php artisan db:seed --force
+            if [ "$RUN_SEEDERS" = "true" ]; then
+              echo "WARNING: Running seeders (manual trigger). This may overwrite stasiun/koneksi data."
+              php artisan db:seed --force
+            else
+              echo "Skipping seeders (default). Schema/data fixes go via migrations."
+            fi
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
@@ -35,11 +54,13 @@ jobs:
             chown -R www-data:www-data /var/www/jejakjalur-staging/storage
             chown -R www-data:www-data /var/www/jejakjalur-staging/bootstrap/cache
             echo "Staging deployed at $(date)"
+        env:
+          RUN_SEEDERS: ${{ github.event_name == 'workflow_dispatch' && inputs.run_seeders == true }}
 
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && inputs.target == 'production')
     steps:
       - name: Deploy to VPS (Production)
         uses: appleboy/ssh-action@v1.0.3
@@ -47,6 +68,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          envs: RUN_SEEDERS
           script: |
             set -e
             cd /var/www/jejakjalur-prod
@@ -56,6 +78,12 @@ jobs:
             npm ci
             npm run build
             php artisan migrate --force
+            if [ "$RUN_SEEDERS" = "true" ]; then
+              echo "WARNING: Running seeders (manual trigger). This may overwrite stasiun/koneksi data."
+              php artisan db:seed --force
+            else
+              echo "Skipping seeders (default). Schema/data fixes go via migrations."
+            fi
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
@@ -63,3 +91,5 @@ jobs:
             chown -R www-data:www-data /var/www/jejakjalur-prod/storage
             chown -R www-data:www-data /var/www/jejakjalur-prod/bootstrap/cache
             echo "Production deployed at $(date)"
+        env:
+          RUN_SEEDERS: ${{ github.event_name == 'workflow_dispatch' && inputs.run_seeders == true }}
