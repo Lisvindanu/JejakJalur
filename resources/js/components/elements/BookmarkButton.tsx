@@ -1,5 +1,9 @@
 import { router } from '@inertiajs/react';
-import { IconBookmark, IconBookmarkFilled, IconLoader2 } from '@tabler/icons-react';
+import {
+    IconBookmark,
+    IconBookmarkFilled,
+    IconLoader2,
+} from '@tabler/icons-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import * as BookmarkController from '@/actions/App/Http/Controllers/BookmarkController';
@@ -10,7 +14,11 @@ interface Props {
     className?: string;
 }
 
-export default function BookmarkButton({ destinasiId, isBookmarked, className }: Props) {
+export default function BookmarkButton({
+    destinasiId,
+    isBookmarked,
+    className,
+}: Props) {
     const [loading, setLoading] = useState(false);
 
     function toggle() {
