@@ -107,7 +107,7 @@ function WishlistCard({ bookmark }: { bookmark: BookmarkProfil }) {
     }
 
     return (
-        <div className="group flex flex-col overflow-hidden rounded-xl border border-stone-100 bg-white transition-shadow hover:shadow-md">
+        <div className="group flex flex-col overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm transition-shadow hover:shadow-md">
             <Link href={`/destinasi/${destinasi.id}`} className="no-underline">
                 <div
                     className={`flex h-32 items-center justify-center bg-gradient-to-br ${ph.gradient}`}
