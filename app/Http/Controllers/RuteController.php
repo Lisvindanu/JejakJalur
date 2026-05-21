@@ -69,6 +69,9 @@ class RuteController extends Controller
             ->keyBy('id')
             ->map(fn ($s) => [(float) $s->lat, (float) $s->lng]);
 
+        // Edge map untuk reconstruct segments setelah Dijkstra. Key = "dari|ke",
+        // disimpan dua arah supaya path direction-agnostic.
+        $edgeMap = [];
         $graph = [];
         foreach ($koneksi as $k) {
             if ($k->jarak_km !== null) {
@@ -82,6 +85,17 @@ class RuteController extends Controller
             }
             $graph[$k->stasiun_dari_id][$k->stasiun_ke_id] = min($w, $graph[$k->stasiun_dari_id][$k->stasiun_ke_id] ?? PHP_FLOAT_MAX);
             $graph[$k->stasiun_ke_id][$k->stasiun_dari_id] = min($w, $graph[$k->stasiun_ke_id][$k->stasiun_dari_id] ?? PHP_FLOAT_MAX);
+
+            $geom = $k->geometry;
+            if (is_string($geom)) {
+                $geom = json_decode($geom, true);
+            }
+            $forwardKey = $k->stasiun_dari_id.'|'.$k->stasiun_ke_id;
+            $reverseKey = $k->stasiun_ke_id.'|'.$k->stasiun_dari_id;
+            $edgeMap[$forwardKey] = ['jarak_km' => $w, 'geometry' => $geom, 'reversed' => false];
+            if (! isset($edgeMap[$reverseKey])) {
+                $edgeMap[$reverseKey] = ['jarak_km' => $w, 'geometry' => $geom, 'reversed' => true];
+            }
         }
 
         // Dijkstra
@@ -138,7 +152,28 @@ class RuteController extends Controller
 
         $rute = array_values(array_map(fn (string $id) => $stasiunMap[$id], $path));
 
-        return response()->json(['rute' => $rute]);
+        // Build segments per consecutive pair untuk render polyline ikut geometry rel.
+        $segments = [];
+        for ($i = 0; $i < count($path) - 1; $i++) {
+            $from = $path[$i];
+            $to = $path[$i + 1];
+            $edge = $edgeMap[$from.'|'.$to] ?? null;
+            $geometry = $edge['geometry'] ?? null;
+
+            // Kalau edge direction reversed, flip coordinates supaya polyline match arah path.
+            if ($geometry !== null && ($edge['reversed'] ?? false) && isset($geometry['coordinates'])) {
+                $geometry['coordinates'] = array_reverse($geometry['coordinates']);
+            }
+
+            $segments[] = [
+                'dari_id' => $from,
+                'ke_id' => $to,
+                'jarak_km' => $edge['jarak_km'] ?? null,
+                'geometry' => $geometry,
+            ];
+        }
+
+        return response()->json(['rute' => $rute, 'segments' => $segments]);
     }
 
     /**
@@ -148,7 +183,7 @@ class RuteController extends Controller
     {
         // Filter berdasarkan koneksi_stasiun.tipe — source of truth dari DB.
         return KoneksiStasiun::where('tipe', $mode)
-            ->get(['stasiun_dari_id', 'stasiun_ke_id', 'jarak_km']);
+            ->get(['stasiun_dari_id', 'stasiun_ke_id', 'jarak_km', 'geometry']);
     }
 
     private function haversine(float $lat1, float $lng1, float $lat2, float $lng2): float
