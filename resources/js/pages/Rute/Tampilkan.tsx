@@ -3,7 +3,7 @@ import { Head } from '@inertiajs/react';
 import PublicLayout from '@/components/layouts/PublicLayout';
 import RuteMap from '@/components/fragments/Home/RuteMap';
 import PerencanaRute from '@/components/fragments/Rute/PerencanaRute';
-import type { Kota, StasiunRute } from '@/types';
+import type { Kota, RuteSegment, StasiunRute } from '@/types';
 import { MOCK_KOTA } from '@/lib/mock-data';
 
 interface Props {
@@ -28,6 +28,7 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
     }, []);
 
     const [ruteAktif, setRuteAktif] = useState<StasiunRute[] | null>(null);
+    const [segmentsAktif, setSegmentsAktif] = useState<RuteSegment[]>([]);
 
     return (
         <PublicLayout>
@@ -70,6 +71,7 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
                 <RuteMap
                     semuaKota={semuaKota}
                     route={ruteAktif}
+                    segments={segmentsAktif}
                     focusDest={focusDest}
                 />
             </div>
@@ -77,8 +79,14 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
             {/* Trip planner */}
             <PerencanaRute
                 semuaKota={semuaKota}
-                onRuteFound={setRuteAktif}
-                onRuteClear={() => setRuteAktif(null)}
+                onRuteFound={(rute, segments) => {
+                    setRuteAktif(rute);
+                    setSegmentsAktif(segments);
+                }}
+                onRuteClear={() => {
+                    setRuteAktif(null);
+                    setSegmentsAktif([]);
+                }}
             />
         </PublicLayout>
     );
