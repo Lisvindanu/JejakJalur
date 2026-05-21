@@ -81,6 +81,14 @@ class KoneksiStasiunSeeder extends Seeder
                 'RK', 'MJA', 'CTR', 'TNG',
             ],
 
+            // ── PANTURA EXPRESS ──────────────────────────────────────────
+            // Direct edges antar major stations (mirip KA Argo Bromo Anggrek yang
+            // skip stasiun kecil). Tujuannya: Dijkstra punya pilihan rute Pantura
+            // yang cepat untuk GMR→SBI tanpa terbebani semua stasiun kecil.
+            'Pantura Express' => [
+                'GMR', 'CKP', 'CN', 'TG', 'PK', 'SMT', 'BJ', 'LMG', 'SBI',
+            ],
+
             // ── JALUR PANTURA (BARAT) ─────────────────────────────────────
             // Jakarta → Cikampek → Cirebon → Semarang
             'Pantura' => [
