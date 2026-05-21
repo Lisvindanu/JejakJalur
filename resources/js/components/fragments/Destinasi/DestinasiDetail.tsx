@@ -42,19 +42,19 @@ export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
         <div>
             {/* Image */}
             <div className="px-[max(24px,calc(50%-576px))]">
-                <div
-                    className={`flex h-[220px] w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br sm:h-[280px] ${placeholder.gradient}`}
-                >
-                    {destinasi.foto_url ? (
-                        <img
-                            src={destinasi.foto_url}
-                            alt={destinasi.nama}
-                            className="h-full w-full object-contain"
-                        />
-                    ) : (
-                        placeholder.icon
-                    )}
-                </div>
+                {destinasi.foto_url ? (
+                    <img
+                        src={destinasi.foto_url}
+                        alt={destinasi.nama}
+                        className="w-full rounded-2xl"
+                    />
+                ) : (
+                    <div
+                        className={`flex h-[220px] w-full items-center justify-center rounded-2xl bg-gradient-to-br sm:h-[280px] ${placeholder.gradient}`}
+                    >
+                        {placeholder.icon}
+                    </div>
+                )}
             </div>
 
             {/* Content */}
