@@ -79,6 +79,31 @@ export type StasiunRute = {
     kota: { id: string; nama: string };
 };
 
+export type UlasanProfil = {
+    id: string;
+    judul?: string | null;
+    konten: string;
+    rating: number;
+    created_at: string;
+    destinasi: {
+        id: string;
+        nama: string;
+        kategori: string;
+        foto_url?: string | null;
+    };
+};
+
+export type BookmarkProfil = {
+    id: string;
+    destinasi: {
+        id: string;
+        nama: string;
+        kategori: string;
+        rating: string;
+        foto_url?: string | null;
+    };
+};
+
 export type PaginatedData<T> = {
     data: T[];
     current_page: number;
