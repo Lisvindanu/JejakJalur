@@ -6,47 +6,33 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration
 {
     /**
-     * KA Bandara Soekarno-Hatta: Manggarai <-> Sudirman/BNI City <-> Duri <-> Batu Ceper <-> Bandara Soekhatta
+     * KA Bandara Soekarno-Hatta: Manggarai <-> BNI City <-> Duri <-> Batu Ceper <-> Bandara Soekhatta
      *
-     * Insert BNIC (BNI City / Sudirman Baru) dan BST (Bandara Soekarno-Hatta).
+     * BSH (Bandara Soekarno Hatta) sudah exist — re-use.
+     * Insert BNIC (BNI City / Sudirman Baru) yang belum ada.
      */
     public function up(): void
     {
         $jakpus = DB::table('kota')->where('nama', 'Jakarta Pusat')->value('id');
-        $tangerang = DB::table('kota')->where('nama', 'Tangerang')->value('id');
 
-        // 1. Insert BNIC BNI City / Sudirman Baru (-6.2032, 106.8228)
-        DB::table('stasiun')->updateOrInsert(
-            ['kode_stasiun' => 'BNIC'],
-            [
-                'kota_id' => $jakpus,
-                'nama' => 'BNI City',
-                'lat' => -6.2032,
-                'lng' => 106.8228,
-                'updated_at' => now(),
-                'created_at' => now(),
-            ]
-        );
+        // Insert BNIC BNI City / Sudirman Baru — pakai INSERT ON CONFLICT (kode) DO NOTHING
+        // + cek dulu via nama+kota untuk avoid unique constraint
+        $existsId = DB::table('stasiun')->where('nama', 'BNI City')->where('kota_id', $jakpus)->value('id');
+        if (! $existsId) {
+            DB::statement(
+                'INSERT INTO stasiun (id, kota_id, nama, kode_stasiun, lat, lng, created_at, updated_at)
+                 VALUES (gen_random_uuid(), ?, ?, ?, ?, ?, NOW(), NOW())
+                 ON CONFLICT DO NOTHING',
+                [$jakpus, 'BNI City', 'BNIC', -6.2032, 106.8228]
+            );
+        }
 
-        // 2. Insert BST Bandara Soekarno-Hatta (-6.1199, 106.6549)
-        DB::table('stasiun')->updateOrInsert(
-            ['kode_stasiun' => 'BST'],
-            [
-                'kota_id' => $tangerang,
-                'nama' => 'Bandara Soekarno-Hatta',
-                'lat' => -6.1199,
-                'lng' => 106.6549,
-                'updated_at' => now(),
-                'created_at' => now(),
-            ]
-        );
-
-        // 3. Tambah commuter edges Bandara Line
+        // Commuter edges Bandara Line
         $edges = [
             ['MRI', 'BNIC'],
             ['BNIC', 'DU'],
-            ['DU', 'BPR'],   // Duri-Batuceper
-            ['BPR', 'BST'],  // Batuceper-Bandara
+            ['DU', 'BPR'],
+            ['BPR', 'BSH'],
         ];
 
         foreach ($edges as [$a, $b]) {

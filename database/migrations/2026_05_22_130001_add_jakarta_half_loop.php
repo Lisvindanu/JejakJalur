@@ -7,43 +7,14 @@ return new class extends Migration
 {
     /**
      * KRL Jakarta Half Loop (North loop antara JNG dan KPB via Pasar Senen/Kemayoran):
-     *   JNG <-> PDJ <-> KMT <-> GST <-> PSE <-> KMO <-> RJW <-> KPB <-> ANC <-> TPK
+     *   JNG <-> POK <-> KMT <-> GST <-> PSE <-> KMO <-> RJW <-> KPB <-> AC <-> TPK
      *
-     * Insert PDJ (Pondok Jati) di Jakarta Pusat dan ANC (Ancol) di Jakarta Utara.
+     * POK (Pondokjati) dan AC (Ancol) sudah exist di DB — re-use kode tersebut.
      * Tambah commuter edges yang missing.
      */
     public function up(): void
     {
-        $jakpus = DB::table('kota')->where('nama', 'Jakarta Pusat')->value('id');
-        $jakut = DB::table('kota')->where('nama', 'Jakarta Utara')->value('id');
-
-        // 1. Insert PDJ Pondok Jati (-6.2127, 106.8642) — antara JNG dan KMT
-        DB::table('stasiun')->updateOrInsert(
-            ['kode_stasiun' => 'PDJ'],
-            [
-                'kota_id' => $jakpus,
-                'nama' => 'Pondok Jati',
-                'lat' => -6.2127,
-                'lng' => 106.8642,
-                'updated_at' => now(),
-                'created_at' => now(),
-            ]
-        );
-
-        // 2. Insert ANC Ancol (-6.1287, 106.8412) — antara KPB dan TPK
-        DB::table('stasiun')->updateOrInsert(
-            ['kode_stasiun' => 'ANC'],
-            [
-                'kota_id' => $jakut,
-                'nama' => 'Ancol',
-                'lat' => -6.1287,
-                'lng' => 106.8412,
-                'updated_at' => now(),
-                'created_at' => now(),
-            ]
-        );
-
-        // 3. Hapus shortcut KMT-JNG yang skip PDJ
+        // Hapus shortcut KMT-JNG yang skip POK (Pondokjati)
         $shortcuts = [
             ['KMT', 'JNG'],
             ['JNG', 'KMT'],
@@ -57,12 +28,12 @@ return new class extends Migration
             ", [$a, $b]);
         }
 
-        // 4. Tambah commuter edges Half Loop
+        // Tambah commuter edges Half Loop
         $edges = [
-            ['JNG', 'PDJ'],
-            ['PDJ', 'KMT'],
-            ['KPB', 'ANC'],
-            ['ANC', 'TPK'],
+            ['JNG', 'POK'],
+            ['POK', 'KMT'],
+            ['KPB', 'AC'],
+            ['AC', 'TPK'],
         ];
 
         foreach ($edges as [$a, $b]) {
