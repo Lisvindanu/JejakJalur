@@ -49,7 +49,7 @@ export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
                         <img
                             src={destinasi.foto_url}
                             alt={destinasi.nama}
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-contain"
                         />
                     ) : (
                         placeholder.icon
