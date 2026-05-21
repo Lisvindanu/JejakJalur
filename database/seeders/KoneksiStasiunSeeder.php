@@ -72,8 +72,8 @@ class KoneksiStasiunSeeder extends Seeder
                 'SRI', 'KBD', 'WLR', 'KLN', 'MKG', 'ATA', 'SMT', 'SMC',
                 'JRK', 'BBG', 'TGW', 'GUB', 'NBO', 'TGG', 'GBN', 'TRH',
                 'SDI', 'PNL', 'KSO', 'JTS', 'KNN', 'PDS', 'JBN', 'GN', 'KEJ',
-                'KGT', 'GD', 'SL', 'GPK', 'DPL', 'GDB',
-                'TW', 'JBN1', 'CE', 'KT', 'BBN', 'SWT', 'DL',
+                'KGT', 'GD', 'SL', 'GPK', 'DPL',
+                'TW', 'JBN1', 'CE', 'KT', 'BBN', 'SWT',
                 'SLO', 'SK', 'SK', 'PWS', 'STA',
                 'KMR', 'KO', 'PL', 'KDB', 'MSR', 'SLM', 'SUM', 'SR', 'KRO',
                 'WK', 'KG', 'PA', 'GG', 'NGW',
@@ -102,7 +102,7 @@ class KoneksiStasiunSeeder extends Seeder
                 'IJ', 'SOA', 'SRW', 'KM', 'WNS', 'KWN', 'PRB', 'GB', 'BTH',
                 'KTA', 'JN', 'WJ', 'STL', 'WT', 'PTN',
                 'MGW', 'LPN', 'YK',
-                'KLS', 'BBN', 'CE', 'KT', 'SWT', 'DL', 'SLO',
+                'KLS', 'BBN', 'CE', 'KT', 'SWT', 'SLO',
             ],
 
             // ── JALUR SUKABUMI ────────────────────────────────────────────
