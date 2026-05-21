@@ -146,11 +146,14 @@ class JejakAiService
             $links[] = ['type' => 'rute', 'nama' => 'Lihat Peta Rute', 'url' => '/rute'];
         }
 
-        // Find destinasi mentioned in reply
-        $destinasis = Destinasi::select('id', 'nama')->get();
-        foreach ($destinasis as $d) {
-            if (mb_stripos($reply, $d->nama) !== false) {
-                $links[] = ['type' => 'destinasi', 'id' => $d->id, 'nama' => $d->nama, 'url' => "/destinasi/{$d->id}"];
+        // Use vector search on reply to find top candidate destinasi, then check if mentioned
+        $candidateIds = array_column($this->vectorSearch($reply, 'destinasi', 20), 'id');
+        if (! empty($candidateIds)) {
+            $destinasis = Destinasi::select('id', 'nama')->whereIn('id', $candidateIds)->get();
+            foreach ($destinasis as $d) {
+                if (mb_stripos($reply, $d->nama) !== false) {
+                    $links[] = ['type' => 'destinasi', 'id' => $d->id, 'nama' => $d->nama, 'url' => "/destinasi/{$d->id}"];
+                }
             }
         }
 
