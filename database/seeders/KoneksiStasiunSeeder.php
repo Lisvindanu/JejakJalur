@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\KoneksiStasiun;
 use App\Models\Stasiun;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class KoneksiStasiunSeeder extends Seeder
 {
@@ -238,5 +239,44 @@ class KoneksiStasiunSeeder extends Seeder
         }
 
         $this->command->info('Koneksi stasiun: '.count($koneksi).' edges dibuat.');
+
+        // Refill jarak_km via Haversine berdasarkan koordinat stasiun terbaru.
+        // Dijalankan setiap seed agar konsisten kalau coord di-update di
+        // StasiunLatLngSeeder. Kalibrasi faktor jalan vs garis lurus per bucket.
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            DB::statement('
+                UPDATE koneksi_stasiun ks SET jarak_km = ROUND((
+                    6371 * 2 * asin(sqrt(
+                        sin(radians((s2.lat - s1.lat)/2))^2 +
+                        cos(radians(s1.lat)) * cos(radians(s2.lat)) *
+                        sin(radians((s2.lng - s1.lng)/2))^2
+                    )) * CASE
+                        WHEN 6371 * 2 * asin(sqrt(
+                            sin(radians((s2.lat - s1.lat)/2))^2 +
+                            cos(radians(s1.lat)) * cos(radians(s2.lat)) *
+                            sin(radians((s2.lng - s1.lng)/2))^2
+                        )) < 5  THEN 1.3169
+                        WHEN 6371 * 2 * asin(sqrt(
+                            sin(radians((s2.lat - s1.lat)/2))^2 +
+                            cos(radians(s1.lat)) * cos(radians(s2.lat)) *
+                            sin(radians((s2.lng - s1.lng)/2))^2
+                        )) < 20 THEN 1.1182
+                        WHEN 6371 * 2 * asin(sqrt(
+                            sin(radians((s2.lat - s1.lat)/2))^2 +
+                            cos(radians(s1.lat)) * cos(radians(s2.lat)) *
+                            sin(radians((s2.lng - s1.lng)/2))^2
+                        )) < 50 THEN 1.0886
+                        ELSE 0.9395
+                    END
+                )::numeric, 1)
+                FROM stasiun s1, stasiun s2
+                WHERE ks.stasiun_dari_id = s1.id
+                  AND ks.stasiun_ke_id = s2.id
+                  AND s1.lat IS NOT NULL
+                  AND s2.lat IS NOT NULL
+            ');
+
+            DB::statement('UPDATE koneksi_stasiun SET jarak_km = 1.0 WHERE jarak_km < 1.0');
+        }
     }
 }
