@@ -21,14 +21,31 @@ return new class extends Migration
         // ── Step 2: Update koordinat stasiun yang salah ──
         // Sumber: geocode.maps.co + positionstack, diverifikasi terhadap jalur konteks.
         $corrections = [
-            // Banyuwangi area (sebelumnya keliru ditempatkan di Cirebon)
+            // Banyuwangi area (sebelumnya keliru ditempatkan di Cirebon/Jawa Tengah)
             'KNE' => [-8.2229464, 114.3408077, 'Karangasem (Banyuwangi)'],
+            'KKL' => [-8.2962000, 114.0279000, 'Krikilan (Banyuwangi)'],
+
+            // Jember area (sebelumnya di Jawa Tengah)
+            'PET' => [-8.2070650, 113.5840960, 'Petung (Jember)'],
+
+            // Cianjur area
+            'MLB' => [-6.8178430, 107.1755910, 'Maleber (Cianjur)'],
+
+            // Ciamis area (Selatan jalur)
+            'CKW' => [-7.3566000, 108.4577000, 'Cikawung (Ciamis)'],
 
             // Garut area
             'KRAI' => [-7.0982744, 107.9311555, 'Karangsari (Garut)'],
 
             // Pantura Brebes area (sebelumnya di Tangerang)
             'CLD' => [-6.9755000, 108.9352820, 'Cileduk (Brebes)'],
+
+            // Pemalang area (sebelumnya di Cirebon)
+            'LR' => [-6.8991570, 109.4187540, 'Larang (Pemalang)'],
+
+            // Banyumas/Cilacap area (Selatan jalur)
+            'LGK' => [-7.5580600, 109.2433300, 'Legok (Banyumas)'],
+            'SIL' => [-7.6456990, 109.1337420, 'Sitinggil (Cilacap)'],
 
             // Minor adjustments
             'MN' => [-7.6188000, 111.5246000, 'Madiun'],
