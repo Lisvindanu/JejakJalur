@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Collection;
 class RuteService
 {
     /**
-     * Cari rute terpendek (hop) antara dua stasiun menggunakan BFS.
+     * Cari rute terpendek (jarak km) antara dua stasiun menggunakan Dijkstra.
      *
      * @return array<Stasiun>|null Urutan stasiun dari asal ke tujuan, atau null jika tidak ada jalur.
      */
@@ -21,28 +21,45 @@ class RuteService
             return $stasiun ? [$stasiun] : null;
         }
 
-        // Muat semua edge ke dalam adjacency list (in-memory graph)
+        // Muat semua edge ke dalam adjacency list berbobot (in-memory graph)
         $adjacency = [];
-        KoneksiStasiun::select('stasiun_dari_id', 'stasiun_ke_id')
+        KoneksiStasiun::select('stasiun_dari_id', 'stasiun_ke_id', 'jarak_km')
             ->each(function (KoneksiStasiun $edge) use (&$adjacency) {
-                $adjacency[$edge->stasiun_dari_id][] = $edge->stasiun_ke_id;
+                $adjacency[$edge->stasiun_dari_id][] = [
+                    'ke' => $edge->stasiun_ke_id,
+                    'jarak' => (float) ($edge->jarak_km ?? 50.0),
+                ];
             });
 
-        // BFS dengan pelacak parent untuk rekonstruksi jalur
-        $visited = [$dariId => null]; // node => parent
-        $queue = [$dariId];
+        // Dijkstra dengan SplPriorityQueue (min-heap via negasi prioritas)
+        $distances = [$dariId => 0.0];
+        $parent = [$dariId => null];
+        $finalized = [];
 
-        while (! empty($queue)) {
-            $current = array_shift($queue);
+        $pq = new \SplPriorityQueue;
+        $pq->setExtractFlags(\SplPriorityQueue::EXTR_DATA);
+        $pq->insert($dariId, 0);
+
+        while (! $pq->isEmpty()) {
+            $current = $pq->extract();
+
+            if (isset($finalized[$current])) {
+                continue;
+            }
+            $finalized[$current] = true;
 
             if ($current === $keId) {
-                return $this->rekonstruksiJalur($visited, $keId);
+                return $this->rekonstruksiJalur($parent, $keId);
             }
 
-            foreach ($adjacency[$current] ?? [] as $tetangga) {
-                if (! array_key_exists($tetangga, $visited)) {
-                    $visited[$tetangga] = $current;
-                    $queue[] = $tetangga;
+            foreach ($adjacency[$current] ?? [] as $edge) {
+                $next = $edge['ke'];
+                $newDist = $distances[$current] + $edge['jarak'];
+
+                if (! isset($distances[$next]) || $newDist < $distances[$next]) {
+                    $distances[$next] = $newDist;
+                    $parent[$next] = $current;
+                    $pq->insert($next, -$newDist);
                 }
             }
         }
@@ -66,17 +83,17 @@ class RuteService
     }
 
     /**
-     * @param  array<string, string|null>  $visited  node => parent map
+     * @param  array<string, string|null>  $parent  node => parent map
      * @return array<Stasiun>
      */
-    private function rekonstruksiJalur(array $visited, string $tujuanId): array
+    private function rekonstruksiJalur(array $parent, string $tujuanId): array
     {
         $jalur = [];
         $node = $tujuanId;
 
         while ($node !== null) {
             $jalur[] = $node;
-            $node = $visited[$node];
+            $node = $parent[$node];
         }
 
         $jalur = array_reverse($jalur);
