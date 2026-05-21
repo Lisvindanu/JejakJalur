@@ -6,37 +6,33 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration
 {
     /**
-     * KCIC Whoosh: Halim <-> Karawang KCIC <-> Padalarang <-> Tegalluar
+     * KCIC Whoosh: Halim <-> Karawang Whoosh <-> Padalarang <-> Tegalluar
      *
      * Halim (HAL) sudah ada di DB tapi belum punya edge KCIC.
-     * Karawang KCIC belum ada — insert dengan kode HLM_KRW (avoid clash dengan KRW=Karangsuwung).
+     * Karawang Whoosh belum ada — insert dengan kode KRWW (avoid clash dengan KW=Karawang antarkota).
      */
     public function up(): void
     {
         $karawang = DB::table('kota')->where('nama', 'Karawang')->value('id');
 
-        // 1. Insert Karawang KCIC station (kode 'KRWW' = Karawang Whoosh, avoid clash dengan KRW Karangsuwung)
-        DB::table('stasiun')->updateOrInsert(
-            ['kode_stasiun' => 'KRWW'],
-            [
-                'kota_id' => $karawang,
-                'nama' => 'Karawang Whoosh',
-                'lat' => -6.2920,
-                'lng' => 107.3680,
-                'updated_at' => now(),
-                'created_at' => now(),
-            ]
-        );
+        // Insert Karawang Whoosh — defensive: cek nama+kota dulu
+        $existsId = DB::table('stasiun')->where('nama', 'Karawang Whoosh')->where('kota_id', $karawang)->value('id');
+        if (! $existsId) {
+            DB::statement(
+                'INSERT INTO stasiun (id, kota_id, nama, kode_stasiun, lat, lng, created_at, updated_at)
+                 VALUES (gen_random_uuid(), ?, ?, ?, ?, ?, NOW(), NOW())
+                 ON CONFLICT DO NOTHING',
+                [$karawang, 'Karawang Whoosh', 'KRWW', -6.2920, 107.3680]
+            );
+        }
 
-        // 2. Tambah KCIC edges Halim <-> Karawang <-> Padalarang <-> Tegalluar
+        // KCIC edges: HAL <-> KRWW <-> PDL <-> TGLL (PDL-TGLL existing)
         // Jarak real KCIC (sumber KCIC.co.id):
         //  HAL - KRWW: 41.4 km
         //  KRWW - PDL: 88.5 km
-        //  PDL - TGLL: 12.4 km (existing)
         $edges = [
             ['HAL', 'KRWW', 41.4],
             ['KRWW', 'PDL', 88.5],
-            // PDL-TGLL already exists in DB, no need to re-insert
         ];
 
         foreach ($edges as [$a, $b, $jarak]) {
