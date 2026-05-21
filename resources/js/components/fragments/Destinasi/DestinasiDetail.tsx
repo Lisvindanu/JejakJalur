@@ -41,7 +41,7 @@ export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
     return (
         <div>
             {/* Image */}
-            <div className="px-[max(24px,calc(50%-576px))]">
+            <div className="px-[max(24px,calc(50%-576px))] py-5">
                 {destinasi.foto_url ? (
                     <img
                         src={destinasi.foto_url}
