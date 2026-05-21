@@ -54,7 +54,7 @@ class GeocodeDestinasi extends Command
                 if ($koordinat) {
                     break;
                 }
-                usleep(1_100_000);
+                usleep(300_000);
             }
 
             if ($koordinat) {
@@ -68,7 +68,7 @@ class GeocodeDestinasi extends Command
             }
 
             $bar->advance();
-            usleep(1_100_000);
+            usleep(300_000);
         }
 
         $bar->finish();
@@ -83,11 +83,12 @@ class GeocodeDestinasi extends Command
         try {
             $results = Http::timeout(10)->withHeaders([
                 'User-Agent' => 'JejakJalur/1.0 (jejakjalur@project-n.site)',
-            ])->get('https://nominatim.openstreetmap.org/search', [
+            ])->get('https://geocode.maps.co/search', [
                 'q' => $q,
                 'format' => 'json',
                 'limit' => 1,
                 'countrycodes' => 'id',
+                'api_key' => config('services.geocoding.key'),
             ])->json();
 
             if (! empty($results[0])) {
