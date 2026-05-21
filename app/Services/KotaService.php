@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Kota;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class KotaService
 {
@@ -12,10 +13,32 @@ class KotaService
 
     public function semuaKotaDenganStasiun(): Collection
     {
-        return Kota::with(['stasiun' => fn ($q) => $q->withCount('destinasi')])
+        $kotaList = Kota::with(['stasiun' => fn ($q) => $q->withCount('destinasi')])
             ->withCount('destinasi')
             ->orderBy('nama')
             ->get();
+
+        // Derive jenis_layanan (antarkota/commuter/kcic) per stasiun dari koneksi_stasiun.tipe
+        // sehingga frontend bisa filter mode tanpa hardcoded kode stasiun.
+        $layananByStasiun = DB::table('koneksi_stasiun')
+            ->select('stasiun_dari_id as stasiun_id', 'tipe')
+            ->distinct()
+            ->unionAll(
+                DB::table('koneksi_stasiun')
+                    ->select('stasiun_ke_id as stasiun_id', 'tipe')
+                    ->distinct()
+            )
+            ->get()
+            ->groupBy('stasiun_id')
+            ->map(fn ($rows) => $rows->pluck('tipe')->unique()->values()->all());
+
+        $kotaList->each(function ($kota) use ($layananByStasiun) {
+            $kota->stasiun->each(function ($stasiun) use ($layananByStasiun) {
+                $stasiun->jenis_layanan = $layananByStasiun->get($stasiun->id, []);
+            });
+        });
+
+        return $kotaList;
     }
 
     public function semuaKota(?string $search = null): LengthAwarePaginator
