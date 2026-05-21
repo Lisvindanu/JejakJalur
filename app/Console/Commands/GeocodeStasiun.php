@@ -55,7 +55,7 @@ class GeocodeStasiun extends Command
                 if ($koordinat) {
                     break;
                 }
-                usleep(1_100_000);
+                usleep(300_000); // 300ms — geocode.maps.co 5 req/s
             }
 
             if ($koordinat) {
@@ -66,7 +66,7 @@ class GeocodeStasiun extends Command
             }
 
             $bar->advance();
-            usleep(1_100_000);
+            usleep(300_000);
         }
 
         $bar->finish();
@@ -93,12 +93,13 @@ class GeocodeStasiun extends Command
                 'format' => 'json',
                 'limit' => 5,
                 'countrycodes' => 'id',
+                'api_key' => config('services.geocoding.key'),
             ];
 
             $results = Http::timeout(10)->withHeaders([
                 'User-Agent' => 'JejakJalur/1.0 (jejakjalur@project-n.site)',
                 'Accept-Language' => 'id,en',
-            ])->get('https://nominatim.openstreetmap.org/search', $params)->json();
+            ])->get('https://geocode.maps.co/search', $params)->json();
 
             if (empty($results)) {
                 return null;
