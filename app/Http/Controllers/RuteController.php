@@ -71,7 +71,7 @@ class RuteController extends Controller
                 [$lat2, $lng2] = $stasiunCoords[$k->stasiun_ke_id];
                 $w = $this->haversine($lat1, $lng1, $lat2, $lng2) * 1.15;
             } else {
-                continue; // skip koneksi tanpa koordinat sama sekali
+                $w = 50.0; // penalty tinggi untuk koneksi tanpa koordinat — graph tetap terhubung
             }
             $graph[$k->stasiun_dari_id][$k->stasiun_ke_id] = $w;
             $graph[$k->stasiun_ke_id][$k->stasiun_dari_id] = $w;
