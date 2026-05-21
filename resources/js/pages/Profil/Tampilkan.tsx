@@ -1,19 +1,28 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
+    IconBookmark,
+    IconBookmarkFilled,
     IconLayoutDashboard,
+    IconLoader2,
     IconMapPin,
+    IconMountain,
     IconPencil,
+    IconShoppingBag,
     IconStar,
+    IconToolsKitchen2,
     IconTrash,
 } from '@tabler/icons-react';
+import { useState } from 'react';
 import Avatar from '@/components/elements/Avatar';
 import Button from '@/components/elements/Button';
 import Modal from '@/components/elements/Modal';
+import RatingDisplay from '@/components/elements/Rating';
 import PublicLayout from '@/components/layouts/PublicLayout';
 import { useConfirm } from '@/hooks/useConfirm';
 import { formatTanggal } from '@/lib/utils';
 import { MOCK_PENGGUNA } from '@/lib/mock-data';
-import type { SharedProps } from '@/types';
+import * as BookmarkController from '@/actions/App/Http/Controllers/BookmarkController';
+import type { BookmarkProfil, SharedProps, UlasanProfil } from '@/types';
 
 interface Pengguna {
     id: number;
@@ -29,6 +38,8 @@ interface Props {
     jumlah_ulasan?: number;
     rata_rata_rating?: number | null;
     jumlah_destinasi_diulas?: number;
+    ulasan?: UlasanProfil[];
+    bookmarks?: BookmarkProfil[];
 }
 
 function StatItem({
@@ -55,11 +66,111 @@ function StatItem({
     );
 }
 
+function kategoriPlaceholder(kategori: string) {
+    if (kategori === 'Kuliner') {
+        return { gradient: 'from-amber-100 to-amber-200', icon: <IconToolsKitchen2 size={28} className="text-black/20" /> };
+    }
+    if (kategori === 'UMKM') {
+        return { gradient: 'from-indigo-100 to-indigo-200', icon: <IconShoppingBag size={28} className="text-black/20" /> };
+    }
+    return { gradient: 'from-emerald-100 to-emerald-200', icon: <IconMountain size={28} className="text-black/20" /> };
+}
+
+function WishlistCard({ bookmark }: { bookmark: BookmarkProfil }) {
+    const [removing, setRemoving] = useState(false);
+    const { destinasi } = bookmark;
+    const ph = kategoriPlaceholder(destinasi.kategori);
+
+    function hapus() {
+        setRemoving(true);
+        const action = BookmarkController.hapus({ destinasi: destinasi.id });
+        router.visit(action.url, {
+            method: action.method,
+            preserveScroll: true,
+            onFinish: () => setRemoving(false),
+        });
+    }
+
+    return (
+        <div className="group flex flex-col overflow-hidden rounded-xl border border-stone-100 bg-white transition-shadow hover:shadow-md">
+            <Link href={`/destinasi/${destinasi.id}`} className="no-underline">
+                <div className={`flex h-32 items-center justify-center bg-gradient-to-br ${ph.gradient}`}>
+                    {destinasi.foto_url ? (
+                        <img src={destinasi.foto_url} alt={destinasi.nama} className="h-full w-full object-cover" />
+                    ) : (
+                        ph.icon
+                    )}
+                </div>
+            </Link>
+
+            <div className="flex flex-1 flex-col gap-1 p-3">
+                <Link
+                    href={`/destinasi/${destinasi.id}`}
+                    className="line-clamp-2 text-sm font-medium text-stone-800 no-underline hover:text-emerald-700"
+                >
+                    {destinasi.nama}
+                </Link>
+                <div className="flex items-center justify-between">
+                    <RatingDisplay value={Number(destinasi.rating)} size={13} />
+                    <button
+                        onClick={hapus}
+                        disabled={removing}
+                        title="Hapus dari wishlist"
+                        className="text-stone-400 transition-colors hover:text-red-500 disabled:opacity-50"
+                    >
+                        {removing
+                            ? <IconLoader2 size={15} className="animate-spin" />
+                            : <IconBookmarkFilled size={15} />
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function UlasanCard({ ulasan }: { ulasan: UlasanProfil }) {
+    const ph = kategoriPlaceholder(ulasan.destinasi.kategori);
+
+    return (
+        <div className="flex gap-4 rounded-xl border border-stone-100 bg-white p-4">
+            <Link href={`/destinasi/${ulasan.destinasi.id}`} className="no-underline shrink-0">
+                <div className={`flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br ${ph.gradient}`}>
+                    {ulasan.destinasi.foto_url ? (
+                        <img src={ulasan.destinasi.foto_url} alt={ulasan.destinasi.nama} className="h-full w-full object-cover" />
+                    ) : (
+                        ph.icon
+                    )}
+                </div>
+            </Link>
+
+            <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-start justify-between gap-1">
+                    <Link
+                        href={`/destinasi/${ulasan.destinasi.id}`}
+                        className="text-sm font-medium text-stone-800 no-underline hover:text-emerald-700"
+                    >
+                        {ulasan.destinasi.nama}
+                    </Link>
+                    <span className="text-xs text-stone-400">{formatTanggal(ulasan.created_at)}</span>
+                </div>
+                <RatingDisplay value={ulasan.rating} size={13} className="mt-1" />
+                {ulasan.judul && (
+                    <p className="mt-1 text-xs font-medium text-stone-700">{ulasan.judul}</p>
+                )}
+                <p className="mt-0.5 line-clamp-2 text-xs text-stone-500">{ulasan.konten}</p>
+            </div>
+        </div>
+    );
+}
+
 export default function Tampilkan({
     pengguna: penggunaProp,
     jumlah_ulasan = 0,
     rata_rata_rating = null,
     jumlah_destinasi_diulas = 0,
+    ulasan = [],
+    bookmarks = [],
 }: Props) {
     const pengguna = penggunaProp ?? MOCK_PENGGUNA;
     const { auth } = usePage<SharedProps>().props;
@@ -78,7 +189,7 @@ export default function Tampilkan({
             <Head title="Profil — JejakJalur" />
 
             <div className="px-4 pt-24 pb-16 sm:px-6">
-                <div className="mx-auto max-w-4xl">
+                <div className="mx-auto max-w-4xl space-y-6">
                     {/* Main profile card */}
                     <div className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">
                         <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
@@ -100,10 +211,7 @@ export default function Tampilkan({
                                     {formatTanggal(pengguna.created_at)}
                                 </p>
                                 <div className="mt-4 flex flex-wrap gap-2">
-                                    <Link
-                                        href="/profil/edit"
-                                        className="no-underline"
-                                    >
+                                    <Link href="/profil/edit" className="no-underline">
                                         <Button
                                             variant="outline"
                                             leftIcon={<IconPencil size={15} />}
@@ -112,17 +220,10 @@ export default function Tampilkan({
                                         </Button>
                                     </Link>
                                     {isAdmin && (
-                                        <Link
-                                            href="/admin"
-                                            className="no-underline"
-                                        >
+                                        <Link href="/admin" className="no-underline">
                                             <Button
                                                 variant="secondary"
-                                                leftIcon={
-                                                    <IconLayoutDashboard
-                                                        size={15}
-                                                    />
-                                                }
+                                                leftIcon={<IconLayoutDashboard size={15} />}
                                             >
                                                 Admin Panel
                                             </Button>
@@ -156,11 +257,73 @@ export default function Tampilkan({
                         </div>
                     </div>
 
+                    {/* Wishlist */}
+                    <div className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">
+                        <div className="mb-4 flex items-center gap-2">
+                            <IconBookmark size={18} className="text-amber-600" />
+                            <h2 className="font-semibold text-stone-800">Wishlist Destinasi</h2>
+                            {bookmarks.length > 0 && (
+                                <span className="ml-auto rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-500">
+                                    {bookmarks.length}
+                                </span>
+                            )}
+                        </div>
+
+                        {bookmarks.length === 0 ? (
+                            <div className="rounded-xl border border-dashed border-stone-200 py-10 text-center">
+                                <IconBookmark size={32} className="mx-auto mb-2 text-stone-300" />
+                                <p className="text-sm text-stone-400">Belum ada destinasi yang disimpan.</p>
+                                <Link
+                                    href="/destinasi"
+                                    className="mt-2 inline-block text-sm font-medium text-emerald-700 no-underline hover:text-emerald-800"
+                                >
+                                    Jelajahi destinasi
+                                </Link>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                                {bookmarks.map((b) => (
+                                    <WishlistCard key={b.id} bookmark={b} />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Riwayat Ulasan */}
+                    <div className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">
+                        <div className="mb-4 flex items-center gap-2">
+                            <IconPencil size={18} className="text-emerald-700" />
+                            <h2 className="font-semibold text-stone-800">Riwayat Ulasan</h2>
+                            {ulasan.length > 0 && (
+                                <span className="ml-auto rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-500">
+                                    {ulasan.length}
+                                </span>
+                            )}
+                        </div>
+
+                        {ulasan.length === 0 ? (
+                            <div className="rounded-xl border border-dashed border-stone-200 py-10 text-center">
+                                <IconPencil size={32} className="mx-auto mb-2 text-stone-300" />
+                                <p className="text-sm text-stone-400">Belum ada ulasan yang ditulis.</p>
+                                <Link
+                                    href="/destinasi"
+                                    className="mt-2 inline-block text-sm font-medium text-emerald-700 no-underline hover:text-emerald-800"
+                                >
+                                    Temukan destinasi untuk diulas
+                                </Link>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {ulasan.map((u) => (
+                                    <UlasanCard key={u.id} ulasan={u} />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
                     {/* Danger zone */}
-                    <div className="mt-6 rounded-2xl border border-red-200 bg-white p-6 sm:p-8">
-                        <h3 className="font-semibold text-red-700">
-                            Zona Bahaya
-                        </h3>
+                    <div className="rounded-2xl border border-red-200 bg-white p-6 sm:p-8">
+                        <h3 className="font-semibold text-red-700">Zona Bahaya</h3>
                         <p className="mt-1 text-sm text-stone-600">
                             Tindakan ini tidak dapat dibatalkan. Semua ulasan
                             dan data akun akan dihapus permanen.
