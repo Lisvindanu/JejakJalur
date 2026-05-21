@@ -59,4 +59,8 @@ return [
         'embed_model' => env('OLLAMA_EMBED_MODEL', 'nomic-embed-text'),
     ],
 
+    'geocoding' => [
+        'key' => env('GEOCODING_API_KEY'),
+    ],
+
 ];
