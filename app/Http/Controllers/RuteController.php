@@ -57,7 +57,8 @@ class RuteController extends Controller
         // Build undirected weighted adjacency list (kedua arah)
         // Load station coords so null jarak_km can fall back to Haversine instead of 1
         $stasiunCoords = Stasiun::whereNotNull('lat')->whereNotNull('lng')
-            ->pluck(null, 'id')
+            ->get(['id', 'lat', 'lng'])
+            ->keyBy('id')
             ->map(fn ($s) => [(float) $s->lat, (float) $s->lng]);
 
         $koneksi = KoneksiStasiun::select('stasiun_dari_id', 'stasiun_ke_id', 'jarak_km')->get();
