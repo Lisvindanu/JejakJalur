@@ -93,7 +93,11 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
 
             {/* Interactive Leaflet map */}
             <div className="border-b border-stone-100 bg-white px-[max(24px,calc(50%-576px))] py-8">
-                <RuteMap semuaKota={semuaKota} route={ruteAktif} focusDest={focusDest} />
+                <RuteMap
+                    semuaKota={semuaKota}
+                    route={ruteAktif}
+                    focusDest={focusDest}
+                />
             </div>
 
             {/* Trip planner */}
