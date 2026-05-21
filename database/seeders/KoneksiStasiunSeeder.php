@@ -119,7 +119,7 @@ class KoneksiStasiunSeeder extends Seeder
                 'GMR', 'PSE', 'JNG', 'BKS', 'CKP',
                 'CBR', 'SAD', 'PWK', 'PLD', 'SUT', 'CA', 'CG', 'CD', 'RH', 'CPT',
                 'SKT', 'CLE', 'CMI', 'PDL', 'GK', 'TAU', 'MSI', 'LBJ', 'RCK',
-                'BD', 'CMD', 'CIR', 'AND', 'CTH', 'CMK', 'GDB', 'KAC',
+                'CMD', 'AND', 'CIR', 'BD', 'CTH', 'KAC', 'GDB', 'CMK',
                 'HRP', 'CCL', 'NG', 'CB', 'CPD', 'WB', 'LL', 'LO', 'BMW',
                 'KRAI', 'RJP', 'CAW', 'CAA', 'MNJ', 'IH', 'TSM', 'AW',
                 'CKW', 'CI', 'BJG', 'LN', 'KNP', 'BJR',
