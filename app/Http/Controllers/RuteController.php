@@ -23,9 +23,9 @@ class RuteController extends Controller
         // Nambo branch
         'PDRG', 'CBN', 'NMO',
         // Cikarang line
-        'JNG', 'BKS', 'KRI', 'KLD', 'KLDB', 'LMB', 'TB', 'CKR',
+        'JNG', 'BKS', 'KRI', 'KLD', 'KLDB', 'CUK', 'LMB', 'TB', 'CKR',
         // Rangkasbitung line
-        'KBY', 'PLM', 'PDR', 'SRP', 'PRP', 'TJ', 'TGS', 'MJA', 'CTR', 'RK',
+        'KBY', 'PLM', 'PDR', 'SRP', 'PRP', 'CJT', 'DAR', 'TJ', 'TGS', 'MJA', 'CTR', 'RK',
         // Tangerang line
         'DU', 'GGL', 'RW', 'PI', 'BPR', 'THL', 'TNG',
         // Tanjung Priok
