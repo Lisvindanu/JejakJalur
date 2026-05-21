@@ -9,7 +9,7 @@ import {
     IconTrain,
     IconX,
 } from '@tabler/icons-react';
-import type { Kota, StasiunRute } from '@/types';
+import type { Kota, RuteSegment, StasiunRute } from '@/types';
 
 // ── Types & Constants ─────────────────────────────────────────────────────────
 
@@ -462,7 +462,7 @@ function PemberhentianList({ stops }: { stops: StasiunRute[] }) {
 
 interface Props {
     semuaKota: Kota[];
-    onRuteFound: (rute: StasiunRute[]) => void;
+    onRuteFound: (rute: StasiunRute[], segments: RuteSegment[]) => void;
     onRuteClear: () => void;
 }
 
@@ -574,7 +574,7 @@ export default function PerencanaRute({
                 setError(data.error ?? 'Terjadi kesalahan.');
             } else {
                 setRute(data.rute);
-                onRuteFound(data.rute);
+                onRuteFound(data.rute, data.segments ?? []);
             }
         } catch {
             setError('Gagal menghubungi server. Coba lagi.');
