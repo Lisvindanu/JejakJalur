@@ -17,21 +17,83 @@ type Mode = 'antarkota' | 'commuter' | 'kcic';
 const KCIC_KODES = new Set(['HAL', 'KW', 'PDL', 'TGLL']);
 
 const KRL_KODES = new Set([
-    'JAKK', 'JAY', 'MGB', 'SW', 'JUA', 'GDD', 'CKI', 'MRI', 'TEB', 'CW',
-    'DRN', 'PSMB', 'PSM', 'TNT', 'LNA', 'UP', 'UI', 'DPB', 'DP', 'CTA',
-    'BJD', 'CLT', 'BOO', 'PDRG', 'CBN', 'NMO',
-    'JNG', 'BKS', 'KRI', 'KLD', 'KLDB', 'LMB', 'TB', 'CKR',
-    'KBY', 'PLM', 'PDR', 'SRP', 'PRP', 'TJ', 'TGS', 'MJA', 'CTR', 'RK',
+    'JAKK',
+    'JAY',
+    'MGB',
+    'SW',
+    'JUA',
+    'GDD',
+    'CKI',
+    'MRI',
+    'TEB',
+    'CW',
+    'DRN',
+    'PSMB',
+    'PSM',
+    'TNT',
+    'LNA',
+    'UP',
+    'UI',
+    'DPB',
+    'DP',
+    'CTA',
+    'BJD',
+    'CLT',
+    'BOO',
+    'PDRG',
+    'CBN',
+    'NMO',
+    'JNG',
+    'BKS',
+    'KRI',
+    'KLD',
+    'KLDB',
+    'LMB',
+    'TB',
+    'CKR',
+    'KBY',
+    'PLM',
+    'PDR',
+    'SRP',
+    'PRP',
+    'TJ',
+    'TGS',
+    'MJA',
+    'CTR',
+    'RK',
+    'DU',
+    'GGL',
+    'RW',
+    'PI',
+    'BPR',
+    'THL',
+    'TNG',
+    'KPB',
+]);
+
+// Stasiun yang hanya via KRL/KCIC — tidak muncul di dropdown antarkota
+const ANTARKOTA_EXCLUDED = new Set([
+    'HAL', 'TGLL',
+    'JAY', 'MGB', 'SW', 'JUA', 'GDD', 'CKI', 'TEB', 'CW',
+    'DRN', 'PSMB', 'PSM', 'TNT', 'LNA', 'UP', 'UI', 'DPB', 'CTA', 'BJD', 'CLT',
+    'PDRG', 'CBN', 'NMO',
+    'KRI', 'KLD', 'KLDB', 'LMB', 'TB',
+    'KBY', 'PDR', 'PRP', 'TJ', 'TGS', 'MJA', 'CTR', 'RK',
     'DU', 'GGL', 'RW', 'PI', 'BPR', 'THL', 'TNG', 'KPB',
 ]);
 
 function filterKotaByMode(semuaKota: Kota[], mode: Mode): Kota[] {
-    if (mode === 'antarkota') return semuaKota;
-    const allowed = mode === 'kcic' ? KCIC_KODES : KRL_KODES;
+    const filterFn =
+        mode === 'kcic'
+            ? (kode: string) => KCIC_KODES.has(kode)
+            : mode === 'commuter'
+              ? (kode: string) => KRL_KODES.has(kode)
+              : (kode: string) => !ANTARKOTA_EXCLUDED.has(kode);
+
     return semuaKota
         .map((k) => ({
             ...k,
-            stasiun: k.stasiun.filter((s) => allowed.has(s.kode_stasiun)),
+            stasiun: k.stasiun.filter((s) => filterFn(s.kode_stasiun)),
         }))
         .filter((k) => k.stasiun.length > 0);
 }
