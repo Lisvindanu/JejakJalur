@@ -13,7 +13,10 @@ interface Props {
     is_bookmarked?: boolean;
 }
 
-export default function Detail({ destinasi: dest, is_bookmarked = false }: Props) {
+export default function Detail({
+    destinasi: dest,
+    is_bookmarked = false,
+}: Props) {
     const destinasi: Destinasi = dest ?? {
         ...MOCK_DESTINASI[0],
         ulasan: MOCK_ULASAN,

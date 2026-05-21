@@ -13,11 +13,15 @@ class ProfilController extends Controller
     {
         $pengguna = auth()->user();
 
+        $jumlah_ulasan = $pengguna->ulasan()->count();
+        $rata_rata_rating = $pengguna->ulasan()->avg('rating');
+        $jumlah_destinasi_diulas = $pengguna->ulasan()->distinct('destinasi_id')->count('destinasi_id');
+
         $ulasan = $pengguna->ulasan()
             ->with('destinasi:id,nama,kategori,foto,stasiun_id')
             ->latest()
-            ->get()
-            ->map(fn ($u) => [
+            ->paginate(5, ['*'], 'ulasan_page')
+            ->through(fn ($u) => [
                 'id' => $u->id,
                 'judul' => $u->judul,
                 'konten' => $u->konten,
@@ -34,8 +38,8 @@ class ProfilController extends Controller
         $bookmarks = $pengguna->bookmarks()
             ->with('destinasi:id,nama,kategori,foto,rating,stasiun_id')
             ->latest()
-            ->get()
-            ->map(fn ($b) => [
+            ->paginate(8, ['*'], 'bookmark_page')
+            ->through(fn ($b) => [
                 'id' => $b->id,
                 'destinasi' => [
                     'id' => $b->destinasi->id,
@@ -48,9 +52,9 @@ class ProfilController extends Controller
 
         return Inertia::render('Profil/Tampilkan', [
             'pengguna' => $pengguna,
-            'jumlah_ulasan' => $ulasan->count(),
-            'rata_rata_rating' => $ulasan->count() > 0 ? round($ulasan->avg('rating'), 1) : null,
-            'jumlah_destinasi_diulas' => $ulasan->pluck('destinasi.id')->unique()->count(),
+            'jumlah_ulasan' => $jumlah_ulasan,
+            'rata_rata_rating' => $rata_rata_rating ? round($rata_rata_rating, 1) : null,
+            'jumlah_destinasi_diulas' => $jumlah_destinasi_diulas,
             'ulasan' => $ulasan,
             'bookmarks' => $bookmarks,
         ]);
