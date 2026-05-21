@@ -55,10 +55,23 @@ class RuteController extends Controller
         }
 
         // Build undirected weighted adjacency list (kedua arah)
+        // Load station coords so null jarak_km can fall back to Haversine instead of 1
+        $stasiunCoords = Stasiun::whereNotNull('lat')->whereNotNull('lng')
+            ->pluck(null, 'id')
+            ->map(fn ($s) => [(float) $s->lat, (float) $s->lng]);
+
         $koneksi = KoneksiStasiun::select('stasiun_dari_id', 'stasiun_ke_id', 'jarak_km')->get();
         $graph = [];
         foreach ($koneksi as $k) {
-            $w = $k->jarak_km ?? 1;
+            if ($k->jarak_km !== null) {
+                $w = (float) $k->jarak_km;
+            } elseif (isset($stasiunCoords[$k->stasiun_dari_id], $stasiunCoords[$k->stasiun_ke_id])) {
+                [$lat1, $lng1] = $stasiunCoords[$k->stasiun_dari_id];
+                [$lat2, $lng2] = $stasiunCoords[$k->stasiun_ke_id];
+                $w = $this->haversine($lat1, $lng1, $lat2, $lng2) * 1.15;
+            } else {
+                continue; // skip koneksi tanpa koordinat sama sekali
+            }
             $graph[$k->stasiun_dari_id][$k->stasiun_ke_id] = $w;
             $graph[$k->stasiun_ke_id][$k->stasiun_dari_id] = $w;
         }
@@ -120,5 +133,16 @@ class RuteController extends Controller
         $rute = array_values(array_map(fn (string $id) => $stasiunMap[$id], $path));
 
         return response()->json(['rute' => $rute]);
+    }
+
+    private function haversine(float $lat1, float $lng1, float $lat2, float $lng2): float
+    {
+        $R = 6371;
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLng = deg2rad($lng2 - $lng1);
+        $a = sin($dLat / 2) ** 2
+            + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng / 2) ** 2;
+
+        return $R * 2 * atan2(sqrt($a), sqrt(1 - $a));
     }
 }
