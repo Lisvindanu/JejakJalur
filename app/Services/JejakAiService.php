@@ -146,11 +146,14 @@ class JejakAiService
             $links[] = ['type' => 'rute', 'nama' => 'Lihat Peta Rute', 'url' => '/rute'];
         }
 
-        // Find destinasi mentioned in reply
-        $destinasis = Destinasi::select('id', 'nama')->get();
-        foreach ($destinasis as $d) {
-            if (mb_stripos($reply, $d->nama) !== false) {
-                $links[] = ['type' => 'destinasi', 'id' => $d->id, 'nama' => $d->nama, 'url' => "/destinasi/{$d->id}"];
+        // Use vector search on reply to find top candidate destinasi, then check if mentioned
+        $candidateIds = array_column($this->vectorSearch($reply, 'destinasi', 20), 'id');
+        if (! empty($candidateIds)) {
+            $destinasis = Destinasi::select('id', 'nama')->whereIn('id', $candidateIds)->get();
+            foreach ($destinasis as $d) {
+                if (mb_stripos($reply, $d->nama) !== false) {
+                    $links[] = ['type' => 'destinasi', 'id' => $d->id, 'nama' => $d->nama, 'url' => "/destinasi/{$d->id}"];
+                }
             }
         }
 
@@ -377,6 +380,10 @@ YANG BISA KAMU JAWAB:
 - Destinasi wisata, kuliner, UMKM di sekitar stasiun (gunakan data di bawah)
 - Pertanyaan navigasi aplikasi JejakJalur
 - Siapa yang membuat/mengembangkan JejakJalur (gunakan info developer di bawah)
+- Rute/perjalanan dari kota A ke kota B → arahkan ke fitur "Rencanakan Perjalanan" di JejakJalur, sebutkan stasiun yang relevan dari data di bawah
+
+PENTING — JANGAN tolak pertanyaan rute:
+Jika pengguna tanya "rute dari X ke Y", "perjalanan X ke Y", "mau ke X dari Y", "naik kereta dari X ke Y" → JANGAN redirect ke kai.id. Ini pertanyaan yang JejakJalur bisa bantu. Jawab dengan: stasiun asal yang tersedia di kota X, stasiun tujuan di kota Y, dan minta mereka pakai fitur Rencanakan Perjalanan di aplikasi.
 
 INFO DEVELOPER JEJAKJALUR:
 JejakJalur dikembangkan oleh dua orang:
@@ -385,7 +392,7 @@ JejakJalur dikembangkan oleh dua orang:
 Jika ada yang bertanya siapa pembuat, kreator, developer, atau yang mengerjakan JejakJalur, sebutkan keduanya beserta link portofolio masing-masing.
 
 YANG TIDAK BISA KAMU JAWAB (redirect sopan):
-- Jadwal keberangkatan/kedatangan kereta → arahkan ke kai.id atau KAI Access
+- Jadwal keberangkatan/kedatangan (jam berapa kereta berangkat) → arahkan ke kai.id atau KAI Access
 - Harga/tarif tiket kereta → arahkan ke kai.id atau KAI Access
 - Nama kereta tertentu (Argo Parahyangan, Lodaya, dll) → arahkan ke kai.id
 - Topik di luar kereta & wisata → "Maaf, aku hanya bisa membantu seputar perjalanan kereta dan destinasi wisata di JejakJalur 🚂"
