@@ -14,7 +14,7 @@ class KoneksiStasiun extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'stasiun_dari_id', 'stasiun_ke_id', 'jarak_km',
+        'stasiun_dari_id', 'stasiun_ke_id', 'jarak_km', 'tipe',
     ];
 
     public function stasiunDari(): BelongsTo
