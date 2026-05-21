@@ -14,24 +14,6 @@ use Inertia\Response;
 
 class RuteController extends Controller
 {
-    /** @var string[] */
-    private const KRL_KODES = [
-        // Bogor line
-        'JAKK', 'JAY', 'MGB', 'SW', 'JUA', 'GDD', 'CKI', 'MRI', 'TEB', 'CW',
-        'DRN', 'PSMB', 'PSM', 'TNT', 'LNA', 'UP', 'UI', 'DPB', 'DP', 'CTA',
-        'BJD', 'CLT', 'BOO',
-        // Nambo branch
-        'PDRG', 'CBN', 'NMO',
-        // Cikarang line
-        'JNG', 'BKS', 'KRI', 'KLD', 'KLDB', 'CUK', 'LMB', 'TB', 'CKR',
-        // Rangkasbitung line
-        'KBY', 'PLM', 'PDR', 'SRP', 'PRP', 'CJT', 'DAR', 'TJ', 'TGS', 'MJA', 'CTR', 'RK',
-        // Tangerang line
-        'DU', 'GGL', 'RW', 'PI', 'BPR', 'THL', 'TNG',
-        // Tanjung Priok
-        'KPB',
-    ];
-
     public function __construct(
         private KotaService $kotaService,
         private StasiunService $stasiunService,
@@ -75,7 +57,7 @@ class RuteController extends Controller
             return response()->json(['error' => 'Stasiun asal dan tujuan harus berbeda.'], 422);
         }
 
-        $koneksi = $this->loadKoneksi($mode, $dariId, $keId);
+        $koneksi = $this->loadKoneksi($mode);
 
         if ($koneksi->isEmpty()) {
             return response()->json(['error' => 'Tidak ada koneksi tersedia untuk mode ini.'], 404);
@@ -162,24 +144,11 @@ class RuteController extends Controller
     /**
      * @return Collection<int, KoneksiStasiun>
      */
-    private function loadKoneksi(string $mode, string $dariId, string $keId): Collection
+    private function loadKoneksi(string $mode): Collection
     {
-        $cols = ['stasiun_dari_id', 'stasiun_ke_id', 'jarak_km'];
-
-        if ($mode === 'kcic') {
-            return KoneksiStasiun::where('tipe', 'kcic')->get($cols);
-        }
-
-        if ($mode === 'commuter') {
-            $krlIds = Stasiun::whereIn('kode_stasiun', self::KRL_KODES)->pluck('id')->all();
-
-            return KoneksiStasiun::whereIn('stasiun_dari_id', $krlIds)
-                ->whereIn('stasiun_ke_id', $krlIds)
-                ->get($cols);
-        }
-
-        // antarkota (default)
-        return KoneksiStasiun::where('tipe', 'antarkota')->get($cols);
+        // Filter berdasarkan koneksi_stasiun.tipe — source of truth dari DB.
+        return KoneksiStasiun::where('tipe', $mode)
+            ->get(['stasiun_dari_id', 'stasiun_ke_id', 'jarak_km']);
     }
 
     private function haversine(float $lat1, float $lng1, float $lat2, float $lng2): float

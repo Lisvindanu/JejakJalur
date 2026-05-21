@@ -19,6 +19,8 @@ export type Stasiun = {
     lng?: number | null;
     kota?: Kota;
     destinasi_count?: number;
+    /** Mode kereta yang menyinggahi stasiun ini (derived dari koneksi_stasiun.tipe) */
+    jenis_layanan?: Array<'antarkota' | 'commuter' | 'kcic'>;
 };
 
 export type Kota = {
