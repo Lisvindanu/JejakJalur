@@ -79,6 +79,16 @@ export type StasiunRute = {
     kota: { id: string; nama: string };
 };
 
+export type RuteSegment = {
+    dari_id: string;
+    ke_id: string;
+    jarak_km: number | null;
+    geometry: {
+        type: 'LineString';
+        coordinates: [number, number][];
+    } | null;
+};
+
 export type PaginatedData<T> = {
     data: T[];
     current_page: number;

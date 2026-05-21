@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from '@inertiajs/react';
 import 'leaflet/dist/leaflet.css';
 import { IconTrain, IconX } from '@tabler/icons-react';
-import type { Kota, Stasiun, StasiunRute } from '@/types';
+import type { Kota, RuteSegment, Stasiun, StasiunRute } from '@/types';
 
 interface FocusDest {
     lat: number;
@@ -13,6 +13,7 @@ interface FocusDest {
 interface Props {
     semuaKota: Kota[];
     route?: StasiunRute[] | null;
+    segments?: RuteSegment[];
     focusDest?: FocusDest | null;
 }
 
@@ -40,7 +41,7 @@ const WARNA_KOTA = [
     '#0f766e',
 ];
 
-export default function RuteMap({ semuaKota, route, focusDest }: Props) {
+export default function RuteMap({ semuaKota, route, segments, focusDest }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mapRef = useRef<any>(null);
@@ -249,15 +250,34 @@ export default function RuteMap({ semuaKota, route, focusDest }: Props) {
                 }
             });
 
-            const coords = route
-                .filter((s) => s.lat && s.lng)
-                .map(
-                    (s) =>
-                        [parseFloat(s.lat!), parseFloat(s.lng!)] as [
-                            number,
-                            number,
-                        ],
-                );
+            // Build polyline coords: prefer GeoJSON geometry per segment (ikut lengkungan
+            // rel asli), fallback ke straight-line antar stasiun kalau geometry null.
+            const coords: [number, number][] = [];
+            const stasiunCoord = (s: StasiunRute): [number, number] | null =>
+                s.lat && s.lng
+                    ? [parseFloat(s.lat), parseFloat(s.lng)]
+                    : null;
+
+            for (let i = 0; i < route.length - 1; i++) {
+                const seg = segments?.[i];
+                const geomCoords = seg?.geometry?.coordinates;
+                if (geomCoords && geomCoords.length >= 2) {
+                    // GeoJSON: [lng, lat] → Leaflet: [lat, lng]
+                    for (let j = 0; j < geomCoords.length; j++) {
+                        if (i > 0 && j === 0) continue; // skip duplicate join point
+                        const [lng, lat] = geomCoords[j];
+                        coords.push([lat, lng]);
+                    }
+                } else {
+                    // Fallback straight-line
+                    const a = stasiunCoord(route[i]);
+                    const b = stasiunCoord(route[i + 1]);
+                    if (a && (coords.length === 0 || coords[coords.length - 1][0] !== a[0] || coords[coords.length - 1][1] !== a[1])) {
+                        coords.push(a);
+                    }
+                    if (b) coords.push(b);
+                }
+            }
 
             if (coords.length >= 2) {
                 const polyline = L.polyline(coords, {
@@ -269,7 +289,7 @@ export default function RuteMap({ semuaKota, route, focusDest }: Props) {
                 map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
             }
         });
-    }, [route]);
+    }, [route, segments]);
 
     function handleClose() {
         if (selectedMarkerRef.current) {
