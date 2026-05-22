@@ -3,6 +3,8 @@ import {
     IconChevronDown,
     IconLayoutDashboard,
     IconLogout,
+    IconMapPin,
+    IconPlus,
     IconTrain,
     IconUser,
 } from '@tabler/icons-react';
@@ -143,6 +145,30 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                                         className="text-stone-400"
                                     />
                                     Profil saya
+                                </Link>
+
+                                <Link
+                                    href="/destinasi/milik-saya"
+                                    onClick={() => setDropdownOpen(false)}
+                                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-stone-700 no-underline hover:bg-stone-50"
+                                >
+                                    <IconMapPin
+                                        size={15}
+                                        className="text-stone-400"
+                                    />
+                                    Destinasi saya
+                                </Link>
+
+                                <Link
+                                    href="/destinasi/buat"
+                                    onClick={() => setDropdownOpen(false)}
+                                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-stone-700 no-underline hover:bg-stone-50"
+                                >
+                                    <IconPlus
+                                        size={15}
+                                        className="text-stone-400"
+                                    />
+                                    Tambah destinasi
                                 </Link>
 
                                 {auth.user.is_admin && (

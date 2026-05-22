@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DestinasiSubmissionRequest;
 use App\Models\Destinasi;
+use App\Models\Stasiun;
 use App\Services\DestinasiService;
 use App\Services\KotaService;
-use App\Services\StasiunService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,7 +18,6 @@ class DestinasiController extends Controller
     public function __construct(
         private DestinasiService $destinasiService,
         private KotaService $kotaService,
-        private StasiunService $stasiunService,
     ) {}
 
     public function indeks(Request $request): Response
@@ -70,7 +70,7 @@ class DestinasiController extends Controller
     public function formulir(): Response
     {
         return Inertia::render('Destinasi/Formulir', [
-            'semuaStasiun' => $this->stasiunService->semuaStasiunDenganKota(),
+            'semuaStasiun' => $this->daftarStasiunUntukDropdown(),
         ]);
     }
 
@@ -92,8 +92,15 @@ class DestinasiController extends Controller
 
         return Inertia::render('Destinasi/Formulir', [
             'destinasi' => $destinasi,
-            'semuaStasiun' => $this->stasiunService->semuaStasiunDenganKota(),
+            'semuaStasiun' => $this->daftarStasiunUntukDropdown(),
         ]);
+    }
+
+    private function daftarStasiunUntukDropdown(): Collection
+    {
+        return Stasiun::with('kota:id,nama')
+            ->orderBy('nama')
+            ->get(['id', 'nama', 'kota_id']);
     }
 
     public function perbarui(DestinasiSubmissionRequest $request, Destinasi $destinasi): RedirectResponse
