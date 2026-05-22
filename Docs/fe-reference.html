@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JejakJalur — FE Reference</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #fafaf9; color: #292524; line-height: 1.6; }
+    .sidebar { position: fixed; top: 0; left: 0; width: 220px; height: 100vh; background: #1c1917; color: #d6d3d1; overflow-y: auto; padding: 20px 0; }
+    .sidebar h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #78716c; padding: 0 20px 8px; }
+    .sidebar a { display: block; padding: 6px 20px; font-size: 13px; color: #d6d3d1; text-decoration: none; }
+    .sidebar a:hover { background: #292524; color: #fff; }
+    .sidebar .sep { border-top: 1px solid #292524; margin: 10px 0; }
+    .main { margin-left: 220px; padding: 40px 48px; max-width: 960px; }
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { color: #78716c; margin-bottom: 40px; }
+    h2.section { font-size: 20px; font-weight: 700; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 2px solid #e7e5e4; }
+    h3 { font-size: 15px; font-weight: 600; margin: 24px 0 8px; }
+    .route { background: #fff; border: 1px solid #e7e5e4; border-radius: 8px; padding: 16px 20px; margin-bottom: 12px; }
+    .route-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .method { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: .05em; }
+    .get  { background: #dcfce7; color: #166534; }
+    .post { background: #dbeafe; color: #1e40af; }
+    .patch{ background: #fef9c3; color: #854d0e; }
+    .del  { background: #fee2e2; color: #991b1b; }
+    .path { font-family: monospace; font-size: 14px; font-weight: 600; }
+    .desc { font-size: 13px; color: #57534e; margin-bottom: 8px; }
+    .guard { font-size: 11px; background: #f5f5f4; border-radius: 4px; padding: 2px 8px; color: #78716c; display: inline-block; }
+    pre { background: #1c1917; color: #d6d3d1; border-radius: 8px; padding: 16px 20px; font-size: 13px; overflow-x: auto; margin: 10px 0; line-height: 1.7; }
+    code { font-family: 'Fira Code', monospace; }
+    .type-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0 16px; }
+    .type-table th { text-align: left; padding: 6px 10px; background: #f5f5f4; border: 1px solid #e7e5e4; font-weight: 600; }
+    .type-table td { padding: 6px 10px; border: 1px solid #e7e5e4; font-family: monospace; font-size: 12px; vertical-align: top; }
+    .badge { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 3px; }
+    .req { background: #fee2e2; color: #991b1b; }
+    .opt { background: #f0fdf4; color: #166534; }
+    .note { background: #fef9c3; border-left: 3px solid #ca8a04; padding: 10px 14px; border-radius: 0 6px 6px 0; font-size: 13px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <h2>JejakJalur FE</h2>
+  <a href="#types">TypeScript Types</a>
+  <a href="#auth">Auth</a>
+  <a href="#destinasi">Destinasi</a>
+  <a href="#ulasan">Ulasan</a>
+  <a href="#profil">Profil</a>
+  <a href="#rute">Rute</a>
+  <a href="#admin">Admin</a>
+  <div class="sep"></div>
+  <a href="#shared-props">Shared Props</a>
+  <a href="#flash">Flash Messages</a>
+</nav>
+
+<div class="main">
+  <h1>JejakJalur — FE Reference</h1>
+  <p class="subtitle">Semua routes, field names, dan TypeScript types yang dipakai BE. Jangan sampai salah nama field lagi.</p>
+
+  <!-- ======================== TYPES ======================== -->
+  <h2 class="section" id="types">TypeScript Types</h2>
+
+  <h3>Ulasan</h3>
+  <table class="type-table">
+    <tr><th>Field</th><th>Type</th><th>Catatan</th></tr>
+    <tr><td>id</td><td>string</td><td>UUID</td></tr>
+    <tr><td>rating</td><td>number</td><td>1–5 (integer)</td></tr>
+    <tr><td>judul</td><td>string | null</td><td>opsional</td></tr>
+    <tr><td>konten</td><td>string</td><td>isi ulasan</td></tr>
+    <tr><td>created_at</td><td>string</td><td>ISO 8601</td></tr>
+    <tr><td>updated_at</td><td>string</td><td>ISO 8601</td></tr>
+    <tr><td>user.id</td><td>number</td><td></td></tr>
+    <tr><td>user.name</td><td>string</td><td></td></tr>
+    <tr><td>user.avatar</td><td>string | null</td><td></td></tr>
+  </table>
+  <div class="note">Hati-hati: field-nya <strong>rating</strong> dan <strong>konten</strong>, bukan <code>nilai</code>/<code>komentar</code>.</div>
+
+  <h3>Destinasi</h3>
+  <table class="type-table">
+    <tr><th>Field</th><th>Type</th><th>Catatan</th></tr>
+    <tr><td>id</td><td>string</td><td>UUID</td></tr>
+    <tr><td>nama</td><td>string</td><td></td></tr>
+    <tr><td>deskripsi</td><td>string</td><td></td></tr>
+    <tr><td>alamat</td><td>string</td><td></td></tr>
+    <tr><td>kategori</td><td>'Wisata' | 'Kuliner' | 'UMKM'</td><td></td></tr>
+    <tr><td>rating</td><td>string</td><td>decimal string, e.g. "4.50" — gunakan Number() untuk konversi</td></tr>
+    <tr><td>foto</td><td>string | null</td><td>path di R2</td></tr>
+    <tr><td>foto_url</td><td>string | null</td><td>public URL R2 — pakai ini untuk &lt;img&gt;</td></tr>
+    <tr><td>is_verified</td><td>boolean</td><td></td></tr>
+    <tr><td>stasiun.id</td><td>string</td><td></td></tr>
+    <tr><td>stasiun.nama</td><td>string</td><td></td></tr>
+    <tr><td>stasiun.kode_stasiun</td><td>string</td><td></td></tr>
+    <tr><td>stasiun.kota.id</td><td>string</td><td></td></tr>
+    <tr><td>stasiun.kota.nama</td><td>string</td><td></td></tr>
+    <tr><td>ulasan</td><td>Ulasan[]</td><td>hanya di halaman detail</td></tr>
+  </table>
+
+  <h3>Kota</h3>
+  <table class="type-table">
+    <tr><th>Field</th><th>Type</th><th>Catatan</th></tr>
+    <tr><td>id</td><td>string</td><td>UUID</td></tr>
+    <tr><td>nama</td><td>string</td><td></td></tr>
+    <tr><td>kode_ibukota</td><td>string</td><td></td></tr>
+    <tr><td>foto</td><td>string | null</td><td>URL foto landmark kota</td></tr>
+    <tr><td>stasiun</td><td>Stasiun[]</td><td>hanya kalau di-load dengan relasi</td></tr>
+  </table>
+
+  <h3>Stasiun</h3>
+  <table class="type-table">
+    <tr><th>Field</th><th>Type</th></tr>
+    <tr><td>id</td><td>string</td></tr>
+    <tr><td>nama</td><td>string</td></tr>
+    <tr><td>kode_stasiun</td><td>string</td></tr>
+    <tr><td>kota</td><td>Kota (optional)</td></tr>
+  </table>
+
+  <h3>User (Auth)</h3>
+  <table class="type-table">
+    <tr><th>Field</th><th>Type</th></tr>
+    <tr><td>id</td><td>number</td></tr>
+    <tr><td>name</td><td>string</td></tr>
+    <tr><td>nama</td><td>string</td></tr>
+    <tr><td>email</td><td>string</td></tr>
+    <tr><td>is_admin</td><td>boolean</td></tr>
+    <tr><td>avatar</td><td>string | null</td></tr>
+  </table>
+
+  <!-- ======================== SHARED PROPS ======================== -->
+  <h2 class="section" id="shared-props">Shared Props (usePage)</h2>
+  <pre><code>const { auth, flash, name } = usePage&lt;SharedProps&gt;().props;
+
+// auth.user → User | null (null = belum login)
+// flash.sukses → pesan sukses
+// flash.error  → pesan error</code></pre>
+
+  <!-- ======================== FLASH ======================== -->
+  <h2 class="section" id="flash">Flash Messages</h2>
+  <p class="desc">Backend kirim flash via session. Key-nya:</p>
+  <table class="type-table">
+    <tr><th>Key</th><th>Kapan muncul</th></tr>
+    <tr><td>flash.sukses</td><td>Operasi berhasil (login, daftar, simpan, hapus)</td></tr>
+    <tr><td>flash.error</td><td>Operasi gagal (login salah, dll)</td></tr>
+  </table>
+
+  <!-- ======================== AUTH ======================== -->
+  <h2 class="section" id="auth">Auth</h2>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method get">GET</span>
+      <span class="path">/daftar</span>
+    </div>
+    <p class="desc">Halaman form register. Render: <code>Auth/Daftar</code></p>
+  </div>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method post">POST</span>
+      <span class="path">/daftar</span>
+    </div>
+    <p class="desc">Proses register akun baru.</p>
+    <h3>Request fields</h3>
+    <table class="type-table">
+      <tr><th>Field</th><th>Validasi</th><th></th></tr>
+      <tr><td>nama</td><td>required, string, max:255</td><td><span class="badge req">required</span></td></tr>
+      <tr><td>email</td><td>required, email, unique</td><td><span class="badge req">required</span></td></tr>
+      <tr><td>password</td><td>required, min:8, confirmed</td><td><span class="badge req">required</span></td></tr>
+      <tr><td>password_confirmation</td><td>harus sama dengan password</td><td><span class="badge req">required</span></td></tr>
+      <tr><td>consent_given</td><td>required, accepted (true)</td><td><span class="badge req">required</span></td></tr>
+    </table>
+    <div class="note">Setelah berhasil: login otomatis lalu redirect ke <code>/</code>.</div>
+  </div>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method get">GET</span>
+      <span class="path">/masuk</span>
+    </div>
+    <p class="desc">Halaman form login. Render: <code>Auth/Login</code></p>
+  </div>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method post">POST</span>
+      <span class="path">/masuk</span>
+    </div>
+    <p class="desc">Proses login.</p>
+    <table class="type-table">
+      <tr><th>Field</th><th>Validasi</th></tr>
+      <tr><td>email</td><td>required, email</td></tr>
+      <tr><td>password</td><td>required</td></tr>
+      <tr><td>ingat</td><td>boolean (remember me)</td></tr>
+    </table>
+  </div>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method post">POST</span>
+      <span class="path">/keluar</span>
+    </div>
+    <p class="desc">Logout. Redirect ke <code>/</code>.</p>
+  </div>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method get">GET</span>
+      <span class="path">/oauth/google</span>
+    </div>
+    <p class="desc">Redirect ke Google OAuth.</p>
+  </div>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method get">GET</span>
+      <span class="path">/lupa-password</span>
+    </div>
+    <p class="desc">Form lupa password. Render: <code>Auth/LupaPassword</code></p>
+  </div>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method post">POST</span>
+      <span class="path">/lupa-password</span>
+    </div>
+    <p class="desc">Kirim link reset password ke email.</p>
+    <table class="type-table">
+      <tr><th>Field</th><th></th></tr>
+      <tr><td>email</td><td><span class="badge req">required</span></td></tr>
+    </table>
+    <div class="note">Anti-enumeration: selalu return sukses meski email tidak terdaftar.</div>
+  </div>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method get">GET</span>
+      <span class="path">/reset-password/{token}</span>
+    </div>
+    <p class="desc">Form reset password. Render: <code>Auth/ResetPassword</code> — props: <code>token</code>, <code>email</code></p>
+  </div>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method post">POST</span>
+      <span class="path">/reset-password</span>
+    </div>
+    <table class="type-table">
+      <tr><th>Field</th><th></th></tr>
+      <tr><td>token</td><td><span class="badge req">required</span></td></tr>
+      <tr><td>email</td><td><span class="badge req">required</span></td></tr>
+      <tr><td>password</td><td><span class="badge req">required</span>, min:8, confirmed</td></tr>
+      <tr><td>password_confirmation</td><td><span class="badge req">required</span></td></tr>
+    </table>
+  </div>
+
+  <!-- ======================== DESTINASI ======================== -->
+  <h2 class="section" id="destinasi">Destinasi</h2>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method get">GET</span>
+      <span class="path">/destinasi</span>
+    </div>
+    <p class="desc">Daftar destinasi dengan filter & pagination. Render: <code>Destinasi/Indeks</code></p>
+    <h3>Query params (filter)</h3>
+    <table class="type-table">
+      <tr><th>Param</th><th>Keterangan</th></tr>
+      <tr><td>kata_kunci</td><td>full-text search nama</td></tr>
+      <tr><td>kota_id</td><td>UUID kota</td></tr>
+      <tr><td>stasiun_id</td><td>UUID stasiun</td></tr>
+      <tr><td>kategori</td><td>Wisata | Kuliner | UMKM</td></tr>
+    </table>
+    <h3>Inertia props</h3>
+    <pre><code>{
+  destinasi: PaginatedData&lt;Destinasi&gt;,  // tanpa ulasan
+  semuaKota: Kota[],                      // include stasiun[]
+  filter: { kata_kunci, kota_id, stasiun_id, kategori }
+}</code></pre>
+  </div>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method get">GET</span>
+      <span class="path">/destinasi/{id}</span>
+    </div>
+    <p class="desc">Detail destinasi. Render: <code>Destinasi/Detail</code></p>
+    <h3>Inertia props</h3>
+    <pre><code>{
+  destinasi: Destinasi  // include stasiun.kota + ulasan[].user + foto_url
+}</code></pre>
+    <div class="note">Gunakan <strong>foto_url</strong> (bukan foto) untuk tag &lt;img&gt;. foto_url adalah public URL R2.</div>
+  </div>
+
+  <!-- ======================== ULASAN ======================== -->
+  <h2 class="section" id="ulasan">Ulasan</h2>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method post">POST</span>
+      <span class="path">/destinasi/{destinasi}/ulasan</span>
+      <span class="guard">auth</span>
+    </div>
+    <p class="desc">Tambah ulasan baru.</p>
+    <table class="type-table">
+      <tr><th>Field</th><th>Validasi</th></tr>
+      <tr><td>rating</td><td>required, integer, 1–5</td></tr>
+      <tr><td>judul</td><td>nullable, max:100</td></tr>
+      <tr><td>konten</td><td>required, max:1000</td></tr>
+    </table>
+    <div class="note">Field-nya <strong>rating</strong> dan <strong>konten</strong> (bukan nilai/komentar).</div>
+  </div>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method patch">PATCH</span>
+      <span class="path">/destinasi/{destinasi}/ulasan/{ulasan}</span>
+      <span class="guard">auth + owner</span>
+    </div>
+    <p class="desc">Edit ulasan milik sendiri. Field sama seperti POST.</p>
+  </div>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method del">DELETE</span>
+      <span class="path">/destinasi/{destinasi}/ulasan/{ulasan}</span>
+      <span class="guard">auth + owner</span>
+    </div>
+    <p class="desc">Hapus ulasan milik sendiri.</p>
+  </div>
+
+  <!-- ======================== PROFIL ======================== -->
+  <h2 class="section" id="profil">Profil</h2>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method get">GET</span>
+      <span class="path">/profil</span>
+      <span class="guard">auth</span>
+    </div>
+    <p class="desc">Halaman profil user. Render: <code>Profil/Tampilkan</code></p>
+  </div>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method get">GET</span>
+      <span class="path">/profil/edit</span>
+      <span class="guard">auth</span>
+    </div>
+    <p class="desc">Form edit profil. Render: <code>Profil/Edit</code></p>
+  </div>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method patch">PATCH</span>
+      <span class="path">/profil</span>
+      <span class="guard">auth</span>
+    </div>
+    <p class="desc">Update profil.</p>
+    <table class="type-table">
+      <tr><th>Field</th><th>Validasi</th></tr>
+      <tr><td>nama</td><td>required, string, max:255</td></tr>
+      <tr><td>email</td><td>required, email, unique (ignore self)</td></tr>
+    </table>
+  </div>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method del">DELETE</span>
+      <span class="path">/profil</span>
+      <span class="guard">auth</span>
+    </div>
+    <p class="desc">Hapus akun (soft delete, UU PDP). Logout otomatis setelahnya.</p>
+  </div>
+
+  <!-- ======================== RUTE ======================== -->
+  <h2 class="section" id="rute">Rute Kereta</h2>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method get">GET</span>
+      <span class="path">/rute</span>
+    </div>
+    <p class="desc">Halaman pencari rute antar stasiun. Render: <code>Rute/Tampilkan</code></p>
+  </div>
+
+  <div class="route">
+    <div class="route-header">
+      <span class="method get">GET</span>
+      <span class="path">/rute/cari-stasiun</span>
+    </div>
+    <p class="desc">Cari rute antara dua stasiun.</p>
+    <table class="type-table">
+      <tr><th>Query param</th><th>Keterangan</th></tr>
+      <tr><td>dari</td><td>kode_stasiun asal</td></tr>
+      <tr><td>ke</td><td>kode_stasiun tujuan</td></tr>
+    </table>
+  </div>
+
+  <!-- ======================== ADMIN ======================== -->
+  <h2 class="section" id="admin">Admin Panel</h2>
+  <div class="note">Semua route <code>/admin/*</code> butuh middleware <strong>auth + is_admin</strong>.</div>
+
+  <h3>Dashboard</h3>
+  <div class="route">
+    <div class="route-header">
+      <span class="method get">GET</span>
+      <span class="path">/admin</span>
+    </div>
+    <p class="desc">Render: <code>Admin/Dashboard</code> — props: statistik (jumlah kota, stasiun, destinasi, pengguna, dll)</p>
+  </div>
+
+  <h3>Kota</h3>
+  <div class="route">
+    <div class="route-header"><span class="method get">GET</span><span class="path">/admin/kota</span></div>
+    <p class="desc">List kota. Render: <code>Admin/Kota/Indeks</code></p>
+    <h3>Query params</h3>
+    <table class="type-table">
+      <tr><th>Param</th><th>Keterangan</th></tr>
+      <tr><td>search</td><td>Filter nama kota (ILIKE)</td></tr>
+    </table>
+    <h3>Inertia props</h3>
+    <pre><code>{ kota: Kota[], search: string | null }</code></pre>
+  </div>
+  <div class="route">
+    <div class="route-header"><span class="method get">GET</span><span class="path">/admin/kota/buat</span></div>
+    <p class="desc">Form buat kota. Render: <code>Admin/Kota/Formulir</code></p>
+  </div>
+  <div class="route">
+    <div class="route-header"><span class="method post">POST</span><span class="path">/admin/kota</span></div>
+    <table class="type-table">
+      <tr><th>Field</th><th>Validasi</th></tr>
+      <tr><td>nama</td><td>required, unique</td></tr>
+      <tr><td>kode_ibukota</td><td>required, 3 huruf kapital</td></tr>
+    </table>
+  </div>
+  <div class="route">
+    <div class="route-header"><span class="method patch">PATCH</span><span class="path">/admin/kota/{kota}</span></div>
+    <p class="desc">Update kota. Field sama seperti POST.</p>
+  </div>
+  <div class="route">
+    <div class="route-header"><span class="method del">DELETE</span><span class="path">/admin/kota/{kota}</span></div>
+    <p class="desc">Hapus kota.</p>
+  </div>
+
+  <h3>Stasiun</h3>
+  <div class="route">
+    <div class="route-header"><span class="method get">GET</span><span class="path">/admin/stasiun</span></div>
+    <p class="desc">List stasiun. Render: <code>Admin/Stasiun/Indeks</code></p>
+    <h3>Query params</h3>
+    <table class="type-table">
+      <tr><th>Param</th><th>Keterangan</th></tr>
+      <tr><td>search</td><td>Filter nama stasiun atau nama kota (ILIKE)</td></tr>
+    </table>
+    <h3>Inertia props</h3>
+    <pre><code>{ stasiun: Stasiun[], search: string | null }</code></pre>
+  </div>
+  <div class="route">
+    <div class="route-header"><span class="method post">POST</span><span class="path">/admin/stasiun</span></div>
+    <table class="type-table">
+      <tr><th>Field</th><th>Validasi</th></tr>
+      <tr><td>nama</td><td>required, unique per kota</td></tr>
+      <tr><td>kode_stasiun</td><td>required, unique, 2–5 huruf kapital</td></tr>
+      <tr><td>kota_id</td><td>required, UUID, exists:kota</td></tr>
+    </table>
+  </div>
+
+  <h3>Destinasi Admin</h3>
+  <div class="route">
+    <div class="route-header"><span class="method get">GET</span><span class="path">/admin/destinasi</span></div>
+    <p class="desc">List destinasi. Render: <code>Admin/Destinasi/Indeks</code></p>
+  </div>
+  <div class="route">
+    <div class="route-header"><span class="method post">POST</span><span class="path">/admin/destinasi</span></div>
+    <p class="desc">Buat destinasi baru. <code>multipart/form-data</code> kalau ada foto.</p>
+    <table class="type-table">
+      <tr><th>Field</th><th>Validasi</th></tr>
+      <tr><td>nama</td><td>required, string</td></tr>
+      <tr><td>deskripsi</td><td>required, string</td></tr>
+      <tr><td>alamat</td><td>required, string</td></tr>
+      <tr><td>kategori</td><td>required, Wisata|Kuliner|UMKM</td></tr>
+      <tr><td>stasiun_id</td><td>required, UUID</td></tr>
+      <tr><td>foto</td><td>nullable, image, max:5MB</td></tr>
+      <tr><td>is_verified</td><td>boolean</td></tr>
+    </table>
+  </div>
+  <div class="route">
+    <div class="route-header"><span class="method patch">PATCH</span><span class="path">/admin/destinasi/{destinasi}/verifikasi</span></div>
+    <p class="desc">Toggle verifikasi destinasi.</p>
+  </div>
+
+</div>
+</body>
+</html>

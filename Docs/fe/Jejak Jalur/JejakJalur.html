@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JejakJalur — Jelajahi Indonesia, Satu Stasiun Setiap Kali</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&amp;family=JetBrains+Mono:wght@400..600&amp;display=swap" rel="stylesheet" />
+
+<!-- Tailwind v4 (Play CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
+
+<!-- React + Babel -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<style>
+  html, body { font-family: "Instrument Sans", ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  body { margin: 0; background: #fafaf9; color: #292524; }
+  code, .font-mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+  /* Smooth scroll for fixed-header anchors */
+  html { scroll-behavior: smooth; }
+
+  /* Toast slide-in keyframe */
+  @keyframes slideIn { from { transform: translateY(-8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* Compact density: shrink paddings + font sizes by ~10% */
+  .jj-compact .py-20 { padding-top: 3.5rem; padding-bottom: 3.5rem; }
+  .jj-compact .py-16 { padding-top: 3rem; padding-bottom: 3rem; }
+  .jj-compact .py-12 { padding-top: 2.25rem; padding-bottom: 2.25rem; }
+  .jj-compact .py-10 { padding-top: 2rem; padding-bottom: 2rem; }
+  .jj-compact .py-8 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+  .jj-compact .p-8 { padding: 1.5rem; }
+  .jj-compact .p-6 { padding: 1.25rem; }
+  .jj-compact .gap-6 { gap: 1rem; }
+  .jj-compact .gap-4 { gap: 0.625rem; }
+  .jj-compact h1.text-3xl, .jj-compact h1.text-4xl { font-size: 1.875rem; }
+  .jj-compact h2.text-3xl, .jj-compact h2.text-4xl { font-size: 1.5rem; }
+  .jj-compact .h-16 { height: 3.25rem; }
+  .jj-compact .text-lg { font-size: 0.975rem; }
+
+  /* Hide focus ring when not keyboard-focused */
+  button:focus-visible { outline: none; }
+
+  /* Leaflet — match palette */
+  .leaflet-container { font-family: "Instrument Sans", sans-serif; }
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip { border-radius: 12px; }
+  .leaflet-tooltip { background: #1c1917; color: white; border: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.18); }
+  .leaflet-tooltip-top:before { border-top-color: #1c1917; }
+  .leaflet-control-zoom a { color: #44403c; }
+
+  /* Prose */
+  .prose p { margin: 0; }
+
+  /* Subtle line-clamp helpers (Tailwind v4 provides line-clamp already) */
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- Order matters: data → components → layouts → pages → ai → tweaks → app -->
+<script src="data.js"></script>
+<script type="text/babel" src="components.jsx"></script>
+<script type="text/babel" src="layouts.jsx"></script>
+<script type="text/babel" src="pages-home.jsx"></script>
+<script type="text/babel" src="pages-destinasi.jsx"></script>
+<script type="text/babel" src="pages-rute.jsx"></script>
+<script type="text/babel" src="pages-auth-profil.jsx"></script>
+<script type="text/babel" src="pages-admin.jsx"></script>
+<script type="text/babel" src="ai-widget.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="app.jsx"></script>
+
+</body>
+</html>

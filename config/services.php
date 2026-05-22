@@ -35,4 +35,32 @@ return [
         ],
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI'),
+    ],
+
+    'tavily' => [
+        'key' => env('TAVILY_API_KEY'),
+        'key_2' => env('TAVILY_API_KEY_2'),
+        'key_3' => env('TAVILY_API_KEY_3'),
+    ],
+
+    'ollama' => [
+        'key_1' => env('OLLAMA_API_KEY_1'),
+        'key_2' => env('OLLAMA_API_KEY_2'),
+        'key_3' => env('OLLAMA_API_KEY_3'),
+        'key_4' => env('OLLAMA_API_KEY_4'),
+        'key_5' => env('OLLAMA_API_KEY_5'),
+        'model' => env('OLLAMA_MODEL', 'gemma3:4b'),
+        'endpoint' => env('OLLAMA_ENDPOINT', 'https://ollama.com/api/chat'),
+        'embed_endpoint' => env('OLLAMA_EMBED_ENDPOINT', 'http://localhost:11434/api/embed'),
+        'embed_model' => env('OLLAMA_EMBED_MODEL', 'nomic-embed-text'),
+    ],
+
+    'geocoding' => [
+        'key' => env('GEOCODING_API_KEY'),
+    ],
+
 ];

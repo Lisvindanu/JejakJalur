@@ -1,0 +1,282 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\KoneksiStasiun;
+use App\Models\Stasiun;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class KoneksiStasiunSeeder extends Seeder
+{
+    public function run(): void
+    {
+        // Setiap jalur didefinisikan sebagai urutan kode stasiun.
+        // Koneksi dibuat dua arah (A→B dan B→A) antar stasiun berurutan.
+        $jalur = [
+
+            // ── KRL BOGOR LINE ───────────────────────────────────────────
+            // Gambir → Manggarai → Pasar Minggu → Lenteng Agung → Bogor
+            'KRL Bogor' => [
+                'GMR', 'JNG', 'MRI', 'CW', 'DRN', 'PSM', 'PSMB', 'LNA', 'TNT',
+                'CTA', 'DPB', 'DP', 'BJD', 'CLT', 'BOO',
+            ],
+
+            // ── KRL BEKASI LINE ──────────────────────────────────────────
+            // Pasar Senen → Jatinegara → Klender → Buaran → Klender Baru → Cakung
+            // → Rawabebek → Kranji → Bekasi → Bekasi Timur → Tambun → Cibitung → Cikarang → Lemahabang
+            'KRL Bekasi' => [
+                'PSE', 'JNG', 'KLD', 'BUA', 'KLDB', 'CUK', 'RWB', 'KRI',
+                'BKS', 'BKT', 'TB', 'CIT', 'CKR', 'LMB',
+            ],
+
+            // ── KRL TANAH ABANG LINE ─────────────────────────────────────
+            // Manggarai → Sudirman → Karet → Tanah Abang → Duri
+            'KRL Tanah Abang' => [
+                'MRI', 'SUD', 'KAT', 'THB', 'DU',
+            ],
+
+            // ── KRL JAKARTA KOTA LOOP ────────────────────────────────────
+            // Manggarai → Cikini → Gondangdia → Juanda → Sawah Besar → Mangga Besar
+            // → Jayakarta → Jakarta Kota → Kampung Bandan
+            'KRL Jakarta Kota' => [
+                'MRI', 'CKI', 'GDD', 'JUA', 'SW', 'MGB', 'JAY', 'JAKK', 'KPB',
+            ],
+
+            // ── KRL DURI-ANGKE ───────────────────────────────────────────
+            // Duri → Angke → Kampung Bandan
+            'KRL Duri-Angke' => [
+                'DU', 'AK', 'KPB',
+            ],
+
+            // ── KRL TANGERANG LINE ───────────────────────────────────────
+            'KRL Tangerang' => [
+                'DU', 'RW', 'BOI', 'GGL', 'TAK', 'THL', 'TNG',
+            ],
+
+            // ── KRL SERPONG/RANGKASBITUNG LINE ───────────────────────────
+            'KRL Serpong' => [
+                'THB', 'PSG', 'PLM', 'MRI', 'SDM', 'JMU', 'PDR', 'RU', 'SRP',
+                'CSA', 'CKY', 'DAR', 'PRP', 'TJ', 'DAR', 'MJA', 'CTR', 'RK',
+            ],
+
+            // ── KRL COMMUTER CIKARANG LINE ───────────────────────────────
+            'KRL Cikarang' => [
+                'MRI', 'JNG', 'BKS', 'CIT', 'CKR',
+            ],
+
+            // ── KRL TANJUNG PRIUK LINE ───────────────────────────────────
+            'KRL Priuk' => [
+                'KPB', 'POO', 'SAO', 'AC', 'TPK',
+            ],
+
+            // ── KRL NAMBO LINE ───────────────────────────────────────────
+            'KRL Nambo' => [
+                'CIT', 'CKR', 'KDH', 'NMO',
+            ],
+
+            // ── MERAK LINE ───────────────────────────────────────────────
+            // Merak → Cilegon → Serang → Rangkasbitung → Jakarta
+            'Merak' => [
+                'MER', 'KEN', 'CLG', 'WLT', 'JBU', 'TAJ', 'CT', 'SG', 'TAJ',
+                'RK', 'MJA', 'CTR', 'TNG',
+            ],
+
+            // ── PANTURA EXPRESS ──────────────────────────────────────────
+            // Direct edges antar major stations (mirip KA Argo Bromo Anggrek yang
+            // skip stasiun kecil). Tujuannya: Dijkstra punya pilihan rute Pantura
+            // yang cepat untuk GMR→SBI tanpa terbebani semua stasiun kecil.
+            'Pantura Express' => [
+                'GMR', 'CKP', 'CN', 'TG', 'PK', 'SMT', 'BJ', 'LMG', 'SBI',
+            ],
+
+            // ── JALUR PANTURA (BARAT) ─────────────────────────────────────
+            // Jakarta → Cikampek → Cirebon → Semarang
+            'Pantura' => [
+                'GMR', 'PSE', 'JNG', 'BKS', 'KW', 'CKP',
+                'CRA', 'PAB', 'PGB', 'PAS', 'PRI', 'HGL', 'TLS', 'KAB', 'CLH',
+                'JTB', 'SDU', 'KTM', 'TIS', 'AWN', 'WDW', 'KLW', 'LWG', 'BBK',
+                'CNK', 'CLD', 'CN', 'CNP', 'LOS', 'KGB', 'KGG', 'TGN', 'BKA',
+                'BB', 'LRA', 'KRT', 'SGG', 'BMA', 'PPK', 'LG', 'PAT', 'TG', 'LR',
+                'SD', 'PTA', 'CO', 'PML', 'KNS', 'PLB', 'UJN', 'BTG', 'PK',
+                'SRI', 'KBD', 'WLR', 'KLN', 'MKG', 'ATA', 'SMT', 'SMC',
+            ],
+
+            // ── JALUR PANTURA TENGAH-TIMUR (Lintas Tengah) ────────────────
+            // Semarang → Gambringan → Doplang → Cepu → Bojonegoro → Babat → Lamongan → Surabaya Pasarturi
+            'Pantura Timur' => [
+                'SMT', 'JRK', 'BBG', 'TGW', 'GUB', 'NBO', 'TGG', 'GBN', 'TRH',
+                'SDI', 'PNL', 'KSO', 'JTS', 'KNN', 'PDS', 'JBN', 'GN', 'KEJ',
+                'KGT', 'GD', 'SL', 'GPK', 'DPL',
+                'RBG', 'CU', 'TBO', 'KIT', 'BJ',
+                'BWO', 'BBT', 'SBN', 'GEB', 'PC', 'SLR', 'LMG', 'KRU',
+                'DD', 'GS', 'CME', 'BNW', 'KDA', 'IDO', 'TES', 'SBI',
+            ],
+
+            // ── JALUR SELATAN ─────────────────────────────────────────────
+            // Jakarta → Purwakarta → Bandung → Tasikmalaya → Purwokerto → Yogyakarta → Solo
+            'Selatan' => [
+                'GMR', 'PSE', 'JNG', 'BKS', 'CKP',
+                'CBR', 'SAD', 'PWK', 'PLD', 'SUT', 'CA', 'CG', 'CD', 'RH', 'CPT',
+                'SKT', 'CLE', 'CMI', 'PDL', 'GK', 'TAU', 'MSI', 'LBJ', 'RCK',
+                'CMD', 'AND', 'CIR', 'BD', 'CTH', 'KAC', 'GDB', 'CMK',
+                'HRP', 'CCL', 'NG', 'CB', 'CPD', 'WB', 'LL', 'LO', 'BMW',
+                'KRAI', 'RJP', 'CAW', 'CAA', 'MNJ', 'IH', 'TSM', 'AW',
+                'CKW', 'CI', 'BJG', 'LN', 'KNP', 'BJR',
+                'SDR', 'LBG', 'CPI', 'JRL', 'GDM', 'SKP', 'RDN', 'SIL',
+                'MLW', 'KKD', 'KRL', 'GM', 'KH', 'CP', 'MA',
+                'PKW', 'KRR', 'KBS', 'KGD', 'NTG', 'SPH', 'TBK', 'LGK',
+                'KJ', 'PWT', 'KYA',
+                'IJ', 'SOA', 'SRW', 'KM', 'WNS', 'KWN', 'PRB', 'GB', 'BTH',
+                'KTA', 'JN', 'WJ', 'STL', 'WT', 'PTN',
+                'MGW', 'LPN', 'YK',
+                'KLS', 'BBN', 'CE', 'KT', 'SWT', 'SLO',
+            ],
+
+            // ── JALUR SUKABUMI ────────────────────────────────────────────
+            'Sukabumi' => [
+                'BOO', 'MSG', 'CGB', 'CSA', 'GDS', 'SLJ', 'RI', 'PRK',
+                'CCR', 'PON', 'CRG', 'SI',
+            ],
+
+            // ── JALUR CIANJUR ─────────────────────────────────────────────
+            'Cianjur' => [
+                'PDL', 'RM', 'CPY', 'SLJ', 'CLK', 'LP', 'MLB', 'CJR', 'SSI',
+                'MLB', 'CRJ', 'CBB', 'TPR', 'CI',
+            ],
+
+            // ── JALUR GARUT ───────────────────────────────────────────────
+            'Garut' => [
+                'CCL', 'HRP', 'NG', 'RCK', 'CIR', 'BD',
+            ],
+
+            // ── JALUR KROYA-CILACAP ───────────────────────────────────────
+            'Cilacap' => [
+                'KYA', 'MA', 'CP',
+            ],
+
+            // ── JALUR WONOGIRI ────────────────────────────────────────────
+            'Wonogiri' => [
+                'SLO', 'GW', 'SKH', 'PNT', 'WNG',
+            ],
+
+            // ── JALUR MADIUN-PONOROGO (freight) ──────────────────────────
+            'Madiun-Slahung' => [
+                'MN', 'BBD', 'MAG', 'BAT',
+            ],
+
+            // ── JALUR SURABAYA-MALANG ─────────────────────────────────────
+            'Surabaya-Malang' => [
+                'SGU', 'SDA', 'GNG', 'SKJ', 'WN', 'SN', 'BG', 'GI', 'RO',
+                'PS', 'PS1', 'LW', 'SGS', 'NB', 'ML', 'MLK', 'BMG',
+            ],
+
+            // ── JALUR MALANG-BLITAR-KEDIRI ───────────────────────────────
+            'Malang-Kediri' => [
+                'ML', 'MLK', 'KPN', 'SBP', 'KGS', 'PAD', 'PAG', 'PGJ', 'KSB',
+                'WG', 'BL', 'GRM', 'KRS', 'KD', 'PPR', 'MGN', 'NDL', 'PWA', 'KTS',
+            ],
+
+            // ── JALUR SURABAYA-BANYUWANGI ─────────────────────────────────
+            'Surabaya-Banyuwangi' => [
+                'SGU', 'BG', 'GNG', 'PB', 'BYM', 'LEC', 'MLS', 'KK',
+                'RDA', 'KLO', 'RN', 'JTR', 'AJ', 'TGL', 'BSS', 'KTK', 'SBB',
+                'LDO', 'SBS', 'PET', 'MI', 'RBP', 'JR', 'GRN', 'MRW',
+                'KBR', 'GLM', 'SGJ', 'RGP', 'KKL', 'KNE', 'KMP', 'KSL',
+                'SWD', 'KBT', 'TGR', 'AGO', 'BWB', 'BW', 'BWI', 'KTG',
+            ],
+
+            // ── JALUR SURABAYA-MOJOKERTO ──────────────────────────────────
+            'Surabaya-Mojokerto' => [
+                'SGU', 'WO', 'KRN', 'MR', 'BAL',
+            ],
+
+        ];
+
+        $cache = [];
+        $koneksi = [];
+
+        foreach ($jalur as $namaJalur => $urutanKode) {
+            $urutanKode = array_values(array_unique($urutanKode));
+
+            for ($i = 0; $i < count($urutanKode) - 1; $i++) {
+                $dari = $urutanKode[$i];
+                $ke = $urutanKode[$i + 1];
+
+                foreach ([$dari, $ke] as $kode) {
+                    if (! isset($cache[$kode])) {
+                        $cache[$kode] = Stasiun::where('kode_stasiun', $kode)->value('id');
+                    }
+                }
+
+                $idDari = $cache[$dari] ?? null;
+                $idKe = $cache[$ke] ?? null;
+
+                if (! $idDari || ! $idKe) {
+                    continue;
+                }
+
+                // Kedua arah
+                $pasangan = [
+                    [$idDari, $idKe],
+                    [$idKe, $idDari],
+                ];
+
+                foreach ($pasangan as [$a, $b]) {
+                    $key = $a.'|'.$b;
+                    if (! isset($koneksi[$key])) {
+                        $koneksi[$key] = ['stasiun_dari_id' => $a, 'stasiun_ke_id' => $b];
+                    }
+                }
+            }
+        }
+
+        foreach ($koneksi as $data) {
+            KoneksiStasiun::firstOrCreate(
+                ['stasiun_dari_id' => $data['stasiun_dari_id'], 'stasiun_ke_id' => $data['stasiun_ke_id']],
+                $data,
+            );
+        }
+
+        $this->command->info('Koneksi stasiun: '.count($koneksi).' edges dibuat.');
+
+        // Refill jarak_km via Haversine berdasarkan koordinat stasiun terbaru.
+        // Dijalankan setiap seed agar konsisten kalau coord di-update di
+        // StasiunLatLngSeeder. Kalibrasi faktor jalan vs garis lurus per bucket.
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            DB::statement('
+                UPDATE koneksi_stasiun ks SET jarak_km = ROUND((
+                    6371 * 2 * asin(sqrt(
+                        sin(radians((s2.lat - s1.lat)/2))^2 +
+                        cos(radians(s1.lat)) * cos(radians(s2.lat)) *
+                        sin(radians((s2.lng - s1.lng)/2))^2
+                    )) * CASE
+                        WHEN 6371 * 2 * asin(sqrt(
+                            sin(radians((s2.lat - s1.lat)/2))^2 +
+                            cos(radians(s1.lat)) * cos(radians(s2.lat)) *
+                            sin(radians((s2.lng - s1.lng)/2))^2
+                        )) < 5  THEN 1.3169
+                        WHEN 6371 * 2 * asin(sqrt(
+                            sin(radians((s2.lat - s1.lat)/2))^2 +
+                            cos(radians(s1.lat)) * cos(radians(s2.lat)) *
+                            sin(radians((s2.lng - s1.lng)/2))^2
+                        )) < 20 THEN 1.1182
+                        WHEN 6371 * 2 * asin(sqrt(
+                            sin(radians((s2.lat - s1.lat)/2))^2 +
+                            cos(radians(s1.lat)) * cos(radians(s2.lat)) *
+                            sin(radians((s2.lng - s1.lng)/2))^2
+                        )) < 50 THEN 1.0886
+                        ELSE 0.9395
+                    END
+                )::numeric, 1)
+                FROM stasiun s1, stasiun s2
+                WHERE ks.stasiun_dari_id = s1.id
+                  AND ks.stasiun_ke_id = s2.id
+                  AND s1.lat IS NOT NULL
+                  AND s2.lat IS NOT NULL
+            ');
+
+            DB::statement('UPDATE koneksi_stasiun SET jarak_km = 1.0 WHERE jarak_km < 1.0');
+        }
+    }
+}

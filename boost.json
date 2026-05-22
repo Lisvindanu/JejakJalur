@@ -11,6 +11,7 @@
     "sail": false,
     "skills": [
         "laravel-best-practices",
+        "socialite-development",
         "wayfinder-development",
         "inertia-react-development",
         "tailwindcss-development"

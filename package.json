@@ -31,7 +31,9 @@
     "dependencies": {
         "@inertiajs/react": "^3.0.0",
         "@inertiajs/vite": "^3.0.0",
+        "@tabler/icons-react": "^3.44.0",
         "@tailwindcss/vite": "^4.1.11",
+        "@types/leaflet": "^1.9.21",
         "@types/react": "^19.2.0",
         "@types/react-dom": "^19.2.0",
         "@vitejs/plugin-react": "^5.2.0",
@@ -40,6 +42,7 @@
         "concurrently": "^9.0.1",
         "globals": "^15.14.0",
         "laravel-vite-plugin": "^3.1",
+        "leaflet": "^1.9.4",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
         "tailwind-merge": "^3.0.1",
