@@ -279,10 +279,10 @@ function HeroCardDeck({ destinations }: { destinations: Destinasi[] }) {
                             onTouchEnd={isFront ? onUp : undefined}
                         >
                             <HeroCardFace
-                                            d={destinations[dataIdx % total]}
-                                            isFront={isFront}
-                                            didDrag={didDrag}
-                                        />
+                                d={destinations[dataIdx % total]}
+                                isFront={isFront}
+                                didDrag={didDrag}
+                            />
                         </div>
                     );
                 },
