@@ -1,2 +1,13 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /profil
+Disallow: /profil/
+Disallow: /masuk
+Disallow: /daftar
+Disallow: /keluar
+Disallow: /lupa-password
+Disallow: /reset-password
+
+Sitemap: https://jejakjalur.project-n.site/sitemap.xml
