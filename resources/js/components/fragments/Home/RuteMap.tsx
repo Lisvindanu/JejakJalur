@@ -6,14 +6,22 @@ import type { Kota, RuteSegment, Stasiun, StasiunRute } from '@/types';
 
 type JenisLayanan = 'antarkota' | 'commuter' | 'kcic';
 
-function jenisLayananStyle(jenis: JenisLayanan[]): { color: string; weight: number } {
-    if (jenis.includes('kcic')) return { color: '#D97706', weight: 3 };
-    if (jenis.includes('commuter')) return { color: '#3B82F6', weight: 2.5 };
-    return { color: '#fff', weight: 2 };
+function jenisLayananStyle(jenis: JenisLayanan[]): {
+    color: string;
+    weight: number;
+} {
+    if (jenis.includes('kcic')) return { color: '#D97706', weight: 5 };
+    if (jenis.includes('commuter')) return { color: '#3B82F6', weight: 3.5 };
+    return { color: '#fff', weight: 1.5 };
 }
 
 function JenisLayananBadge({ jenis }: { jenis: JenisLayanan[] }) {
-    const items: { key: JenisLayanan; label: string; bg: string; text: string }[] = [
+    const items: {
+        key: JenisLayanan;
+        label: string;
+        bg: string;
+        text: string;
+    }[] = [
         { key: 'kcic', label: 'Whoosh', bg: '#FEF3C7', text: '#B45309' },
         { key: 'commuter', label: 'KRL', bg: '#EFF6FF', text: '#1D4ED8' },
         { key: 'antarkota', label: 'KAI', bg: '#ECFDF5', text: '#065F46' },
@@ -25,7 +33,7 @@ function JenisLayananBadge({ jenis }: { jenis: JenisLayanan[] }) {
                 .map((i) => (
                     <span
                         key={i.key}
-                        className="rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide"
+                        className="rounded-full px-1.5 py-0.5 text-[9px] font-semibold tracking-wide uppercase"
                         style={{ background: i.bg, color: i.text }}
                     >
                         {i.label}
@@ -73,7 +81,12 @@ const WARNA_KOTA = [
     '#0f766e',
 ];
 
-export default function RuteMap({ semuaKota, route, segments, focusDest }: Props) {
+export default function RuteMap({
+    semuaKota,
+    route,
+    segments,
+    focusDest,
+}: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mapRef = useRef<any>(null);
@@ -177,13 +190,16 @@ export default function RuteMap({ semuaKota, route, segments, focusDest }: Props
                     if (isNaN(lat) || isNaN(lng)) return;
 
                     const isHub = sIdx === 0;
-                    const jenisLayanan = (s.jenis_layanan ?? []) as JenisLayanan[];
+                    const jenisLayanan = (s.jenis_layanan ??
+                        []) as JenisLayanan[];
                     const typeStyle = jenisLayananStyle(jenisLayanan);
                     const orig = {
                         radius: isHub ? 8 : 5,
                         fillColor: warna,
                         color: typeStyle.color,
-                        weight: isHub ? typeStyle.weight + 0.5 : typeStyle.weight,
+                        weight: isHub
+                            ? typeStyle.weight + 0.5
+                            : typeStyle.weight,
                         opacity: 1,
                         fillOpacity: isHub ? 1 : 0.8,
                     };
@@ -288,9 +304,7 @@ export default function RuteMap({ semuaKota, route, segments, focusDest }: Props
             // rel asli), fallback ke straight-line antar stasiun kalau geometry null.
             const coords: [number, number][] = [];
             const stasiunCoord = (s: StasiunRute): [number, number] | null =>
-                s.lat && s.lng
-                    ? [parseFloat(s.lat), parseFloat(s.lng)]
-                    : null;
+                s.lat && s.lng ? [parseFloat(s.lat), parseFloat(s.lng)] : null;
 
             for (let i = 0; i < route.length - 1; i++) {
                 const seg = segments?.[i];
@@ -306,7 +320,12 @@ export default function RuteMap({ semuaKota, route, segments, focusDest }: Props
                     // Fallback straight-line
                     const a = stasiunCoord(route[i]);
                     const b = stasiunCoord(route[i + 1]);
-                    if (a && (coords.length === 0 || coords[coords.length - 1][0] !== a[0] || coords[coords.length - 1][1] !== a[1])) {
+                    if (
+                        a &&
+                        (coords.length === 0 ||
+                            coords[coords.length - 1][0] !== a[0] ||
+                            coords[coords.length - 1][1] !== a[1])
+                    ) {
                         coords.push(a);
                     }
                     if (b) coords.push(b);
@@ -396,7 +415,9 @@ export default function RuteMap({ semuaKota, route, segments, focusDest }: Props
                             </p>
 
                             {selected.jenisLayanan.length > 0 && (
-                                <JenisLayananBadge jenis={selected.jenisLayanan} />
+                                <JenisLayananBadge
+                                    jenis={selected.jenisLayanan}
+                                />
                             )}
 
                             {selected.stasiun.destinasi_count != null && (
@@ -439,8 +460,8 @@ export default function RuteMap({ semuaKota, route, segments, focusDest }: Props
                     <span>Warna berbeda = kota berbeda</span>
                 </div>
                 <div>
-                    Ganti tampilan: kontrol kanan atas (Jalan / Terrain / Satelit).
-                    Jalur Kereta dapat diaktifkan/nonaktifkan.
+                    Ganti tampilan: kontrol kanan atas (Jalan / Terrain /
+                    Satelit). Jalur Kereta dapat diaktifkan/nonaktifkan.
                 </div>
             </div>
         </div>
