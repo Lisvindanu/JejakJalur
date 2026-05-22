@@ -35,21 +35,19 @@
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
         {{-- Schema.org --}}
-        <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            "name": "JejakJalur",
-            "url": "{{ config('app.url') }}",
-            "description": "Direktori destinasi wisata, kuliner, dan UMKM terbaik di jalur kereta Pulau Jawa.",
-            "inLanguage": "id-ID",
-            "potentialAction": {
-                "@type": "SearchAction",
-                "target": "{{ config('app.url') }}/destinasi?q={search_term_string}",
-                "query-input": "required name=search_term_string"
-            }
-        }
-        </script>
+        <script type="application/ld+json">{!! json_encode([
+            '@context' => 'https://schema.org',
+            '@type' => 'WebSite',
+            'name' => 'JejakJalur',
+            'url' => config('app.url'),
+            'description' => 'Direktori destinasi wisata, kuliner, dan UMKM terbaik di jalur kereta Pulau Jawa.',
+            'inLanguage' => 'id-ID',
+            'potentialAction' => [
+                '@type' => 'SearchAction',
+                'target' => config('app.url').'/destinasi?q={search_term_string}',
+                'query-input' => 'required name=search_term_string',
+            ],
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
 
         @fonts
 
