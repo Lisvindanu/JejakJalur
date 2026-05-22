@@ -17,7 +17,15 @@ interface HeroSectionProps {
 }
 
 /* ─── Internal: card content ─── */
-function HeroCardFace({ d }: { d: Destinasi }) {
+function HeroCardFace({
+    d,
+    isFront,
+    didDrag,
+}: {
+    d: Destinasi;
+    isFront: boolean;
+    didDrag: boolean;
+}) {
     function grad(k: string) {
         if (k === 'Kuliner') return 'from-amber-800 to-amber-600';
         if (k === 'UMKM') return 'from-purple-800 to-purple-600';
@@ -60,6 +68,15 @@ function HeroCardFace({ d }: { d: Destinasi }) {
                     {d.stasiun.nama} — {d.stasiun.kota.nama}
                 </p>
                 <RatingDisplay value={Number(d.rating)} />
+                {isFront && (
+                    <Link
+                        href={`/destinasi/${d.id}`}
+                        className="mt-3 flex w-full items-center justify-center rounded-lg bg-emerald-700 px-4 py-2 text-[13px] font-semibold text-white no-underline transition hover:bg-emerald-800"
+                        onClick={(e) => didDrag && e.preventDefault()}
+                    >
+                        Lihat Detail
+                    </Link>
+                )}
             </div>
         </>
     );
@@ -116,6 +133,7 @@ function HeroCardDeck({ destinations }: { destinations: Destinasi[] }) {
     });
     const [dragX, setDragX] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
+    const [didDrag, setDidDrag] = useState(false);
     const [noTx, setNoTx] = useState(false);
     const busy = useRef(false);
     const nextData = useRef(3);
@@ -171,10 +189,13 @@ function HeroCardDeck({ destinations }: { destinations: Destinasi[] }) {
         if (busy.current) return;
         startX.current = x;
         setIsDragging(true);
+        setDidDrag(false);
     };
     const onMove = (x: number) => {
         if (!isDragging) return;
-        setDragX(x - startX.current);
+        const dx = x - startX.current;
+        setDragX(dx);
+        if (Math.abs(dx) > 8) setDidDrag(true);
     };
     const onUp = () => {
         if (!isDragging) return;
@@ -257,7 +278,11 @@ function HeroCardDeck({ destinations }: { destinations: Destinasi[] }) {
                             }
                             onTouchEnd={isFront ? onUp : undefined}
                         >
-                            <HeroCardFace d={destinations[dataIdx % total]} />
+                            <HeroCardFace
+                                d={destinations[dataIdx % total]}
+                                isFront={isFront}
+                                didDrag={didDrag}
+                            />
                         </div>
                     );
                 },
