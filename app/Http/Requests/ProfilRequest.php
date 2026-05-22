@@ -17,6 +17,7 @@ class ProfilRequest extends FormRequest
         return [
             'nama' => ['required', 'string', 'max:100'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->user()->id)],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ];
     }
 
@@ -27,6 +28,9 @@ class ProfilRequest extends FormRequest
             'email.required' => 'Email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email sudah digunakan akun lain.',
+            'avatar.image' => 'File harus berupa gambar.',
+            'avatar.mimes' => 'Format gambar harus jpeg, png, jpg, atau webp.',
+            'avatar.max' => 'Ukuran gambar maksimal 2MB.',
         ];
     }
 }
