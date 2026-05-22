@@ -21,7 +21,7 @@ class Destinasi extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'stasiun_id', 'nama', 'deskripsi', 'alamat', 'lat', 'lng',
+        'stasiun_id', 'user_id', 'nama', 'deskripsi', 'alamat', 'lat', 'lng',
         'kategori', 'rating', 'foto', 'is_verified',
     ];
 
@@ -37,9 +37,24 @@ class Destinasi extends Model
         return $this->belongsTo(Stasiun::class);
     }
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function ulasan(): HasMany
     {
         return $this->hasMany(Ulasan::class);
+    }
+
+    public function scopeVerified(Builder $query): Builder
+    {
+        return $query->where('is_verified', true);
+    }
+
+    public function scopeMilikUser(Builder $query, string $userId): Builder
+    {
+        return $query->where('user_id', $userId);
     }
 
     protected function fotoUrl(): Attribute
