@@ -30,6 +30,18 @@ Route::get('/', [HomeController::class, 'tampilkan'])->name('home');
 
 Route::prefix('destinasi')->name('destinasi.')->group(function () {
     Route::get('/', [DestinasiController::class, 'indeks'])->name('indeks');
+
+    // Submission destinasi oleh user terautentikasi.
+    // Static path harus DI ATAS {destinasi:id} biar tidak nyantol di binding model.
+    Route::middleware('auth')->group(function () {
+        Route::get('/milik-saya', [DestinasiController::class, 'milikSaya'])->name('milik-saya');
+        Route::get('/buat', [DestinasiController::class, 'formulir'])->name('buat');
+        Route::post('/', [DestinasiController::class, 'simpan'])->middleware('throttle:10,60')->name('simpan');
+        Route::get('/{destinasi:id}/edit', [DestinasiController::class, 'formulirEdit'])->name('edit');
+        Route::patch('/{destinasi:id}', [DestinasiController::class, 'perbarui'])->name('perbarui');
+        Route::delete('/{destinasi:id}', [DestinasiController::class, 'hapus'])->name('hapus');
+    });
+
     Route::get('/{destinasi:id}', [DestinasiController::class, 'detail'])->name('detail');
 });
 
