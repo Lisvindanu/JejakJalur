@@ -36,8 +36,14 @@ class AuthService
             ->orWhere('email', $dataSosial->getEmail())
             ->first();
 
+        $avatarUrl = $dataSosial->getAvatar();
+
         if ($pengguna) {
-            $pengguna->update([$kolomProvider => $dataSosial->getId()]);
+            $update = [$kolomProvider => $dataSosial->getId()];
+            if ($avatarUrl && ! $pengguna->getRawOriginal('avatar')) {
+                $update['avatar'] = $avatarUrl;
+            }
+            $pengguna->update($update);
         } else {
             $namaLengkap = $dataSosial->getName() ?? $dataSosial->getNickname() ?? 'Pengguna';
 
@@ -45,6 +51,7 @@ class AuthService
                 'nama' => $namaLengkap,
                 'name' => $namaLengkap,
                 'email' => $dataSosial->getEmail(),
+                'avatar' => $avatarUrl,
                 $kolomProvider => $dataSosial->getId(),
                 'consent_given' => true,
             ]);

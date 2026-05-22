@@ -91,7 +91,7 @@ export default function Navbar({ transparent = false }: NavbarProps) {
             </div>
 
             {/* Auth area */}
-            <div className="ml-6 flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-2 md:ml-6">
                 {auth?.user ? (
                     <div ref={dropdownRef} className="relative">
                         <button

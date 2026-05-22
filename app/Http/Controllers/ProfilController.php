@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfilRequest;
+use App\Services\FotoService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ProfilController extends Controller
 {
+    public function __construct(private FotoService $fotoService) {}
+
     public function tampilkan(): Response
     {
         $pengguna = auth()->user();
@@ -75,6 +78,11 @@ class ProfilController extends Controller
         $pengguna->nama = $data['nama'];
         $pengguna->name = $data['nama'];
         $pengguna->email = $data['email'];
+
+        if ($request->hasFile('avatar')) {
+            $pengguna->avatar = $this->fotoService->simpan($request->file('avatar'), 'avatars');
+        }
+
         $pengguna->save();
 
         return redirect()->route('profil.tampilkan')->with('sukses', 'Profil berhasil diperbarui.');
