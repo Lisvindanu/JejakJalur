@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StasiunRequest;
+use App\Models\Kota;
 use App\Models\Stasiun;
-use App\Services\KotaService;
 use App\Services\StasiunService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,7 +17,6 @@ class StasiunController extends Controller
 {
     public function __construct(
         private StasiunService $stasiunService,
-        private KotaService $kotaService,
     ) {}
 
     public function indeks(Request $request): Response
@@ -30,7 +30,7 @@ class StasiunController extends Controller
     public function buat(): Response
     {
         return Inertia::render('Admin/Stasiun/Formulir', [
-            'semuaKota' => $this->kotaService->semuaKota(),
+            'semuaKota' => $this->daftarKotaUntukDropdown(),
         ]);
     }
 
@@ -45,7 +45,7 @@ class StasiunController extends Controller
     {
         return Inertia::render('Admin/Stasiun/Formulir', [
             'stasiun' => $stasiun,
-            'semuaKota' => $this->kotaService->semuaKota(),
+            'semuaKota' => $this->daftarKotaUntukDropdown(),
         ]);
     }
 
@@ -61,5 +61,10 @@ class StasiunController extends Controller
         $this->stasiunService->hapusStasiun($stasiun);
 
         return redirect()->route('admin.stasiun.indeks')->with('sukses', 'Stasiun berhasil dihapus.');
+    }
+
+    private function daftarKotaUntukDropdown(): Collection
+    {
+        return Kota::orderBy('nama')->get(['id', 'nama']);
     }
 }
