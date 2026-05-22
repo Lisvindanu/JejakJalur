@@ -7,7 +7,7 @@ use App\Http\Requests\Admin\DestinasiRequest;
 use App\Models\Destinasi;
 use App\Models\Stasiun;
 use App\Services\DestinasiService;
-use App\Services\StasiunService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,7 +16,6 @@ class DestinasiController extends Controller
 {
     public function __construct(
         private DestinasiService $destinasiService,
-        private StasiunService $stasiunService,
     ) {}
 
     public function indeks(): Response
@@ -25,7 +24,7 @@ class DestinasiController extends Controller
 
         return Inertia::render('Admin/Destinasi/Indeks', [
             'destinasi' => $this->destinasiService->daftarDestinasiTerfilter($filter),
-            'semuaStasiun' => Stasiun::with('kota:id,nama')->orderBy('nama')->get(['id', 'nama', 'kota_id']),
+            'semuaStasiun' => $this->daftarStasiunUntukDropdown(),
             'filter' => $filter,
         ]);
     }
@@ -33,7 +32,7 @@ class DestinasiController extends Controller
     public function buat(): Response
     {
         return Inertia::render('Admin/Destinasi/Formulir', [
-            'semuaStasiun' => $this->stasiunService->semuaStasiunDenganKota(),
+            'semuaStasiun' => $this->daftarStasiunUntukDropdown(),
         ]);
     }
 
@@ -51,7 +50,7 @@ class DestinasiController extends Controller
     {
         return Inertia::render('Admin/Destinasi/Formulir', [
             'destinasi' => $destinasi,
-            'semuaStasiun' => $this->stasiunService->semuaStasiunDenganKota(),
+            'semuaStasiun' => $this->daftarStasiunUntukDropdown(),
         ]);
     }
 
@@ -60,10 +59,17 @@ class DestinasiController extends Controller
         $this->destinasiService->perbaruiDestinasi(
             destinasi: $destinasi,
             data: $request->safe()->except('foto'),
-            fotoBarу: $request->file('foto'),
+            fotoBaru: $request->file('foto'),
         );
 
         return redirect()->route('admin.destinasi.indeks')->with('sukses', 'Destinasi berhasil diperbarui.');
+    }
+
+    private function daftarStasiunUntukDropdown(): Collection
+    {
+        return Stasiun::with('kota:id,nama')
+            ->orderBy('nama')
+            ->get(['id', 'nama', 'kota_id']);
     }
 
     public function hapus(Destinasi $destinasi): RedirectResponse
