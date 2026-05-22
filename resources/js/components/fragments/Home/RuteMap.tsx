@@ -4,6 +4,45 @@ import 'leaflet/dist/leaflet.css';
 import { IconTrain, IconX } from '@tabler/icons-react';
 import type { Kota, RuteSegment, Stasiun, StasiunRute } from '@/types';
 
+type JenisLayanan = 'antarkota' | 'commuter' | 'kcic';
+
+function jenisLayananStyle(jenis: JenisLayanan[]): {
+    color: string;
+    weight: number;
+} {
+    if (jenis.includes('kcic')) return { color: '#D97706', weight: 5 };
+    if (jenis.includes('commuter')) return { color: '#3B82F6', weight: 3.5 };
+    return { color: '#fff', weight: 1.5 };
+}
+
+function JenisLayananBadge({ jenis }: { jenis: JenisLayanan[] }) {
+    const items: {
+        key: JenisLayanan;
+        label: string;
+        bg: string;
+        text: string;
+    }[] = [
+        { key: 'kcic', label: 'Whoosh', bg: '#FEF3C7', text: '#B45309' },
+        { key: 'commuter', label: 'KRL', bg: '#EFF6FF', text: '#1D4ED8' },
+        { key: 'antarkota', label: 'KAI', bg: '#ECFDF5', text: '#065F46' },
+    ];
+    return (
+        <div className="mb-2 flex flex-wrap gap-1">
+            {items
+                .filter((i) => jenis.includes(i.key))
+                .map((i) => (
+                    <span
+                        key={i.key}
+                        className="rounded-full px-1.5 py-0.5 text-[9px] font-semibold tracking-wide uppercase"
+                        style={{ background: i.bg, color: i.text }}
+                    >
+                        {i.label}
+                    </span>
+                ))}
+        </div>
+    );
+}
+
 interface FocusDest {
     lat: number;
     lng: number;
@@ -21,6 +60,7 @@ interface SelectedStation {
     kota: Kota;
     stasiun: Stasiun;
     warna: string;
+    jenisLayanan: JenisLayanan[];
 }
 
 const WARNA_KOTA = [
@@ -41,7 +81,12 @@ const WARNA_KOTA = [
     '#0f766e',
 ];
 
-export default function RuteMap({ semuaKota, route, segments, focusDest }: Props) {
+export default function RuteMap({
+    semuaKota,
+    route,
+    segments,
+    focusDest,
+}: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mapRef = useRef<any>(null);
@@ -145,11 +190,16 @@ export default function RuteMap({ semuaKota, route, segments, focusDest }: Props
                     if (isNaN(lat) || isNaN(lng)) return;
 
                     const isHub = sIdx === 0;
+                    const jenisLayanan = (s.jenis_layanan ??
+                        []) as JenisLayanan[];
+                    const typeStyle = jenisLayananStyle(jenisLayanan);
                     const orig = {
                         radius: isHub ? 8 : 5,
                         fillColor: warna,
-                        color: '#fff',
-                        weight: isHub ? 2.5 : 1.5,
+                        color: typeStyle.color,
+                        weight: isHub
+                            ? typeStyle.weight + 0.5
+                            : typeStyle.weight,
                         opacity: 1,
                         fillOpacity: isHub ? 1 : 0.8,
                     };
@@ -172,13 +222,13 @@ export default function RuteMap({ semuaKota, route, segments, focusDest }: Props
                         marker.setStyle({
                             radius: isHub ? 11 : 8,
                             fillColor: warna,
-                            color: '#fff',
-                            weight: 3,
+                            color: typeStyle.color,
+                            weight: typeStyle.weight + 1,
                             fillOpacity: 1,
                         });
                         marker.bringToFront();
                         selectedMarkerRef.current = marker;
-                        setSelected({ kota, stasiun: s, warna });
+                        setSelected({ kota, stasiun: s, warna, jenisLayanan });
                     });
                 });
             });
@@ -254,9 +304,7 @@ export default function RuteMap({ semuaKota, route, segments, focusDest }: Props
             // rel asli), fallback ke straight-line antar stasiun kalau geometry null.
             const coords: [number, number][] = [];
             const stasiunCoord = (s: StasiunRute): [number, number] | null =>
-                s.lat && s.lng
-                    ? [parseFloat(s.lat), parseFloat(s.lng)]
-                    : null;
+                s.lat && s.lng ? [parseFloat(s.lat), parseFloat(s.lng)] : null;
 
             for (let i = 0; i < route.length - 1; i++) {
                 const seg = segments?.[i];
@@ -272,7 +320,12 @@ export default function RuteMap({ semuaKota, route, segments, focusDest }: Props
                     // Fallback straight-line
                     const a = stasiunCoord(route[i]);
                     const b = stasiunCoord(route[i + 1]);
-                    if (a && (coords.length === 0 || coords[coords.length - 1][0] !== a[0] || coords[coords.length - 1][1] !== a[1])) {
+                    if (
+                        a &&
+                        (coords.length === 0 ||
+                            coords[coords.length - 1][0] !== a[0] ||
+                            coords[coords.length - 1][1] !== a[1])
+                    ) {
                         coords.push(a);
                     }
                     if (b) coords.push(b);
@@ -357,9 +410,15 @@ export default function RuteMap({ semuaKota, route, segments, focusDest }: Props
                             <p className="mb-0.5 text-sm leading-tight font-semibold text-stone-800">
                                 {selected.stasiun.nama}
                             </p>
-                            <p className="mb-3 font-mono text-xs text-stone-400">
+                            <p className="mb-2 font-mono text-xs text-stone-400">
                                 {selected.stasiun.kode_stasiun}
                             </p>
+
+                            {selected.jenisLayanan.length > 0 && (
+                                <JenisLayananBadge
+                                    jenis={selected.jenisLayanan}
+                                />
+                            )}
 
                             {selected.stasiun.destinasi_count != null && (
                                 <p className="mb-3 text-xs text-stone-500">
@@ -383,9 +442,27 @@ export default function RuteMap({ semuaKota, route, segments, focusDest }: Props
             </div>
 
             {/* Footer */}
-            <div className="border-t border-stone-100 bg-stone-50 px-5 py-2 text-xs text-stone-400">
-                Ganti tampilan: gunakan kontrol di kanan atas (Jalan / Terrain /
-                Satelit). Jalur Kereta dapat diaktifkan/nonaktifkan.
+            <div className="border-t border-stone-100 bg-stone-50 px-5 py-2.5 text-xs text-stone-400">
+                <div className="mb-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">
+                    <span className="flex items-center gap-1.5">
+                        <span className="inline-block h-3 w-3 rounded-full border-2 border-white bg-stone-400" />
+                        KAI Antarkota
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                        <span className="inline-block h-3 w-3 rounded-full border-2 border-blue-500 bg-stone-400" />
+                        KRL Commuter
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                        <span className="inline-block h-3 w-3 rounded-full border-2 border-amber-500 bg-stone-400" />
+                        Whoosh (KCIC)
+                    </span>
+                    <span className="text-stone-300">·</span>
+                    <span>Warna berbeda = kota berbeda</span>
+                </div>
+                <div>
+                    Ganti tampilan: kontrol kanan atas (Jalan / Terrain /
+                    Satelit). Jalur Kereta dapat diaktifkan/nonaktifkan.
+                </div>
             </div>
         </div>
     );
