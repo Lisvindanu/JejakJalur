@@ -15,9 +15,13 @@ class DestinasiService
 
     public function __construct(private FotoService $fotoService) {}
 
-    public function daftarDestinasiTerfilter(array $filter): LengthAwarePaginator
+    public function daftarDestinasiTerfilter(array $filter, bool $hanyaVerified = false): LengthAwarePaginator
     {
         $query = Destinasi::with('stasiun.kota');
+
+        if ($hanyaVerified) {
+            $query->verified();
+        }
 
         if (! empty($filter['kata_kunci'])) {
             $query->search($filter['kata_kunci']);
@@ -49,7 +53,7 @@ class DestinasiService
     public function destinasiFeatured(int $jumlah = 6): Collection
     {
         return Destinasi::with('stasiun.kota')
-            ->where('is_verified', true)
+            ->verified()
             ->orderByDesc('rating')
             ->limit($jumlah)
             ->get();
@@ -62,6 +66,26 @@ class DestinasiService
         }
 
         return Destinasi::create($data);
+    }
+
+    /**
+     * Submission destinasi oleh user biasa. Auto set user_id & is_verified=false.
+     */
+    public function buatDestinasiOlehUser(string $userId, array $data, ?UploadedFile $foto = null): Destinasi
+    {
+        $data['user_id'] = $userId;
+        $data['is_verified'] = false;
+
+        return $this->buatDestinasi($data, $foto);
+    }
+
+    public function daftarDestinasiMilikUser(string $userId): LengthAwarePaginator
+    {
+        return Destinasi::with('stasiun.kota')
+            ->milikUser($userId)
+            ->orderByDesc('created_at')
+            ->paginate(self::JUMLAH_PER_HALAMAN)
+            ->withQueryString();
     }
 
     public function perbaruiDestinasi(Destinasi $destinasi, array $data, ?UploadedFile $fotoBaru = null): Destinasi
