@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AiSessionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DestinasiController as AdminDestinasiController;
+use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\Admin\KotaController;
 use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\StasiunController;
@@ -157,5 +158,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/', [AiSessionController::class, 'indeks'])->name('indeks');
         Route::patch('/{aiSession}/reset', [AiSessionController::class, 'reset'])->name('reset');
         Route::delete('/{aiSession}', [AiSessionController::class, 'hapus'])->name('hapus');
+    });
+
+    Route::prefix('export')->name('export.')->group(function () {
+        Route::get('/destinasi', [ExportController::class, 'destinasi'])->name('destinasi');
+        Route::get('/ulasan', [ExportController::class, 'ulasan'])->name('ulasan');
+        Route::get('/pengguna', [ExportController::class, 'pengguna'])->name('pengguna');
     });
 });

@@ -3,6 +3,7 @@ import StatsCard from '@/components/fragments/Admin/StatsCard';
 import {
     IconBuilding,
     IconCheck,
+    IconDownload,
     IconMapPin,
     IconMessageCircle,
     IconPlus,
@@ -400,6 +401,30 @@ export default function Dashboard({
                             Catat wisata, kuliner, atau UMKM.
                         </p>
                     </Link>
+                </div>
+
+                {/* Export data */}
+                <div className="rounded-2xl border border-stone-200 bg-white p-5">
+                    <h2 className="mb-3 text-sm font-semibold text-stone-800">
+                        Export Data
+                    </h2>
+                    <div className="flex flex-wrap gap-2">
+                        {[
+                            { label: 'Destinasi', href: '/admin/export/destinasi' },
+                            { label: 'Ulasan', href: '/admin/export/ulasan' },
+                            { label: 'Pengguna', href: '/admin/export/pengguna' },
+                        ].map((e) => (
+                            <a
+                                key={e.label}
+                                href={e.href}
+                                download
+                                className="flex items-center gap-1.5 rounded-lg border border-stone-200 px-3 py-1.5 text-sm font-medium text-stone-600 no-underline transition-colors hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+                            >
+                                <IconDownload size={14} />
+                                {e.label} CSV
+                            </a>
+                        ))}
+                    </div>
                 </div>
             </div>
         </AdminLayout>
