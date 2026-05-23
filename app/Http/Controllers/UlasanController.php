@@ -23,14 +23,14 @@ class UlasanController extends Controller
         return back()->with('sukses', 'Ulasan berhasil ditambahkan.');
     }
 
-    public function perbarui(UlasanRequest $request, Ulasan $ulasan): RedirectResponse
+    public function perbarui(UlasanRequest $request, Destinasi $destinasi, Ulasan $ulasan): RedirectResponse
     {
         $this->ulasanService->perbaruiUlasan($ulasan, $request->validated(), $request->user());
 
         return back()->with('sukses', 'Ulasan berhasil diperbarui.');
     }
 
-    public function hapus(Ulasan $ulasan): RedirectResponse
+    public function hapus(Destinasi $destinasi, Ulasan $ulasan): RedirectResponse
     {
         $this->ulasanService->hapusUlasan($ulasan, request()->user());
 
