@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import {
     IconArrowLeft,
     IconCash,
+    IconClock,
     IconExternalLink,
     IconMapPin,
     IconMountain,
@@ -35,6 +36,70 @@ function placeholderConfig(kategori: string) {
         gradient: 'from-emerald-100 to-emerald-200',
         icon: <IconMountain size={56} className="text-black/15" />,
     };
+}
+
+type JamMap = NonNullable<NonNullable<import('@/types').Destinasi['jam_operasional']>>;
+
+function JamOperasionalPanel({ jam }: { jam: JamMap }) {
+    const todayKey = HARI[new Date().getDay()];
+    const open = isOpenNow(jam);
+
+    return (
+        <div className="w-full rounded-lg border border-stone-100 bg-stone-50 p-3">
+            <div className="mb-2 flex items-center gap-2">
+                <IconClock size={15} className="shrink-0 text-stone-400" />
+                <span className="text-sm font-medium text-stone-700">
+                    Jam Operasional
+                </span>
+                <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                        open
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-red-100 text-red-600'
+                    }`}
+                >
+                    {open ? 'Buka' : 'Tutup'}
+                </span>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs sm:grid-cols-3 lg:grid-cols-4">
+                {HARI_ORDER.map((day) => {
+                    const slot = jam[day];
+                    const isToday = day === todayKey;
+                    return (
+                        <div
+                            key={day}
+                            className={`flex items-center justify-between py-0.5 ${isToday ? 'font-semibold text-emerald-700' : 'text-stone-600'}`}
+                        >
+                            <span>{HARI_LABEL[day]}</span>
+                            <span className={slot ? '' : 'text-stone-400'}>
+                                {slot
+                                    ? `${slot.buka}–${slot.tutup}`
+                                    : 'Tutup'}
+                            </span>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+const HARI = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'] as const;
+const HARI_ORDER = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'] as const;
+const HARI_LABEL: Record<string, string> = {
+    senin: 'Senin', selasa: 'Selasa', rabu: 'Rabu', kamis: 'Kamis',
+    jumat: 'Jumat', sabtu: 'Sabtu', minggu: 'Minggu',
+};
+
+function isOpenNow(jam: NonNullable<NonNullable<import('@/types').Destinasi['jam_operasional']>>): boolean {
+    const now = new Date();
+    const dayKey = HARI[now.getDay()];
+    const slot = jam[dayKey];
+    if (!slot) return false;
+    const [bH, bM] = slot.buka.split(':').map(Number);
+    const [tH, tM] = slot.tutup.split(':').map(Number);
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    return nowMin >= bH * 60 + bM && nowMin < tH * 60 + tM;
 }
 
 export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
@@ -117,21 +182,41 @@ export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
                 </p>
 
                 {/* Info tambahan */}
-                {(destinasi.telepon || destinasi.website || destinasi.harga_min != null) && (
+                {(destinasi.telepon ||
+                    destinasi.website ||
+                    destinasi.harga_min != null ||
+                    destinasi.jam_operasional) && (
                     <div className="mt-5 flex flex-wrap gap-3">
                         {destinasi.harga_min != null && (
                             <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm">
-                                <IconCash size={15} className="shrink-0 text-emerald-600" />
+                                <IconCash
+                                    size={15}
+                                    className="shrink-0 text-emerald-600"
+                                />
                                 <span className="text-stone-700">
-                                    {destinasi.harga_min === 0
-                                        ? <span className="font-semibold text-emerald-700">Gratis</span>
-                                        : <>
-                                            Rp {destinasi.harga_min.toLocaleString('id-ID')}
-                                            {destinasi.harga_max && destinasi.harga_max > destinasi.harga_min && (
-                                                <> – Rp {destinasi.harga_max.toLocaleString('id-ID')}</>
+                                    {destinasi.harga_min === 0 ? (
+                                        <span className="font-semibold text-emerald-700">
+                                            Gratis
+                                        </span>
+                                    ) : (
+                                        <>
+                                            Rp{' '}
+                                            {destinasi.harga_min.toLocaleString(
+                                                'id-ID',
                                             )}
+                                            {destinasi.harga_max &&
+                                                destinasi.harga_max >
+                                                    destinasi.harga_min && (
+                                                    <>
+                                                        {' '}
+                                                        – Rp{' '}
+                                                        {destinasi.harga_max.toLocaleString(
+                                                            'id-ID',
+                                                        )}
+                                                    </>
+                                                )}
                                         </>
-                                    }
+                                    )}
                                 </span>
                             </div>
                         )}
@@ -140,7 +225,10 @@ export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
                                 href={`tel:${destinasi.telepon}`}
                                 className="flex items-center gap-2 rounded-lg bg-stone-50 px-3 py-2 text-sm text-stone-700 transition-colors hover:bg-stone-100"
                             >
-                                <IconPhone size={15} className="shrink-0 text-stone-400" />
+                                <IconPhone
+                                    size={15}
+                                    className="shrink-0 text-stone-400"
+                                />
                                 {destinasi.telepon}
                             </a>
                         )}
@@ -151,9 +239,15 @@ export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2 rounded-lg bg-stone-50 px-3 py-2 text-sm text-stone-700 transition-colors hover:bg-stone-100"
                             >
-                                <IconExternalLink size={15} className="shrink-0 text-stone-400" />
+                                <IconExternalLink
+                                    size={15}
+                                    className="shrink-0 text-stone-400"
+                                />
                                 Website
                             </a>
+                        )}
+                        {destinasi.jam_operasional && (
+                            <JamOperasionalPanel jam={destinasi.jam_operasional} />
                         )}
                     </div>
                 )}

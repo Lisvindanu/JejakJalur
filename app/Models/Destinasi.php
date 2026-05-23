@@ -23,7 +23,7 @@ class Destinasi extends Model
     protected $fillable = [
         'stasiun_id', 'user_id', 'nama', 'deskripsi', 'alamat', 'lat', 'lng',
         'kategori', 'rating', 'foto', 'is_verified',
-        'telepon', 'website', 'harga_min', 'harga_max',
+        'telepon', 'website', 'harga_min', 'harga_max', 'jam_operasional',
     ];
 
     protected $appends = ['foto_url'];
@@ -31,6 +31,7 @@ class Destinasi extends Model
     protected $casts = [
         'is_verified' => 'boolean',
         'rating' => 'decimal:2',
+        'jam_operasional' => 'array',
     ];
 
     public function stasiun(): BelongsTo

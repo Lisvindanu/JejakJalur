@@ -49,6 +49,7 @@ export type Destinasi = {
     website?: string | null;
     harga_min?: number | null;
     harga_max?: number | null;
+    jam_operasional?: Record<string, { buka: string; tutup: string } | null> | null;
     stasiun: {
         id?: string;
         nama: string;

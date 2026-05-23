@@ -1,13 +1,13 @@
-import AdminLayout from '@/components/layouts/AdminLayout';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { IconArrowLeft, IconPhoto } from '@tabler/icons-react';
 import Button from '@/components/elements/Button';
 import Input from '@/components/elements/Input';
 import TextArea from '@/components/elements/TextArea';
 import Select from '@/components/elements/Select';
 import FormCard from '@/components/fragments/Admin/FormCard';
-import type { Destinasi } from '@/types';
+import AdminLayout from '@/components/layouts/AdminLayout';
 import { MOCK_STASIUN } from '@/lib/mock-data';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { IconArrowLeft, IconPhoto } from '@tabler/icons-react';
+import type { Destinasi } from '@/types';
 
 interface Props {
     destinasi?: Destinasi;
@@ -19,6 +19,20 @@ const kategoriOptions = [
     { value: 'Kuliner', label: 'Kuliner' },
     { value: 'UMKM', label: 'UMKM' },
 ];
+
+const HARI_LIST = [
+    { key: 'senin', label: 'Senin' },
+    { key: 'selasa', label: 'Selasa' },
+    { key: 'rabu', label: 'Rabu' },
+    { key: 'kamis', label: 'Kamis' },
+    { key: 'jumat', label: 'Jumat' },
+    { key: 'sabtu', label: 'Sabtu' },
+    { key: 'minggu', label: 'Minggu' },
+] as const;
+
+type HariKey = (typeof HARI_LIST)[number]['key'];
+type JamSlot = { buka: string; tutup: string } | null;
+type JamOperasional = Partial<Record<HariKey, JamSlot>>;
 
 export default function DestinasiFormulir({
     destinasi,
@@ -44,6 +58,7 @@ export default function DestinasiFormulir({
         website: string;
         harga_min: string;
         harga_max: string;
+        jam_operasional: JamOperasional;
         _method?: string;
     }>({
         nama: destinasi?.nama ?? '',
@@ -56,10 +71,17 @@ export default function DestinasiFormulir({
         foto: null,
         telepon: destinasi?.telepon ?? '',
         website: destinasi?.website ?? '',
-        harga_min: destinasi?.harga_min != null ? String(destinasi.harga_min) : '',
-        harga_max: destinasi?.harga_max != null ? String(destinasi.harga_max) : '',
+        harga_min:
+            destinasi?.harga_min != null ? String(destinasi.harga_min) : '',
+        harga_max:
+            destinasi?.harga_max != null ? String(destinasi.harga_max) : '',
+        jam_operasional: (destinasi?.jam_operasional as JamOperasional) ?? {},
         ...(isEdit ? { _method: 'PATCH' } : {}),
     });
+
+    function setJamHari(hari: HariKey, slot: JamSlot) {
+        setData('jam_operasional', { ...data.jam_operasional, [hari]: slot });
+    }
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -209,14 +231,18 @@ export default function DestinasiFormulir({
                             <Input
                                 label="Telepon (opsional)"
                                 value={data.telepon}
-                                onChange={(e) => setData('telepon', e.target.value)}
+                                onChange={(e) =>
+                                    setData('telepon', e.target.value)
+                                }
                                 error={errors.telepon}
                                 placeholder="cth. 0812-3456-7890"
                             />
                             <Input
                                 label="Website (opsional)"
                                 value={data.website}
-                                onChange={(e) => setData('website', e.target.value)}
+                                onChange={(e) =>
+                                    setData('website', e.target.value)
+                                }
                                 error={errors.website}
                                 placeholder="https://..."
                                 type="url"
@@ -228,7 +254,9 @@ export default function DestinasiFormulir({
                                 <Input
                                     label="Harga Min (opsional)"
                                     value={data.harga_min}
-                                    onChange={(e) => setData('harga_min', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('harga_min', e.target.value)
+                                    }
                                     error={errors.harga_min}
                                     placeholder="cth. 0 (gratis)"
                                     type="number"
@@ -237,7 +265,9 @@ export default function DestinasiFormulir({
                                 <Input
                                     label="Harga Max (opsional)"
                                     value={data.harga_max}
-                                    onChange={(e) => setData('harga_max', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('harga_max', e.target.value)
+                                    }
                                     error={errors.harga_max}
                                     placeholder="cth. 50000"
                                     type="number"
@@ -245,8 +275,85 @@ export default function DestinasiFormulir({
                                 />
                             </div>
                             <p className="mt-1 text-xs text-stone-400">
-                                Isi 0 untuk menandai gratis. Kosongkan kalau belum diketahui.
+                                Isi 0 untuk menandai gratis. Kosongkan kalau
+                                belum diketahui.
                             </p>
+                        </div>
+
+                        {/* Jam operasional */}
+                        <div>
+                            <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                                Jam Operasional (opsional)
+                            </label>
+                            <div className="space-y-2 rounded-lg border border-stone-200 p-3">
+                                {HARI_LIST.map(({ key, label }) => {
+                                    const slot =
+                                        data.jam_operasional[key] ?? null;
+                                    const isBuka = slot !== null;
+                                    return (
+                                        <div
+                                            key={key}
+                                            className="flex flex-wrap items-center gap-3"
+                                        >
+                                            <label className="flex w-20 cursor-pointer items-center gap-2 text-sm text-stone-700">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isBuka}
+                                                    onChange={(e) =>
+                                                        setJamHari(
+                                                            key,
+                                                            e.target.checked
+                                                                ? {
+                                                                      buka: '08:00',
+                                                                      tutup: '21:00',
+                                                                  }
+                                                                : null,
+                                                        )
+                                                    }
+                                                    className="rounded border-stone-300 text-emerald-600"
+                                                />
+                                                {label}
+                                            </label>
+                                            {isBuka && slot && (
+                                                <div className="flex items-center gap-2 text-sm">
+                                                    <input
+                                                        type="time"
+                                                        value={slot.buka}
+                                                        onChange={(e) =>
+                                                            setJamHari(key, {
+                                                                ...slot,
+                                                                buka: e.target
+                                                                    .value,
+                                                            })
+                                                        }
+                                                        className="rounded-lg border border-stone-200 px-2 py-1 text-sm text-stone-700"
+                                                    />
+                                                    <span className="text-stone-400">
+                                                        –
+                                                    </span>
+                                                    <input
+                                                        type="time"
+                                                        value={slot.tutup}
+                                                        onChange={(e) =>
+                                                            setJamHari(key, {
+                                                                ...slot,
+                                                                tutup: e.target
+                                                                    .value,
+                                                            })
+                                                        }
+                                                        className="rounded-lg border border-stone-200 px-2 py-1 text-sm text-stone-700"
+                                                    />
+                                                </div>
+                                            )}
+                                            {!isBuka && (
+                                                <span className="text-xs text-stone-400">
+                                                    Tutup
+                                                </span>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
 
                         {/* Foto upload */}

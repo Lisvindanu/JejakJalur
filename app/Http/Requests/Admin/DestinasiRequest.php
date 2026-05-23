@@ -25,6 +25,10 @@ class DestinasiRequest extends FormRequest
             'website' => ['nullable', 'url', 'max:255'],
             'harga_min' => ['nullable', 'integer', 'min:0'],
             'harga_max' => ['nullable', 'integer', 'min:0', 'gte:harga_min'],
+            'jam_operasional' => ['nullable', 'array'],
+            'jam_operasional.*' => ['nullable', 'array'],
+            'jam_operasional.*.buka' => ['required_with:jam_operasional.*', 'nullable', 'string', 'date_format:H:i'],
+            'jam_operasional.*.tutup' => ['required_with:jam_operasional.*', 'nullable', 'string', 'date_format:H:i'],
         ];
     }
 
