@@ -2,6 +2,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     IconBookmark,
     IconBookmarkFilled,
+    IconCheck,
     IconLayoutDashboard,
     IconLoader2,
     IconMapPin,
@@ -25,6 +26,7 @@ import { MOCK_PENGGUNA } from '@/lib/mock-data';
 import * as BookmarkController from '@/actions/App/Http/Controllers/BookmarkController';
 import type {
     BookmarkProfil,
+    KunjunganProfil,
     PaginatedData,
     SharedProps,
     UlasanProfil,
@@ -46,6 +48,7 @@ interface Props {
     jumlah_destinasi_diulas?: number;
     ulasan?: PaginatedData<UlasanProfil>;
     bookmarks?: PaginatedData<BookmarkProfil>;
+    kunjungan?: PaginatedData<KunjunganProfil>;
 }
 
 function StatItem({
@@ -151,6 +154,65 @@ function WishlistCard({ bookmark }: { bookmark: BookmarkProfil }) {
     );
 }
 
+function KunjunganCard({ kunjungan }: { kunjungan: KunjunganProfil }) {
+    const [removing, setRemoving] = useState(false);
+    const { destinasi } = kunjungan;
+    const ph = kategoriPlaceholder(destinasi.kategori);
+
+    function hapus() {
+        setRemoving(true);
+        router.visit(`/destinasi/${destinasi.id}/kunjungan`, {
+            method: 'delete',
+            preserveScroll: true,
+            onFinish: () => setRemoving(false),
+        });
+    }
+
+    return (
+        <div className="group flex flex-col overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+            <Link href={`/destinasi/${destinasi.id}`} className="no-underline">
+                <div
+                    className={`flex h-32 items-center justify-center bg-gradient-to-br ${ph.gradient}`}
+                >
+                    {destinasi.foto_url ? (
+                        <img
+                            src={destinasi.foto_url}
+                            alt={destinasi.nama}
+                            className="h-full w-full object-cover"
+                        />
+                    ) : (
+                        ph.icon
+                    )}
+                </div>
+            </Link>
+
+            <div className="flex flex-1 flex-col gap-1 p-3">
+                <Link
+                    href={`/destinasi/${destinasi.id}`}
+                    className="line-clamp-2 text-sm font-medium text-stone-800 no-underline hover:text-emerald-700"
+                >
+                    {destinasi.nama}
+                </Link>
+                <div className="flex items-center justify-between">
+                    <RatingDisplay value={Number(destinasi.rating)} size={13} />
+                    <button
+                        onClick={hapus}
+                        disabled={removing}
+                        title="Hapus dari daftar kunjungan"
+                        className="text-emerald-500 transition-colors hover:text-red-500 disabled:opacity-50"
+                    >
+                        {removing ? (
+                            <IconLoader2 size={15} className="animate-spin" />
+                        ) : (
+                            <IconCheck size={15} />
+                        )}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function UlasanCard({ ulasan }: { ulasan: UlasanProfil }) {
     const ph = kategoriPlaceholder(ulasan.destinasi.kategori);
 
@@ -212,6 +274,7 @@ export default function Tampilkan({
     jumlah_destinasi_diulas = 0,
     ulasan,
     bookmarks,
+    kunjungan,
 }: Props) {
     const emptyUlasan: PaginatedData<UlasanProfil> = {
         data: [],
@@ -233,8 +296,19 @@ export default function Tampilkan({
         to: null,
         links: [],
     };
+    const emptyKunjungan: PaginatedData<KunjunganProfil> = {
+        data: [],
+        current_page: 1,
+        last_page: 1,
+        per_page: 8,
+        total: 0,
+        from: null,
+        to: null,
+        links: [],
+    };
     const ulasanData = ulasan ?? emptyUlasan;
     const bookmarksData = bookmarks ?? emptyBookmarks;
+    const kunjunganData = kunjungan ?? emptyKunjungan;
     const pengguna = penggunaProp ?? MOCK_PENGGUNA;
     const { auth } = usePage<SharedProps>().props;
     const isAdmin = pengguna.is_admin ?? auth?.user?.is_admin ?? false;
@@ -373,6 +447,58 @@ export default function Tampilkan({
                                 {bookmarksData.last_page > 1 && (
                                     <div className="mt-4 border-t border-stone-100 pt-4">
                                         <Pagination data={bookmarksData} />
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+
+                    {/* Daftar Kunjungan */}
+                    <div className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">
+                        <div className="mb-4 flex items-center gap-2">
+                            <IconMapPin
+                                size={18}
+                                className="text-emerald-600"
+                            />
+                            <h2 className="font-semibold text-stone-800">
+                                Daftar Kunjungan
+                            </h2>
+                            {kunjunganData.total > 0 && (
+                                <span className="ml-auto rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-500">
+                                    {kunjunganData.total}
+                                </span>
+                            )}
+                        </div>
+
+                        {kunjunganData.total === 0 ? (
+                            <div className="rounded-xl border border-dashed border-stone-200 py-10 text-center">
+                                <IconMapPin
+                                    size={32}
+                                    className="mx-auto mb-2 text-stone-300"
+                                />
+                                <p className="text-sm text-stone-400">
+                                    Belum ada destinasi yang dikunjungi.
+                                </p>
+                                <Link
+                                    href="/destinasi"
+                                    className="mt-2 inline-block text-sm font-medium text-emerald-700 no-underline hover:text-emerald-800"
+                                >
+                                    Jelajahi destinasi
+                                </Link>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                                    {kunjunganData.data.map((k) => (
+                                        <KunjunganCard
+                                            key={k.id}
+                                            kunjungan={k}
+                                        />
+                                    ))}
+                                </div>
+                                {kunjunganData.last_page > 1 && (
+                                    <div className="mt-4 border-t border-stone-100 pt-4">
+                                        <Pagination data={kunjunganData} />
                                     </div>
                                 )}
                             </>

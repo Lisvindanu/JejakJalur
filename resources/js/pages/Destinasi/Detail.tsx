@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import BookmarkButton from '@/components/elements/BookmarkButton';
+import VisitButton from '@/components/elements/VisitButton';
 import DestinasiCard from '@/components/fragments/Destinasi/DestinasiCard';
 import DestinasiDetail from '@/components/fragments/Destinasi/DestinasiDetail';
 import LokasiPanel from '@/components/fragments/Destinasi/LokasiPanel';
@@ -12,6 +13,7 @@ import type { Destinasi, SharedProps } from '@/types';
 interface Props {
     destinasi?: Destinasi;
     is_bookmarked?: boolean;
+    is_visited?: boolean;
     destinasi_terkait?: Destinasi[];
     liked_ulasan_ids?: string[];
 }
@@ -19,6 +21,7 @@ interface Props {
 export default function Detail({
     destinasi: dest,
     is_bookmarked = false,
+    is_visited = false,
     destinasi_terkait = [],
     liked_ulasan_ids = [],
 }: Props) {
@@ -36,13 +39,19 @@ export default function Detail({
                 <DestinasiDetail destinasi={destinasi} />
             </div>
 
-            {/* Bookmark button */}
-            <div className="px-[max(24px,calc(50%-576px))] pb-2">
+            {/* Action buttons */}
+            <div className="flex flex-wrap gap-2 px-[max(24px,calc(50%-576px))] pb-2">
                 {auth?.user && (
-                    <BookmarkButton
-                        destinasiId={destinasi.id}
-                        isBookmarked={is_bookmarked}
-                    />
+                    <>
+                        <BookmarkButton
+                            destinasiId={destinasi.id}
+                            isBookmarked={is_bookmarked}
+                        />
+                        <VisitButton
+                            destinasiId={destinasi.id}
+                            isVisited={is_visited}
+                        />
+                    </>
                 )}
             </div>
 

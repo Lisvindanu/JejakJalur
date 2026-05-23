@@ -53,6 +53,9 @@ class DestinasiController extends Controller
         $isBookmarked = auth()->check()
             && auth()->user()->bookmarks()->where('destinasi_id', $destinasi->id)->exists();
 
+        $isVisited = auth()->check()
+            && auth()->user()->kunjungan()->where('destinasi_id', $destinasi->id)->exists();
+
         $likedUlasanIds = auth()->check()
             ? UlasanLike::where('user_id', auth()->id())
                 ->whereIn('ulasan_id', $destinasiLengkap->ulasan->pluck('id'))
@@ -63,6 +66,7 @@ class DestinasiController extends Controller
         return Inertia::render('Destinasi/Detail', [
             'destinasi' => $destinasiLengkap,
             'is_bookmarked' => $isBookmarked,
+            'is_visited' => $isVisited,
             'destinasi_terkait' => $this->destinasiService->destinasiTerkait($destinasi),
             'liked_ulasan_ids' => $likedUlasanIds,
         ]);

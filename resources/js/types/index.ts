@@ -111,6 +111,17 @@ export type BookmarkProfil = {
     };
 };
 
+export type KunjunganProfil = {
+    id: string;
+    destinasi: {
+        id: string;
+        nama: string;
+        kategori: string;
+        rating: string;
+        foto_url?: string | null;
+    };
+};
+
 export type PaginatedData<T> = {
     data: T[];
     current_page: number;

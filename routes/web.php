@@ -14,6 +14,7 @@ use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\DestinasiController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JejakAiController;
+use App\Http\Controllers\KunjunganController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\RuteController;
 use App\Http\Controllers\UlasanController;
@@ -84,6 +85,12 @@ Route::middleware('auth')->prefix('profil')->name('profil.')->group(function () 
 Route::middleware('auth')->prefix('destinasi/{destinasi:id}')->name('bookmark.')->group(function () {
     Route::post('/bookmark', [BookmarkController::class, 'simpan'])->name('simpan');
     Route::delete('/bookmark', [BookmarkController::class, 'hapus'])->name('hapus');
+});
+
+// Kunjungan
+Route::middleware('auth')->prefix('destinasi/{destinasi:id}')->name('kunjungan.')->group(function () {
+    Route::post('/kunjungan', [KunjunganController::class, 'simpan'])->name('simpan');
+    Route::delete('/kunjungan', [KunjunganController::class, 'hapus'])->name('hapus');
 });
 
 // Ulasan (pengguna terautentikasi)

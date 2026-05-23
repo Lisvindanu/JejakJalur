@@ -53,6 +53,21 @@ class ProfilController extends Controller
                 ],
             ]);
 
+        $kunjungan = $pengguna->kunjungan()
+            ->with('destinasi:id,nama,kategori,foto,rating,stasiun_id')
+            ->latest()
+            ->paginate(8, ['*'], 'kunjungan_page')
+            ->through(fn ($k) => [
+                'id' => $k->id,
+                'destinasi' => [
+                    'id' => $k->destinasi->id,
+                    'nama' => $k->destinasi->nama,
+                    'kategori' => $k->destinasi->kategori,
+                    'rating' => $k->destinasi->rating,
+                    'foto_url' => $k->destinasi->foto_url,
+                ],
+            ]);
+
         return Inertia::render('Profil/Tampilkan', [
             'pengguna' => $pengguna,
             'jumlah_ulasan' => $jumlah_ulasan,
@@ -60,6 +75,7 @@ class ProfilController extends Controller
             'jumlah_destinasi_diulas' => $jumlah_destinasi_diulas,
             'ulasan' => $ulasan,
             'bookmarks' => $bookmarks,
+            'kunjungan' => $kunjungan,
         ]);
     }
 
