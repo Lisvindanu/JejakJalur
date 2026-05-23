@@ -70,6 +70,7 @@ export type Ulasan = {
     created_at: string;
     updated_at: string;
     likes_count?: number;
+    foto_urls?: string[];
     user: {
         id: number;
         name: string;

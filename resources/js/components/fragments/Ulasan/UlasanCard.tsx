@@ -88,6 +88,27 @@ export default function UlasanCard({
                 {ulasan.konten}
             </p>
 
+            {/* Foto ulasan */}
+            {(ulasan.foto_urls ?? []).length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                    {ulasan.foto_urls!.map((url, i) => (
+                        <a
+                            key={i}
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="h-20 w-20 overflow-hidden rounded-lg border border-stone-200"
+                        >
+                            <img
+                                src={url}
+                                alt={`foto ${i + 1}`}
+                                className="h-full w-full object-cover transition-opacity hover:opacity-80"
+                            />
+                        </a>
+                    ))}
+                </div>
+            )}
+
             {/* Like button */}
             <div className="mt-3 flex items-center">
                 <button

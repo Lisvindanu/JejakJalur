@@ -79,6 +79,16 @@ class DestinasiService
             ->get();
     }
 
+    public function destinasiBaru(int $jumlah = 6): Collection
+    {
+        return Destinasi::with('stasiun.kota')
+            ->verified()
+            ->where('created_at', '>=', now()->subDays(30))
+            ->orderByDesc('created_at')
+            ->limit($jumlah)
+            ->get();
+    }
+
     public function destinasiFeatured(int $jumlah = 6): Collection
     {
         return Destinasi::with('stasiun.kota')

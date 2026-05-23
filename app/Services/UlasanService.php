@@ -6,16 +6,26 @@ use App\Models\Destinasi;
 use App\Models\Ulasan;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\UploadedFile;
 
 class UlasanService
 {
-    public function buatUlasan(array $data, User $pengguna, Destinasi $destinasi): Ulasan
+    public function __construct(private FotoService $fotoService) {}
+
+    /** @param UploadedFile[] $fotoFiles */
+    public function buatUlasan(array $data, User $pengguna, Destinasi $destinasi, array $fotoFiles = []): Ulasan
     {
+        $fotoArr = array_map(
+            fn (UploadedFile $f) => $this->fotoService->simpan($f, 'ulasan'),
+            $fotoFiles,
+        );
+
         return $destinasi->ulasan()->create([
             'user_id' => $pengguna->id,
             'judul' => $data['judul'] ?? null,
             'konten' => $data['konten'],
             'rating' => $data['rating'],
+            'foto' => $fotoArr ?: null,
         ]);
     }
 

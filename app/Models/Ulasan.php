@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Services\FotoService;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,8 +17,29 @@ class Ulasan extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'user_id', 'destinasi_id', 'judul', 'konten', 'rating',
+        'user_id', 'destinasi_id', 'judul', 'konten', 'rating', 'foto',
     ];
+
+    protected $appends = ['foto_urls'];
+
+    protected $casts = [
+        'foto' => 'array',
+    ];
+
+    protected function fotoUrls(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if (empty($this->foto)) {
+                    return [];
+                }
+
+                $service = app(FotoService::class);
+
+                return array_map(fn ($f) => $service->url($f), $this->foto);
+            },
+        );
+    }
 
     protected static function booted(): void
     {

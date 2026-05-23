@@ -12,6 +12,8 @@ class UlasanRequest extends FormRequest
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
             'judul' => ['nullable', 'string', 'max:100'],
             'konten' => ['required', 'string', 'max:1000'],
+            'foto' => ['nullable', 'array', 'max:3'],
+            'foto.*' => ['image', 'max:2048'],
         ];
     }
 

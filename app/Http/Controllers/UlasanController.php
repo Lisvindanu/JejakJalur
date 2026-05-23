@@ -20,6 +20,7 @@ class UlasanController extends Controller
             data: $request->validated(),
             pengguna: $request->user(),
             destinasi: $destinasi,
+            fotoFiles: $request->file('foto') ?? [],
         );
 
         return back()->with('sukses', 'Ulasan berhasil ditambahkan.');
