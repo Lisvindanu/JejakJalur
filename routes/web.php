@@ -50,6 +50,7 @@ Route::prefix('rute')->name('rute.')->group(function () {
     Route::get('/', [RuteController::class, 'tampilkan'])->name('tampilkan');
     Route::get('/cari-stasiun', [RuteController::class, 'cariStasiun'])->name('cariStasiun');
     Route::get('/cari-rute', [RuteController::class, 'cariRute'])->name('cariRute');
+    Route::get('/stasiun/{stasiunId}/destinasi', [RuteController::class, 'destinasiStasiun'])->name('destinasiStasiun');
 });
 
 // Auth

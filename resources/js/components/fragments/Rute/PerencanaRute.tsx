@@ -10,6 +10,7 @@ import {
     IconX,
 } from '@tabler/icons-react';
 import type { Kota, RuteSegment, StasiunRute } from '@/types';
+import StasiunDestinasiModal from './StasiunDestinasiModal';
 
 // ── Types & Constants ─────────────────────────────────────────────────────────
 
@@ -353,10 +354,12 @@ function EndpointCard({
     label,
     stasiun,
     variant,
+    onLihatDestinasi,
 }: {
     label: string;
     stasiun: StasiunRute;
     variant: 'departure' | 'arrival';
+    onLihatDestinasi?: (s: StasiunRute) => void;
 }) {
     const isDeparture = variant === 'departure';
     return (
@@ -386,14 +389,17 @@ function EndpointCard({
                 <span className="font-mono">{stasiun.kode_stasiun}</span>
             </div>
             {(stasiun.destinasi_count ?? 0) > 0 && (
-                <div
-                    className={`mt-3 inline-flex items-center gap-1.5 text-xs ${
-                        isDeparture ? 'text-emerald-100' : 'text-amber-600'
+                <button
+                    onClick={() => onLihatDestinasi?.(stasiun)}
+                    className={`mt-3 inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
+                        isDeparture
+                            ? 'bg-emerald-600 text-emerald-100 hover:bg-emerald-500'
+                            : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
                     }`}
                 >
                     <IconMapPin size={12} />
-                    {stasiun.destinasi_count} destinasi terdekat
-                </div>
+                    {stasiun.destinasi_count} destinasi · Lihat
+                </button>
             )}
         </div>
     );
@@ -401,7 +407,13 @@ function EndpointCard({
 
 // ── Molecule: PemberhentianList ───────────────────────────────────────────────
 
-function PemberhentianList({ stops }: { stops: StasiunRute[] }) {
+function PemberhentianList({
+    stops,
+    onLihatDestinasi,
+}: {
+    stops: StasiunRute[];
+    onLihatDestinasi?: (s: StasiunRute) => void;
+}) {
     const [expandAll, setExpandAll] = useState(false);
     const visible = expandAll ? stops : stops.slice(0, 6);
 
@@ -435,10 +447,13 @@ function PemberhentianList({ stops }: { stops: StasiunRute[] }) {
                                 </div>
                             </div>
                             {(s.destinasi_count ?? 0) > 0 && (
-                                <div className="flex shrink-0 items-center gap-1.5 text-xs text-stone-400">
-                                    <IconMapPin size={12} />
+                                <button
+                                    onClick={() => onLihatDestinasi?.(s)}
+                                    className="flex shrink-0 items-center gap-1.5 rounded-lg border border-stone-200 px-2.5 py-1 text-xs text-stone-500 transition-colors hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+                                >
+                                    <IconMapPin size={11} />
                                     {s.destinasi_count} destinasi
-                                </div>
+                                </button>
                             )}
                         </div>
                     </div>
@@ -483,6 +498,7 @@ export default function PerencanaRute({
     const [error, setError] = useState<string | null>(null);
     const [loadingGps, setLoadingGps] = useState(false);
     const [gpsError, setGpsError] = useState<string | null>(null);
+    const [stasiunModal, setStasiunModal] = useState<StasiunRute | null>(null);
 
     function findNearestStation(lat: number, lng: number): StasiunFlat | null {
         let nearest: StasiunFlat | null = null;
@@ -733,19 +749,30 @@ export default function PerencanaRute({
                                 label="Berangkat"
                                 stasiun={rute[0]}
                                 variant="departure"
+                                onLihatDestinasi={setStasiunModal}
                             />
                             <EndpointCard
                                 label="Tiba"
                                 stasiun={rute[rute.length - 1]}
                                 variant="arrival"
+                                onLihatDestinasi={setStasiunModal}
                             />
                         </div>
 
                         {/* Pemberhentian */}
-                        <PemberhentianList stops={pemberhentian} />
+                        <PemberhentianList
+                            stops={pemberhentian}
+                            onLihatDestinasi={setStasiunModal}
+                        />
                     </div>
                 )}
             </div>
+
+            <StasiunDestinasiModal
+                stasiun={stasiunModal}
+                open={stasiunModal !== null}
+                onClose={() => setStasiunModal(null)}
+            />
         </div>
     );
 }

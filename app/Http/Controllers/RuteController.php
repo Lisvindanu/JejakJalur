@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Destinasi;
 use App\Models\KoneksiStasiun;
 use App\Models\Stasiun;
 use App\Services\KotaService;
@@ -174,6 +175,18 @@ class RuteController extends Controller
         }
 
         return response()->json(['rute' => $rute, 'segments' => $segments]);
+    }
+
+    public function destinasiStasiun(string $stasiunId): JsonResponse
+    {
+        $destinasi = Destinasi::with('stasiun.kota')
+            ->where('stasiun_id', $stasiunId)
+            ->verified()
+            ->orderByDesc('rating')
+            ->limit(20)
+            ->get();
+
+        return response()->json($destinasi);
     }
 
     /**

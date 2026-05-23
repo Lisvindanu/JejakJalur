@@ -215,7 +215,7 @@ class ScrapeDestinasi extends Command
                         'max_results' => 3,
                     ]);
 
-                    if ($response->status() === 429) {
+                    if (in_array($response->status(), [429, 432], true)) {
                         if (! $this->rotateKey()) {
                             break;
                         }
