@@ -162,50 +162,119 @@ class JejakAiService
 
     private function buildKnowledge(string $query): string
     {
-        $parts = $this->vectorKnowledge($query);
+        // Fast SQL-based search always runs first — no embedding dependency
+        $parts = $this->fastKnowledge($query);
 
-        // Always supplement with direct name-match search
-        // so specific station/destination names never get missed
-        $nameParts = $this->nameMatchKnowledge($query, array_column($parts, null));
-        if (! empty($nameParts)) {
-            $parts = array_merge($parts, $nameParts);
+        // Vector search as supplement (silent fail if embedding service is down)
+        foreach ($this->vectorKnowledge($query) as $vp) {
+            if (! in_array($vp, $parts, true)) {
+                $parts[] = $vp;
+            }
         }
 
-        if (! empty($parts)) {
-            return implode("\n\n", $parts);
-        }
-
-        // Fallback: keyword search
-        return $this->keywordKnowledge($query);
+        return ! empty($parts)
+            ? implode("\n\n", array_slice($parts, 0, 6))
+            : $this->generalKnowledge();
     }
 
-    private function nameMatchKnowledge(string $query, array $existingParts): array
+    /**
+     * Fast SQL-only knowledge retrieval — no vector embedding needed.
+     * Handles: city mentions, station mentions, destination name mentions.
+     *
+     * @return string[]
+     */
+    private function fastKnowledge(string $query): array
     {
-        $parts = [];
-        $lower = strtolower($query);
-        $existingText = implode(' ', $existingParts);
-
-        // Direct station name match
-        $stasiuns = Stasiun::with('kota')
-            ->where(fn ($q) => $q->whereRaw('LOWER(nama) LIKE ?', ["%{$lower}%"])
-                ->orWhereRaw('LOWER(kode_stasiun) LIKE ?', ["%{$lower}%"]))
-            ->limit(5)->get();
-
-        $newStasiuns = $stasiuns->filter(fn ($s) => ! str_contains($existingText, $s->nama));
-        if ($newStasiuns->isNotEmpty()) {
-            $list = $newStasiuns->map(fn ($s) => "- Stasiun {$s->nama} [{$s->kode_stasiun}] di {$s->kota->nama}")->join("\n");
-            $parts[] = "STASIUN (nama match):\n{$list}";
+        $keywords = $this->extractKeywords($query);
+        if (empty($keywords)) {
+            return [];
         }
 
-        // Direct destinasi name match
-        $destinasis = Destinasi::with('stasiun.kota')
-            ->whereRaw('LOWER(nama) LIKE ?', ["%{$lower}%"])
-            ->limit(5)->get();
+        $parts = [];
 
-        $newDest = $destinasis->filter(fn ($d) => ! str_contains($existingText, $d->nama));
-        if ($newDest->isNotEmpty()) {
-            $list = $newDest->map(fn ($d) => "- {$d->nama} [{$d->kategori}] dekat Stasiun {$d->stasiun?->nama}, {$d->stasiun?->kota?->nama}")->join("\n");
-            $parts[] = "DESTINASI (nama match):\n{$list}";
+        // 1. Find matching kota → include all stasiun + destinasi in that kota
+        $kotas = Kota::where(function ($q) use ($keywords) {
+            foreach ($keywords as $kw) {
+                $q->orWhere('nama', 'ILIKE', "%{$kw}%");
+            }
+        })->limit(4)->get();
+
+        if ($kotas->isNotEmpty()) {
+            $kotaIds = $kotas->pluck('id');
+            $stasiunDiKota = Stasiun::whereIn('kota_id', $kotaIds)->get()->groupBy('kota_id');
+
+            $kotaList = $kotas->map(function ($k) use ($stasiunDiKota) {
+                $list = ($stasiunDiKota[$k->id] ?? collect())
+                    ->map(fn ($s) => "  · {$s->nama} [{$s->kode_stasiun}]")
+                    ->join("\n");
+
+                return "- {$k->nama}:\n{$list}";
+            })->join("\n");
+
+            $parts[] = "STASIUN DI KOTA YANG DISEBUTKAN:\n{$kotaList}";
+
+            // Also fetch destinasi for those stasiun
+            $stasiunIds = $stasiunDiKota->flatten()->pluck('id');
+            if ($stasiunIds->isNotEmpty()) {
+                $destinasis = Destinasi::with('stasiun')
+                    ->withCount('ulasan')
+                    ->whereIn('stasiun_id', $stasiunIds)
+                    ->where('is_verified', true)
+                    ->orderByDesc('rating')
+                    ->limit(10)
+                    ->get();
+
+                if ($destinasis->isNotEmpty()) {
+                    $destList = $destinasis->map(function ($d) {
+                        $rating = $d->rating > 0 ? " ⭐{$d->rating}" : '';
+                        $ulasan = $d->ulasan_count > 0 ? " ({$d->ulasan_count} ulasan)" : '';
+
+                        return "- {$d->nama} [{$d->kategori}]{$rating}{$ulasan} dekat Stasiun {$d->stasiun?->nama}: {$d->deskripsi}";
+                    })->join("\n");
+                    $parts[] = "DESTINASI DI KOTA TERSEBUT:\n{$destList}";
+                }
+            }
+        }
+
+        // 2. Find matching stasiun by name/code
+        $coveredKotaIds = $kotas->pluck('id');
+        $stasiuns = Stasiun::with('kota')
+            ->where(function ($q) use ($keywords) {
+                foreach ($keywords as $kw) {
+                    $q->orWhere('nama', 'ILIKE', "%{$kw}%")
+                        ->orWhere('kode_stasiun', 'ILIKE', "%{$kw}%");
+                }
+            })
+            ->when($coveredKotaIds->isNotEmpty(), fn ($q) => $q->whereNotIn('kota_id', $coveredKotaIds))
+            ->limit(6)->get();
+
+        if ($stasiuns->isNotEmpty()) {
+            $list = $stasiuns->map(fn ($s) => "- Stasiun {$s->nama} [{$s->kode_stasiun}] di {$s->kota->nama}")->join("\n");
+            $parts[] = "STASIUN YANG DISEBUTKAN:\n{$list}";
+        }
+
+        // 3. Find matching destinasi by name/description
+        $destByName = Destinasi::with('stasiun.kota')
+            ->withCount('ulasan')
+            ->where(function ($q) use ($keywords) {
+                foreach ($keywords as $kw) {
+                    $q->orWhere('nama', 'ILIKE', "%{$kw}%")
+                        ->orWhere('deskripsi', 'ILIKE', "%{$kw}%")
+                        ->orWhere('kategori', 'ILIKE', "%{$kw}%");
+                }
+            })
+            ->where('is_verified', true)
+            ->orderByDesc('rating')
+            ->limit(6)->get();
+
+        if ($destByName->isNotEmpty()) {
+            $destList = $destByName->map(function ($d) {
+                $loc = $d->stasiun ? "dekat Stasiun {$d->stasiun->nama}, {$d->stasiun->kota->nama}" : '';
+                $rating = $d->rating > 0 ? " ⭐{$d->rating}" : '';
+
+                return "- {$d->nama} [{$d->kategori}]{$rating} {$loc}: {$d->deskripsi}";
+            })->join("\n");
+            $parts[] = "DESTINASI YANG RELEVAN:\n{$destList}";
         }
 
         return $parts;
@@ -251,84 +320,18 @@ class JejakAiService
         $destRows = $this->vectorSearch($query, 'destinasi', 6);
         if (! empty($destRows)) {
             $ids = array_column($destRows, 'id');
-            $destinasis = Destinasi::with('stasiun.kota')->whereIn('id', $ids)->get();
+            $destinasis = Destinasi::with('stasiun.kota')->withCount('ulasan')->whereIn('id', $ids)->get();
             $destList = $destinasis->map(function ($d) {
                 $loc = $d->stasiun ? "dekat Stasiun {$d->stasiun->nama}, {$d->stasiun->kota->nama}" : '';
+                $rating = $d->rating > 0 ? " ⭐{$d->rating}" : '';
+                $ulasan = $d->ulasan_count > 0 ? " ({$d->ulasan_count} ulasan)" : '';
 
-                return "- {$d->nama} [{$d->kategori}] {$loc}: {$d->deskripsi}";
+                return "- {$d->nama} [{$d->kategori}]{$rating}{$ulasan} {$loc}: {$d->deskripsi}";
             })->join("\n");
             $parts[] = "DESTINASI YANG RELEVAN:\n{$destList}";
         }
 
         return $parts;
-    }
-
-    private function keywordKnowledge(string $query): string
-    {
-        $keywords = $this->extractKeywords($query);
-
-        if (empty($keywords)) {
-            return $this->generalKnowledge();
-        }
-
-        $parts = [];
-
-        $kotas = Kota::where(function ($q) use ($keywords) {
-            foreach ($keywords as $kw) {
-                $q->orWhere('nama', 'ILIKE', "%{$kw}%");
-            }
-        })->withCount('stasiun')->limit(5)->get();
-
-        if ($kotas->isNotEmpty()) {
-            $kotaIds = $kotas->pluck('id');
-            $stasiunDiKota = Stasiun::whereIn('kota_id', $kotaIds)->get()->groupBy('kota_id');
-
-            $kotaList = $kotas->map(function ($k) use ($stasiunDiKota) {
-                $list = ($stasiunDiKota[$k->id] ?? collect())
-                    ->map(fn ($s) => "  · {$s->nama} [{$s->kode_stasiun}]")
-                    ->join("\n");
-
-                return "- {$k->nama}:\n{$list}";
-            })->join("\n");
-
-            $parts[] = "STASIUN DI KOTA YANG RELEVAN:\n{$kotaList}";
-        }
-
-        $coveredKotaIds = $kotas->pluck('id');
-        $stasiuns = Stasiun::with('kota')
-            ->where(function ($q) use ($keywords) {
-                foreach ($keywords as $kw) {
-                    $q->orWhere('nama', 'ILIKE', "%{$kw}%")
-                        ->orWhere('kode_stasiun', 'ILIKE', "%{$kw}%");
-                }
-            })
-            ->when($coveredKotaIds->isNotEmpty(), fn ($q) => $q->whereNotIn('kota_id', $coveredKotaIds))
-            ->limit(10)->get();
-
-        if ($stasiuns->isNotEmpty()) {
-            $list = $stasiuns->map(fn ($s) => "- Stasiun {$s->nama} [{$s->kode_stasiun}] di {$s->kota->nama}")->join("\n");
-            $parts[] = "STASIUN LAIN YANG RELEVAN:\n{$list}";
-        }
-
-        $destinasiList = Destinasi::with('stasiun.kota')
-            ->where(function ($q) use ($keywords) {
-                foreach ($keywords as $kw) {
-                    $q->orWhere('nama', 'ILIKE', "%{$kw}%")
-                        ->orWhere('deskripsi', 'ILIKE', "%{$kw}%")
-                        ->orWhere('kategori', 'ILIKE', "%{$kw}%");
-                }
-            })->limit(8)->get();
-
-        if ($destinasiList->isNotEmpty()) {
-            $destList = $destinasiList->map(function ($d) {
-                $loc = $d->stasiun ? "dekat Stasiun {$d->stasiun->nama}, {$d->stasiun->kota->nama}" : '';
-
-                return "- {$d->nama} [{$d->kategori}] {$loc}: {$d->deskripsi}";
-            })->join("\n");
-            $parts[] = "DESTINASI YANG RELEVAN:\n{$destList}";
-        }
-
-        return empty($parts) ? $this->generalKnowledge() : implode("\n\n", $parts);
     }
 
     private function generalKnowledge(): string
