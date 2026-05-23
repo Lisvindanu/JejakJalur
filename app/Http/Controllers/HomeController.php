@@ -18,10 +18,12 @@ class HomeController extends Controller
     {
         $destinasiFeatured = $this->destinasiService->destinasiFeatured(6);
         $semuaKota = $this->kotaService->semuaKotaDenganStasiun();
+        $destinasiPopuler = $this->destinasiService->destinasiPopulerBulanIni(6);
 
         return Inertia::render('welcome', [
             'destinasiFeatured' => $destinasiFeatured,
             'semuaKota' => $semuaKota,
+            'destinasiPopuler' => $destinasiPopuler,
         ]);
     }
 }

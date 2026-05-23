@@ -68,6 +68,17 @@ class DestinasiService
         ]);
     }
 
+    public function destinasiPopulerBulanIni(int $jumlah = 6): Collection
+    {
+        return Destinasi::with('stasiun.kota')
+            ->verified()
+            ->whereHas('ulasan', fn ($q) => $q->where('created_at', '>=', now()->subDays(30)))
+            ->withCount(['ulasan as ulasan_bulan_ini' => fn ($q) => $q->where('created_at', '>=', now()->subDays(30))])
+            ->orderByDesc('ulasan_bulan_ini')
+            ->limit($jumlah)
+            ->get();
+    }
+
     public function destinasiFeatured(int $jumlah = 6): Collection
     {
         return Destinasi::with('stasiun.kota')

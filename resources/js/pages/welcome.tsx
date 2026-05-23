@@ -2,6 +2,7 @@ import { Head } from '@inertiajs/react';
 import FeaturedDestinasi from '@/components/fragments/Home/FeaturedDestinasi';
 import HeroSection from '@/components/fragments/Home/HeroSection';
 import KotaSection from '@/components/fragments/Home/KotaSection';
+import PopulerSection from '@/components/fragments/Home/PopulerSection';
 import PublicLayout from '@/components/layouts/PublicLayout';
 import { MOCK_DESTINASI, MOCK_KOTA } from '@/lib/mock-data';
 import type { Destinasi, Kota } from '@/types';
@@ -26,9 +27,10 @@ const PRIORITY_CITIES = [
 interface Props {
     destinasiFeatured?: Destinasi[];
     semuaKota?: Kota[];
+    destinasiPopuler?: Destinasi[];
 }
 
-export default function Welcome({ destinasiFeatured, semuaKota }: Props) {
+export default function Welcome({ destinasiFeatured, semuaKota, destinasiPopuler = [] }: Props) {
     const featured =
         destinasiFeatured && destinasiFeatured.length > 0
             ? destinasiFeatured
@@ -54,6 +56,7 @@ export default function Welcome({ destinasiFeatured, semuaKota }: Props) {
             <Head title="Temukan Permata Tersembunyi di Jalur Kereta" />
             <HeroSection destinations={featured} />
             <KotaSection kota={kota} />
+            <PopulerSection destinasi={destinasiPopuler} />
             <FeaturedDestinasi destinasi={featured} />
         </PublicLayout>
     );
