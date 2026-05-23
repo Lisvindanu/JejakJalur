@@ -34,6 +34,12 @@ function formatJarak(km: number): string {
     return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
 }
 
+// Estimasi waktu jalan kaki: ~5 km/h
+function formatWaktuJalan(km: number): string {
+    const menit = Math.ceil((km / 5) * 60);
+    return menit < 60 ? `${menit} menit jalan` : `${Math.floor(menit / 60)} jam ${menit % 60} menit jalan`;
+}
+
 export default function LokasiPanel({ destinasi }: Props) {
     const mapRef = useRef<HTMLDivElement>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -249,6 +255,9 @@ export default function LokasiPanel({ destinasi }: Props) {
                             Dari Stasiun {destinasi.stasiun.nama}:{' '}
                             <span className="font-semibold text-blue-700">
                                 {formatJarak(jarakStasiun)}
+                            </span>
+                            <span className="ml-1 text-xs text-stone-400">
+                                (~{formatWaktuJalan(jarakStasiun)})
                             </span>
                         </span>
                     </div>
