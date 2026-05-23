@@ -45,6 +45,10 @@ export type Destinasi = {
     foto_url?: string | null;
     is_verified: boolean;
     created_at?: string | null;
+    telepon?: string | null;
+    website?: string | null;
+    harga_min?: number | null;
+    harga_max?: number | null;
     stasiun: {
         id?: string;
         nama: string;

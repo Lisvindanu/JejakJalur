@@ -40,6 +40,10 @@ export default function DestinasiFormulir({
         kategori: string;
         stasiun_id: string;
         foto: File | null;
+        telepon: string;
+        website: string;
+        harga_min: string;
+        harga_max: string;
         _method?: string;
     }>({
         nama: destinasi?.nama ?? '',
@@ -50,6 +54,10 @@ export default function DestinasiFormulir({
         kategori: destinasi?.kategori ?? '',
         stasiun_id: destinasi?.stasiun?.id ?? '',
         foto: null,
+        telepon: destinasi?.telepon ?? '',
+        website: destinasi?.website ?? '',
+        harga_min: destinasi?.harga_min != null ? String(destinasi.harga_min) : '',
+        harga_max: destinasi?.harga_max != null ? String(destinasi.harga_max) : '',
         ...(isEdit ? { _method: 'PATCH' } : {}),
     });
 
@@ -196,6 +204,50 @@ export default function DestinasiFormulir({
                             placeholder="Pilih stasiun..."
                             error={errors.stasiun_id}
                         />
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <Input
+                                label="Telepon (opsional)"
+                                value={data.telepon}
+                                onChange={(e) => setData('telepon', e.target.value)}
+                                error={errors.telepon}
+                                placeholder="cth. 0812-3456-7890"
+                            />
+                            <Input
+                                label="Website (opsional)"
+                                value={data.website}
+                                onChange={(e) => setData('website', e.target.value)}
+                                error={errors.website}
+                                placeholder="https://..."
+                                type="url"
+                            />
+                        </div>
+
+                        <div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input
+                                    label="Harga Min (opsional)"
+                                    value={data.harga_min}
+                                    onChange={(e) => setData('harga_min', e.target.value)}
+                                    error={errors.harga_min}
+                                    placeholder="cth. 0 (gratis)"
+                                    type="number"
+                                    min="0"
+                                />
+                                <Input
+                                    label="Harga Max (opsional)"
+                                    value={data.harga_max}
+                                    onChange={(e) => setData('harga_max', e.target.value)}
+                                    error={errors.harga_max}
+                                    placeholder="cth. 50000"
+                                    type="number"
+                                    min="0"
+                                />
+                            </div>
+                            <p className="mt-1 text-xs text-stone-400">
+                                Isi 0 untuk menandai gratis. Kosongkan kalau belum diketahui.
+                            </p>
+                        </div>
 
                         {/* Foto upload */}
                         <div>

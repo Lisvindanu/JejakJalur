@@ -75,6 +75,11 @@ export default function DestinasiCard({ destinasi }: DestinasiCardProps) {
                     {destinasi.is_verified && (
                         <Badge verified>Terverifikasi</Badge>
                     )}
+                    {destinasi.harga_min === 0 && (
+                        <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                            Gratis
+                        </span>
+                    )}
                 </div>
                 <p className="mb-1.5 text-[15px] leading-snug font-semibold text-stone-800 group-hover:text-emerald-700">
                     {destinasi.nama}

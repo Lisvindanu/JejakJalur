@@ -23,6 +23,7 @@ class Destinasi extends Model
     protected $fillable = [
         'stasiun_id', 'user_id', 'nama', 'deskripsi', 'alamat', 'lat', 'lng',
         'kategori', 'rating', 'foto', 'is_verified',
+        'telepon', 'website', 'harga_min', 'harga_max',
     ];
 
     protected $appends = ['foto_url'];

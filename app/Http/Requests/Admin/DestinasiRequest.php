@@ -21,6 +21,10 @@ class DestinasiRequest extends FormRequest
             'lng' => ['nullable', 'numeric', 'between:-180,180'],
             'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'is_verified' => ['boolean'],
+            'telepon' => ['nullable', 'string', 'max:20'],
+            'website' => ['nullable', 'url', 'max:255'],
+            'harga_min' => ['nullable', 'integer', 'min:0'],
+            'harga_max' => ['nullable', 'integer', 'min:0', 'gte:harga_min'],
         ];
     }
 

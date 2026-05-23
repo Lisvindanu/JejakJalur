@@ -1,8 +1,11 @@
 import { Link } from '@inertiajs/react';
 import {
     IconArrowLeft,
+    IconCash,
+    IconExternalLink,
     IconMapPin,
     IconMountain,
+    IconPhone,
     IconShoppingBag,
     IconToolsKitchen2,
     IconTrain,
@@ -112,6 +115,48 @@ export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
                 <p className="max-w-[680px] text-[15px] leading-relaxed text-stone-600">
                     {destinasi.deskripsi}
                 </p>
+
+                {/* Info tambahan */}
+                {(destinasi.telepon || destinasi.website || destinasi.harga_min != null) && (
+                    <div className="mt-5 flex flex-wrap gap-3">
+                        {destinasi.harga_min != null && (
+                            <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm">
+                                <IconCash size={15} className="shrink-0 text-emerald-600" />
+                                <span className="text-stone-700">
+                                    {destinasi.harga_min === 0
+                                        ? <span className="font-semibold text-emerald-700">Gratis</span>
+                                        : <>
+                                            Rp {destinasi.harga_min.toLocaleString('id-ID')}
+                                            {destinasi.harga_max && destinasi.harga_max > destinasi.harga_min && (
+                                                <> – Rp {destinasi.harga_max.toLocaleString('id-ID')}</>
+                                            )}
+                                        </>
+                                    }
+                                </span>
+                            </div>
+                        )}
+                        {destinasi.telepon && (
+                            <a
+                                href={`tel:${destinasi.telepon}`}
+                                className="flex items-center gap-2 rounded-lg bg-stone-50 px-3 py-2 text-sm text-stone-700 transition-colors hover:bg-stone-100"
+                            >
+                                <IconPhone size={15} className="shrink-0 text-stone-400" />
+                                {destinasi.telepon}
+                            </a>
+                        )}
+                        {destinasi.website && (
+                            <a
+                                href={destinasi.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 rounded-lg bg-stone-50 px-3 py-2 text-sm text-stone-700 transition-colors hover:bg-stone-100"
+                            >
+                                <IconExternalLink size={15} className="shrink-0 text-stone-400" />
+                                Website
+                            </a>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );
