@@ -32,6 +32,14 @@ interface UlasanTerbaru {
     created_at: string;
 }
 
+interface TopDestinasi {
+    id: string;
+    nama: string;
+    kategori: string;
+    ulasan_bulan_ini: number;
+    rating: string;
+}
+
 interface Props {
     statistik?: {
         jumlah_kota: number;
@@ -42,9 +50,14 @@ interface Props {
         jumlah_pengguna: number;
         jumlah_ulasan: number;
         ai_pesan_hari_ini: number;
+        pengguna_baru_bulan_ini?: number;
+        pengguna_baru_bulan_lalu?: number;
+        ulasan_bulan_ini?: number;
+        bookmark_bulan_ini?: number;
     };
     destinasiPending?: DestinasiPending[];
     ulasanTerbaru?: UlasanTerbaru[];
+    topDestinasiUlasan?: TopDestinasi[];
 }
 
 const KATEGORI_COLOR: Record<string, string> = {
@@ -57,6 +70,7 @@ export default function Dashboard({
     statistik: stat,
     destinasiPending = [],
     ulasanTerbaru = [],
+    topDestinasiUlasan = [],
 }: Props) {
     const statistik = stat ?? {
         ...MOCK_STATISTIK,
@@ -260,6 +274,93 @@ export default function Dashboard({
                         )}
                     </div>
                 </div>
+
+                {/* Analytics bulan ini */}
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {[
+                        {
+                            label: 'Pengguna Baru Bulan Ini',
+                            value: statistik.pengguna_baru_bulan_ini ?? 0,
+                            sub: `${statistik.pengguna_baru_bulan_lalu ?? 0} bulan lalu`,
+                        },
+                        {
+                            label: 'Ulasan Bulan Ini',
+                            value: statistik.ulasan_bulan_ini ?? 0,
+                            sub: 'dari semua pengguna',
+                        },
+                        {
+                            label: 'Bookmark Bulan Ini',
+                            value: statistik.bookmark_bulan_ini ?? 0,
+                            sub: 'destinasi di-save',
+                        },
+                        {
+                            label: 'AI Pesan Hari Ini',
+                            value: statistik.ai_pesan_hari_ini,
+                            sub: 'percakapan aktif',
+                        },
+                    ].map((item) => (
+                        <div
+                            key={item.label}
+                            className="rounded-xl border border-stone-200 bg-white p-5"
+                        >
+                            <p className="text-xs text-stone-500">{item.label}</p>
+                            <p className="mt-1 text-3xl font-bold tabular-nums text-stone-900">
+                                {item.value}
+                            </p>
+                            <p className="mt-0.5 text-xs text-stone-400">{item.sub}</p>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Top destinasi bulan ini */}
+                {topDestinasiUlasan.length > 0 && (
+                    <div className="rounded-2xl border border-stone-200 bg-white">
+                        <div className="border-b border-stone-100 px-5 py-4">
+                            <h2 className="text-sm font-semibold text-stone-800">
+                                Top Destinasi Bulan Ini
+                            </h2>
+                            <p className="text-xs text-stone-400">
+                                Berdasarkan jumlah ulasan 30 hari terakhir
+                            </p>
+                        </div>
+                        <div className="divide-y divide-stone-100">
+                            {topDestinasiUlasan.map((d, i) => (
+                                <div
+                                    key={d.id}
+                                    className="flex items-center gap-3 px-5 py-3"
+                                >
+                                    <span className="w-5 shrink-0 text-center text-xs font-bold text-stone-400">
+                                        {i + 1}
+                                    </span>
+                                    <div className="min-w-0 flex-1">
+                                        <Link
+                                            href={`/destinasi/${d.id}`}
+                                            className="truncate text-sm font-medium text-stone-800 no-underline hover:text-emerald-700"
+                                        >
+                                            {d.nama}
+                                        </Link>
+                                    </div>
+                                    <span
+                                        className={cn(
+                                            'rounded-full px-2 py-0.5 text-[10px] font-semibold',
+                                            KATEGORI_COLOR[d.kategori] ??
+                                                'bg-stone-100 text-stone-600',
+                                        )}
+                                    >
+                                        {d.kategori}
+                                    </span>
+                                    <span className="shrink-0 text-xs font-semibold text-stone-500">
+                                        {d.ulasan_bulan_ini} ulasan
+                                    </span>
+                                    <div className="flex shrink-0 items-center gap-1 text-xs text-amber-600">
+                                        <IconStar size={11} className="fill-current" />
+                                        {Number(d.rating).toFixed(1)}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* Quick actions */}
                 <div className="grid gap-3 sm:grid-cols-3">

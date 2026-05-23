@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AiSession;
+use App\Models\Bookmark;
 use App\Models\Destinasi;
 use App\Models\Kota;
 use App\Models\Stasiun;
@@ -53,10 +54,37 @@ class DashboardController extends Controller
                 'created_at' => $u->created_at->diffForHumans(),
             ]);
 
+        $topDestinasiUlasan = Destinasi::withCount(['ulasan as ulasan_bulan_ini' => fn ($q) => $q->where('created_at', '>=', now()->subDays(30))])
+            ->having('ulasan_bulan_ini', '>', 0)
+            ->orderByDesc('ulasan_bulan_ini')
+            ->limit(5)
+            ->get()
+            ->map(fn (Destinasi $d) => [
+                'id' => $d->id,
+                'nama' => $d->nama,
+                'kategori' => $d->kategori,
+                'ulasan_bulan_ini' => $d->ulasan_bulan_ini,
+                'rating' => $d->rating,
+            ]);
+
+        $pengguna_baru_bulan_ini = User::where('created_at', '>=', now()->startOfMonth())->count();
+        $pengguna_baru_bulan_lalu = User::whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()])->count();
+
+        $ulasan_bulan_ini = Ulasan::where('created_at', '>=', now()->startOfMonth())->count();
+        $bookmark_bulan_ini = Bookmark::where('created_at', '>=', now()->startOfMonth())->count();
+
+        $statistik = array_merge($statistik, [
+            'pengguna_baru_bulan_ini' => $pengguna_baru_bulan_ini,
+            'pengguna_baru_bulan_lalu' => $pengguna_baru_bulan_lalu,
+            'ulasan_bulan_ini' => $ulasan_bulan_ini,
+            'bookmark_bulan_ini' => $bookmark_bulan_ini,
+        ]);
+
         return Inertia::render('Admin/Dashboard', [
             'statistik' => $statistik,
             'destinasiPending' => $destinasiPending,
             'ulasanTerbaru' => $ulasanTerbaru,
+            'topDestinasiUlasan' => $topDestinasiUlasan,
         ]);
     }
 }
