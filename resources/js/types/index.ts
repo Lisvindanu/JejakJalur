@@ -87,6 +87,17 @@ export type StasiunRute = {
     kota: { id: string; nama: string };
 };
 
+export type RuteSegment = {
+    dari_id: string;
+    ke_id: string;
+    jarak_km: number;
+    geometry?: {
+        type: 'LineString';
+        coordinates: [number, number][];
+    } | null;
+    reversed?: boolean;
+};
+
 export type UlasanProfil = {
     id: string;
     judul?: string | null;

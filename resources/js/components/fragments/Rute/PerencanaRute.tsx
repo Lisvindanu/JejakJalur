@@ -534,11 +534,28 @@ export default function PerencanaRute({
     }
 
     const [rute, setRute] = useState<StasiunRute[] | null>(null);
+    const [segments, setSegments] = useState<RuteSegment[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [loadingGps, setLoadingGps] = useState(false);
     const [gpsError, setGpsError] = useState<string | null>(null);
     const [stasiunModal, setStasiunModal] = useState<StasiunRute | null>(null);
+
+    const SPEED_KMPH: Record<Mode, number> = {
+        antarkota: 80,
+        commuter: 40,
+        kcic: 200,
+    };
+
+    const totalJarak = segments.reduce((s, seg) => s + (seg.jarak_km ?? 0), 0);
+    const estimasiMenit = totalJarak > 0 ? Math.round((totalJarak / SPEED_KMPH[mode]) * 60) : 0;
+
+    function formatDurasi(menit: number): string {
+        if (menit < 60) return `${menit} menit`;
+        const jam = Math.floor(menit / 60);
+        const sisa = menit % 60;
+        return sisa > 0 ? `${jam} jam ${sisa} menit` : `${jam} jam`;
+    }
 
     function findNearestStation(lat: number, lng: number): StasiunFlat | null {
         let nearest: StasiunFlat | null = null;
@@ -602,6 +619,7 @@ export default function PerencanaRute({
 
     function resetRute() {
         setRute(null);
+        setSegments([]);
         setError(null);
         onRuteClear();
     }
@@ -630,6 +648,7 @@ export default function PerencanaRute({
                 setError(data.error ?? 'Terjadi kesalahan.');
             } else {
                 setRute(data.rute);
+                setSegments(data.segments ?? []);
                 onRuteFound(data.rute, data.segments ?? []);
             }
         } catch {
@@ -747,8 +766,13 @@ export default function PerencanaRute({
                         >
                             {copied ? (
                                 <>
-                                    <IconCheck size={15} className="text-emerald-600" />
-                                    <span className="text-emerald-600">Tersalin!</span>
+                                    <IconCheck
+                                        size={15}
+                                        className="text-emerald-600"
+                                    />
+                                    <span className="text-emerald-600">
+                                        Tersalin!
+                                    </span>
                                 </>
                             ) : (
                                 <>
@@ -796,8 +820,20 @@ export default function PerencanaRute({
                             <span className="font-medium">
                                 {rute[rute.length - 1].nama}
                             </span>
-                            <span className="ml-auto rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
-                                {rute.length} stasiun total
+                            <span className="ml-auto flex flex-wrap gap-2">
+                                <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+                                    {rute.length} stasiun
+                                </span>
+                                {totalJarak > 0 && (
+                                    <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-semibold text-stone-600">
+                                        {totalJarak.toFixed(0)} km
+                                    </span>
+                                )}
+                                {estimasiMenit > 0 && (
+                                    <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
+                                        ~{formatDurasi(estimasiMenit)}
+                                    </span>
+                                )}
                             </span>
                         </div>
 
