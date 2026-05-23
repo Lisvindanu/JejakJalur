@@ -8,10 +8,12 @@ import {
     IconMapPin,
     IconMountain,
     IconPencil,
+    IconRoute,
     IconShoppingBag,
     IconStar,
     IconToolsKitchen2,
     IconTrash,
+    IconX,
 } from '@tabler/icons-react';
 import { useState } from 'react';
 import Avatar from '@/components/elements/Avatar';
@@ -28,6 +30,7 @@ import type {
     BookmarkProfil,
     KunjunganProfil,
     PaginatedData,
+    RuteFavoritProfil,
     SharedProps,
     UlasanProfil,
 } from '@/types';
@@ -49,6 +52,7 @@ interface Props {
     ulasan?: PaginatedData<UlasanProfil>;
     bookmarks?: PaginatedData<BookmarkProfil>;
     kunjungan?: PaginatedData<KunjunganProfil>;
+    ruteFavorit?: PaginatedData<RuteFavoritProfil>;
 }
 
 function StatItem({
@@ -213,6 +217,67 @@ function KunjunganCard({ kunjungan }: { kunjungan: KunjunganProfil }) {
     );
 }
 
+const MODE_LABEL: Record<string, string> = {
+    antarkota: 'Antarkota',
+    commuter: 'KRL',
+    kcic: 'Whoosh',
+};
+
+function RuteFavoritCard({ rute }: { rute: RuteFavoritProfil }) {
+    const [removing, setRemoving] = useState(false);
+
+    function hapus() {
+        setRemoving(true);
+        router.visit(`/rute-favorit/${rute.id}`, {
+            method: 'delete',
+            preserveScroll: true,
+            onFinish: () => setRemoving(false),
+        });
+    }
+
+    return (
+        <div className="flex items-center gap-3 rounded-xl border border-stone-100 bg-white p-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+                <IconRoute size={17} />
+            </div>
+            <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-medium text-stone-800">
+                    {rute.nama}
+                </div>
+                <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-stone-500">
+                    <span className="font-mono">{rute.dari_kode}</span>
+                    <span className="text-stone-300">→</span>
+                    <span className="font-mono">{rute.ke_kode}</span>
+                    <span className="rounded-full bg-stone-100 px-1.5 py-0.5 text-[10px]">
+                        {MODE_LABEL[rute.mode] ?? rute.mode}
+                    </span>
+                </div>
+            </div>
+            <div className="flex shrink-0 gap-1">
+                <Link
+                    href={`/rute?dari=${rute.dari_kode}&ke=${rute.ke_kode}&mode=${rute.mode}`}
+                    className="flex items-center gap-1 rounded-lg border border-emerald-200 px-2 py-1 text-[11px] font-medium text-emerald-700 no-underline transition-colors hover:bg-emerald-50"
+                >
+                    <IconRoute size={11} />
+                    Buka
+                </Link>
+                <button
+                    onClick={hapus}
+                    disabled={removing}
+                    title="Hapus dari favorit"
+                    className="flex items-center justify-center rounded-lg border border-stone-200 p-1 text-stone-400 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
+                >
+                    {removing ? (
+                        <IconLoader2 size={13} className="animate-spin" />
+                    ) : (
+                        <IconX size={13} />
+                    )}
+                </button>
+            </div>
+        </div>
+    );
+}
+
 function UlasanCard({ ulasan }: { ulasan: UlasanProfil }) {
     const ph = kategoriPlaceholder(ulasan.destinasi.kategori);
 
@@ -275,6 +340,7 @@ export default function Tampilkan({
     ulasan,
     bookmarks,
     kunjungan,
+    ruteFavorit,
 }: Props) {
     const emptyUlasan: PaginatedData<UlasanProfil> = {
         data: [],
@@ -306,9 +372,20 @@ export default function Tampilkan({
         to: null,
         links: [],
     };
+    const emptyRuteFavorit: PaginatedData<RuteFavoritProfil> = {
+        data: [],
+        current_page: 1,
+        last_page: 1,
+        per_page: 10,
+        total: 0,
+        from: null,
+        to: null,
+        links: [],
+    };
     const ulasanData = ulasan ?? emptyUlasan;
     const bookmarksData = bookmarks ?? emptyBookmarks;
     const kunjunganData = kunjungan ?? emptyKunjungan;
+    const ruteFavoritData = ruteFavorit ?? emptyRuteFavorit;
     const pengguna = penggunaProp ?? MOCK_PENGGUNA;
     const { auth } = usePage<SharedProps>().props;
     const isAdmin = pengguna.is_admin ?? auth?.user?.is_admin ?? false;
@@ -499,6 +576,55 @@ export default function Tampilkan({
                                 {kunjunganData.last_page > 1 && (
                                     <div className="mt-4 border-t border-stone-100 pt-4">
                                         <Pagination data={kunjunganData} />
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+
+                    {/* Rute Favorit */}
+                    <div className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">
+                        <div className="mb-4 flex items-center gap-2">
+                            <IconRoute
+                                size={18}
+                                className="text-blue-600"
+                            />
+                            <h2 className="font-semibold text-stone-800">
+                                Rute Favorit
+                            </h2>
+                            {ruteFavoritData.total > 0 && (
+                                <span className="ml-auto rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-500">
+                                    {ruteFavoritData.total}
+                                </span>
+                            )}
+                        </div>
+
+                        {ruteFavoritData.total === 0 ? (
+                            <div className="rounded-xl border border-dashed border-stone-200 py-10 text-center">
+                                <IconRoute
+                                    size={32}
+                                    className="mx-auto mb-2 text-stone-300"
+                                />
+                                <p className="text-sm text-stone-400">
+                                    Belum ada rute yang disimpan.
+                                </p>
+                                <Link
+                                    href="/rute"
+                                    className="mt-2 inline-block text-sm font-medium text-emerald-700 no-underline hover:text-emerald-800"
+                                >
+                                    Rencanakan perjalanan
+                                </Link>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="space-y-2">
+                                    {ruteFavoritData.data.map((r) => (
+                                        <RuteFavoritCard key={r.id} rute={r} />
+                                    ))}
+                                </div>
+                                {ruteFavoritData.last_page > 1 && (
+                                    <div className="mt-4 border-t border-stone-100 pt-4">
+                                        <Pagination data={ruteFavoritData} />
                                     </div>
                                 )}
                             </>

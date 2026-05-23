@@ -17,6 +17,7 @@ use App\Http\Controllers\JejakAiController;
 use App\Http\Controllers\KunjunganController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\RuteController;
+use App\Http\Controllers\RuteFavoritController;
 use App\Http\Controllers\UlasanController;
 use Illuminate\Support\Facades\Route;
 
@@ -91,6 +92,12 @@ Route::middleware('auth')->prefix('destinasi/{destinasi:id}')->name('bookmark.')
 Route::middleware('auth')->prefix('destinasi/{destinasi:id}')->name('kunjungan.')->group(function () {
     Route::post('/kunjungan', [KunjunganController::class, 'simpan'])->name('simpan');
     Route::delete('/kunjungan', [KunjunganController::class, 'hapus'])->name('hapus');
+});
+
+// Rute Favorit
+Route::middleware('auth')->prefix('rute-favorit')->name('rute-favorit.')->group(function () {
+    Route::post('/', [RuteFavoritController::class, 'simpan'])->name('simpan');
+    Route::delete('/{ruteFavorit}', [RuteFavoritController::class, 'hapus'])->name('hapus');
 });
 
 // Ulasan (pengguna terautentikasi)

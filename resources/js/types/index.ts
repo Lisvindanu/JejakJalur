@@ -134,6 +134,16 @@ export type KunjunganProfil = {
     };
 };
 
+export type RuteFavoritProfil = {
+    id: number;
+    nama: string;
+    dari_kode: string;
+    ke_kode: string;
+    dari_nama: string;
+    ke_nama: string;
+    mode: 'antarkota' | 'commuter' | 'kcic';
+};
+
 export type PaginatedData<T> = {
     data: T[];
     current_page: number;

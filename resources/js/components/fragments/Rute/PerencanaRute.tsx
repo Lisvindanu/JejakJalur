@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
     IconBolt,
+    IconBookmark,
     IconCheck,
     IconChevronRight,
     IconCurrentLocation,
@@ -11,7 +12,8 @@ import {
     IconTrain,
     IconX,
 } from '@tabler/icons-react';
-import type { Kota, RuteSegment, StasiunRute } from '@/types';
+import { router, usePage } from '@inertiajs/react';
+import type { Kota, RuteSegment, SharedProps, StasiunRute } from '@/types';
 import StasiunDestinasiModal from './StasiunDestinasiModal';
 
 // ── Types & Constants ─────────────────────────────────────────────────────────
@@ -533,6 +535,9 @@ export default function PerencanaRute({
         });
     }
 
+    const { auth } = usePage<SharedProps>().props;
+    const isAuthenticated = !!auth?.user;
+
     const [rute, setRute] = useState<StasiunRute[] | null>(null);
     const [segments, setSegments] = useState<RuteSegment[]>([]);
     const [loading, setLoading] = useState(false);
@@ -540,6 +545,9 @@ export default function PerencanaRute({
     const [loadingGps, setLoadingGps] = useState(false);
     const [gpsError, setGpsError] = useState<string | null>(null);
     const [stasiunModal, setStasiunModal] = useState<StasiunRute | null>(null);
+    const [showSaveForm, setShowSaveForm] = useState(false);
+    const [namaRute, setNamaRute] = useState('');
+    const [saving, setSaving] = useState(false);
 
     const SPEED_KMPH: Record<Mode, number> = {
         antarkota: 80,
@@ -621,7 +629,34 @@ export default function PerencanaRute({
         setRute(null);
         setSegments([]);
         setError(null);
+        setShowSaveForm(false);
+        setNamaRute('');
         onRuteClear();
+    }
+
+    function handleSimpanRute() {
+        if (!asal || !tujuan || !namaRute.trim()) return;
+        setSaving(true);
+        router.post(
+            '/rute-favorit',
+            {
+                nama: namaRute.trim(),
+                dari_kode: asal.kode_stasiun,
+                ke_kode: tujuan.kode_stasiun,
+                dari_nama: asal.nama,
+                ke_nama: tujuan.nama,
+                mode,
+            },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    setShowSaveForm(false);
+                    setNamaRute('');
+                },
+                onFinish: () => setSaving(false),
+            },
+        );
     }
 
     function handleModeChange(newMode: Mode) {
@@ -836,6 +871,72 @@ export default function PerencanaRute({
                                 )}
                             </span>
                         </div>
+
+                        {/* Save route */}
+                        {isAuthenticated && (
+                            <div className="mb-5">
+                                {!showSaveForm ? (
+                                    <button
+                                        onClick={() => {
+                                            setNamaRute(
+                                                `${asal?.nama} → ${tujuan?.nama}`,
+                                            );
+                                            setShowSaveForm(true);
+                                        }}
+                                        className="flex items-center gap-1.5 rounded-lg border border-stone-200 px-3 py-1.5 text-xs font-medium text-stone-600 transition-colors hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+                                    >
+                                        <IconBookmark size={13} />
+                                        Simpan Rute
+                                    </button>
+                                ) : (
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <input
+                                            value={namaRute}
+                                            onChange={(e) =>
+                                                setNamaRute(e.target.value)
+                                            }
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    handleSimpanRute();
+                                                }
+                                                if (e.key === 'Escape') {
+                                                    setShowSaveForm(false);
+                                                }
+                                            }}
+                                            placeholder="Nama rute..."
+                                            maxLength={100}
+                                            autoFocus
+                                            className="rounded-lg border border-stone-200 px-3 py-1.5 text-xs text-stone-700 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-50"
+                                        />
+                                        <button
+                                            onClick={handleSimpanRute}
+                                            disabled={
+                                                saving || !namaRute.trim()
+                                            }
+                                            className="flex items-center gap-1 rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-emerald-800 disabled:opacity-50"
+                                        >
+                                            {saving ? (
+                                                <IconLoader2
+                                                    size={12}
+                                                    className="animate-spin"
+                                                />
+                                            ) : (
+                                                <IconCheck size={12} />
+                                            )}
+                                            Simpan
+                                        </button>
+                                        <button
+                                            onClick={() =>
+                                                setShowSaveForm(false)
+                                            }
+                                            className="rounded-lg border border-stone-200 px-3 py-1.5 text-xs text-stone-500 transition-colors hover:bg-stone-50"
+                                        >
+                                            Batal
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                         {/* Endpoint cards */}
                         <div className="grid gap-4 sm:grid-cols-2">

@@ -68,6 +68,10 @@ class ProfilController extends Controller
                 ],
             ]);
 
+        $ruteFavorit = $pengguna->ruteFavorit()
+            ->latest()
+            ->paginate(10, ['*'], 'rute_page');
+
         return Inertia::render('Profil/Tampilkan', [
             'pengguna' => $pengguna,
             'jumlah_ulasan' => $jumlah_ulasan,
@@ -76,6 +80,7 @@ class ProfilController extends Controller
             'ulasan' => $ulasan,
             'bookmarks' => $bookmarks,
             'kunjungan' => $kunjungan,
+            'ruteFavorit' => $ruteFavorit,
         ]);
     }
 

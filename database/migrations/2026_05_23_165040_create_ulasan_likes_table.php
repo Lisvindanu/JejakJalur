@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('ulasan_likes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
             $table->uuid('ulasan_id');
             $table->foreign('ulasan_id')->references('id')->on('ulasan')->cascadeOnDelete();
             $table->unique(['user_id', 'ulasan_id']);

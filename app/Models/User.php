@@ -58,4 +58,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Kunjungan::class);
     }
+
+    public function ruteFavorit(): HasMany
+    {
+        return $this->hasMany(RuteFavorit::class);
+    }
 }
