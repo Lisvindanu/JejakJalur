@@ -11,6 +11,7 @@ interface Filter {
     kota_id?: string;
     stasiun_id?: string;
     kategori?: string;
+    urut?: string;
 }
 
 interface Props {

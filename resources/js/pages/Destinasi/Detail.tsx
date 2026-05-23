@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import BookmarkButton from '@/components/elements/BookmarkButton';
+import DestinasiCard from '@/components/fragments/Destinasi/DestinasiCard';
 import DestinasiDetail from '@/components/fragments/Destinasi/DestinasiDetail';
 import LokasiPanel from '@/components/fragments/Destinasi/LokasiPanel';
 import UlasanForm from '@/components/fragments/Ulasan/UlasanForm';
@@ -11,11 +12,13 @@ import type { Destinasi, SharedProps } from '@/types';
 interface Props {
     destinasi?: Destinasi;
     is_bookmarked?: boolean;
+    destinasi_terkait?: Destinasi[];
 }
 
 export default function Detail({
     destinasi: dest,
     is_bookmarked = false,
+    destinasi_terkait = [],
 }: Props) {
     const destinasi: Destinasi = dest ?? {
         ...MOCK_DESTINASI[0],
@@ -77,6 +80,19 @@ export default function Detail({
                     destinasiId={destinasi.id}
                 />
             </div>
+            {/* Destinasi terkait */}
+            {destinasi_terkait.length > 0 && (
+                <div className="border-t border-stone-100 px-[max(24px,calc(50%-576px))] py-10">
+                    <h2 className="mb-5 text-base font-semibold text-stone-800">
+                        Destinasi Lain di Stasiun {destinasi.stasiun.nama}
+                    </h2>
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                        {destinasi_terkait.map((d) => (
+                            <DestinasiCard key={d.id} destinasi={d} />
+                        ))}
+                    </div>
+                </div>
+            )}
         </PublicLayout>
     );
 }

@@ -22,7 +22,7 @@ class DestinasiController extends Controller
 
     public function indeks(Request $request): Response
     {
-        $filter = $request->only(['kata_kunci', 'kota_id', 'stasiun_id', 'kategori']);
+        $filter = $request->only(['kata_kunci', 'kota_id', 'stasiun_id', 'kategori', 'urut']);
 
         $destinasi = $this->destinasiService->daftarDestinasiTerfilter($filter, hanyaVerified: true);
         $semuaKota = $this->kotaService->semuaKotaDenganStasiun();
@@ -55,6 +55,7 @@ class DestinasiController extends Controller
         return Inertia::render('Destinasi/Detail', [
             'destinasi' => $destinasiLengkap,
             'is_bookmarked' => $isBookmarked,
+            'destinasi_terkait' => $this->destinasiService->destinasiTerkait($destinasi),
         ]);
     }
 

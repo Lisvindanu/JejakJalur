@@ -9,6 +9,7 @@ interface Filter {
     kota_id?: string;
     stasiun_id?: string;
     kategori?: string;
+    urut?: string;
 }
 
 interface DestinasiFilterProps {
@@ -23,12 +24,19 @@ const KATEGORI_OPTIONS = [
     { value: 'UMKM', label: 'UMKM' },
 ];
 
+const URUT_OPTIONS = [
+    { value: 'rating', label: 'Rating Tertinggi' },
+    { value: 'ulasan', label: 'Ulasan Terbanyak' },
+    { value: 'terbaru', label: 'Terbaru' },
+];
+
 function applyFilter(params: Filter) {
     const clean: Record<string, string> = {};
     if (params.kata_kunci) clean.kata_kunci = params.kata_kunci;
     if (params.kota_id) clean.kota_id = params.kota_id;
     if (params.stasiun_id) clean.stasiun_id = params.stasiun_id;
     if (params.kategori) clean.kategori = params.kategori;
+    if (params.urut && params.urut !== 'rating') clean.urut = params.urut;
     router.get('/destinasi', clean, { preserveState: true, replace: true });
 }
 
@@ -123,7 +131,8 @@ export default function DestinasiFilter({
         !!filter.kata_kunci ||
         !!filter.kota_id ||
         !!filter.stasiun_id ||
-        !!filter.kategori;
+        !!filter.kategori ||
+        !!filter.urut;
 
     function handleKataKunci(value: string) {
         setKataKunci(value);
@@ -140,6 +149,10 @@ export default function DestinasiFilter({
 
     function handleKategori(kategori: string) {
         applyFilter({ ...filter, kategori });
+    }
+
+    function handleUrut(urut: string) {
+        applyFilter({ ...filter, urut });
     }
 
     function handleReset() {
@@ -190,6 +203,13 @@ export default function DestinasiFilter({
                 onChange={handleKategori}
                 options={KATEGORI_OPTIONS}
                 placeholder="Semua Kategori"
+            />
+
+            <FilterDropdown
+                value={filter.urut ?? 'rating'}
+                onChange={handleUrut}
+                options={URUT_OPTIONS}
+                placeholder="Rating Tertinggi"
             />
 
             {hasFilter && (

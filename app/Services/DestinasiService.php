@@ -39,7 +39,24 @@ class DestinasiService
             $query->whereHas('stasiun', fn ($q) => $q->where('kota_id', $filter['kota_id']));
         }
 
-        return $query->orderByDesc('rating')->paginate(self::JUMLAH_PER_HALAMAN)->withQueryString();
+        match ($filter['urut'] ?? 'rating') {
+            'terbaru' => $query->orderByDesc('created_at'),
+            'ulasan' => $query->withCount('ulasan')->orderByDesc('ulasan_count'),
+            default => $query->orderByDesc('rating'),
+        };
+
+        return $query->paginate(self::JUMLAH_PER_HALAMAN)->withQueryString();
+    }
+
+    public function destinasiTerkait(Destinasi $destinasi, int $jumlah = 4): Collection
+    {
+        return Destinasi::with('stasiun.kota')
+            ->verified()
+            ->where('stasiun_id', $destinasi->stasiun_id)
+            ->where('id', '!=', $destinasi->id)
+            ->orderByDesc('rating')
+            ->limit($jumlah)
+            ->get();
     }
 
     public function detailDestinasi(Destinasi $destinasi): Destinasi
