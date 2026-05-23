@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
     IconBolt,
+    IconCheck,
     IconChevronRight,
     IconCurrentLocation,
+    IconLink,
     IconLoader2,
     IconMapPin,
     IconRoute,
@@ -486,13 +488,51 @@ export default function PerencanaRute({
     onRuteFound,
     onRuteClear,
 }: Props) {
-    const [mode, setMode] = useState<Mode>('antarkota');
+    const [mode, setMode] = useState<Mode>(() => {
+        if (typeof window === 'undefined') return 'antarkota';
+        const m = new URLSearchParams(window.location.search).get('mode');
+        return (m as Mode) ?? 'antarkota';
+    });
     const [asal, setAsal] = useState<StasiunFlat | null>(null);
     const [tujuan, setTujuan] = useState<StasiunFlat | null>(null);
+    const [copied, setCopied] = useState(false);
     const kotaFiltered = useMemo(
         () => filterKotaByMode(semuaKota, mode),
         [semuaKota, mode],
     );
+
+    // Pre-fill dari URL params (?dari=KODE&ke=KODE&mode=MODE)
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const params = new URLSearchParams(window.location.search);
+        const dariKode = params.get('dari');
+        const keKode = params.get('ke');
+        if (!dariKode || !keKode) return;
+
+        for (const kota of semuaKota) {
+            for (const s of kota.stasiun) {
+                if (s.kode_stasiun === dariKode && !asal) {
+                    setAsal({ ...s, kotaNama: kota.nama, kotaId: kota.id });
+                }
+                if (s.kode_stasiun === keKode && !tujuan) {
+                    setTujuan({ ...s, kotaNama: kota.nama, kotaId: kota.id });
+                }
+            }
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    function handleShare() {
+        if (!asal || !tujuan) return;
+        const url = new URL('/rute', window.location.origin);
+        url.searchParams.set('dari', asal.kode_stasiun);
+        url.searchParams.set('ke', tujuan.kode_stasiun);
+        url.searchParams.set('mode', mode);
+        navigator.clipboard.writeText(url.toString()).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
+    }
+
     const [rute, setRute] = useState<StasiunRute[] | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -700,6 +740,24 @@ export default function PerencanaRute({
                         )}
                         Cari Rute
                     </button>
+                    {asal && tujuan && (
+                        <button
+                            onClick={handleShare}
+                            className="flex items-center gap-2 rounded-xl border border-stone-200 px-4 py-2.5 text-sm font-medium text-stone-600 transition-colors hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+                        >
+                            {copied ? (
+                                <>
+                                    <IconCheck size={15} className="text-emerald-600" />
+                                    <span className="text-emerald-600">Tersalin!</span>
+                                </>
+                            ) : (
+                                <>
+                                    <IconLink size={15} />
+                                    Salin Link
+                                </>
+                            )}
+                        </button>
+                    )}
                     <button
                         onClick={handleHapus}
                         className="rounded-xl border border-stone-200 px-5 py-2.5 text-sm font-medium text-stone-600 transition-colors hover:border-stone-300 hover:bg-stone-50"
