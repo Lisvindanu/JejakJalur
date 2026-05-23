@@ -88,7 +88,14 @@ export default function DestinasiCard({ destinasi }: DestinasiCardProps) {
                     <IconTrain size={13} className="text-stone-400" />
                     {destinasi.stasiun.nama} — {destinasi.stasiun.kota.nama}
                 </p>
-                <RatingDisplay value={Number(destinasi.rating)} />
+                <div className="flex items-center gap-2">
+                    <RatingDisplay value={Number(destinasi.rating)} />
+                    {(destinasi.ulasan_count ?? 0) > 0 && (
+                        <span className="text-[11px] text-stone-400">
+                            ({destinasi.ulasan_count})
+                        </span>
+                    )}
+                </div>
             </div>
         </Link>
     );

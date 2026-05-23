@@ -17,7 +17,7 @@ class DestinasiService
 
     public function daftarDestinasiTerfilter(array $filter, bool $hanyaVerified = false): LengthAwarePaginator
     {
-        $query = Destinasi::with('stasiun.kota');
+        $query = Destinasi::with('stasiun.kota')->withCount('ulasan');
 
         if ($hanyaVerified) {
             $query->verified();
@@ -41,7 +41,7 @@ class DestinasiService
 
         match ($filter['urut'] ?? 'rating') {
             'terbaru' => $query->orderByDesc('created_at'),
-            'ulasan' => $query->withCount('ulasan')->orderByDesc('ulasan_count'),
+            'ulasan' => $query->orderByDesc('ulasan_count'),
             default => $query->orderByDesc('rating'),
         };
 

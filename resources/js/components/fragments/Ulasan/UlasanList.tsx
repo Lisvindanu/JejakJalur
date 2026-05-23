@@ -50,21 +50,53 @@ export default function UlasanList({
                 </span>
             </div>
 
-            {/* Average summary */}
+            {/* Average + histogram summary */}
             {ulasan.length > 0 && (
-                <div className="mb-6 flex items-center gap-3 rounded-xl border border-stone-100 bg-stone-50 p-4">
-                    <span className="font-serif text-4xl font-normal text-stone-800">
-                        {average.toFixed(1)}
-                    </span>
-                    <div>
-                        <RatingDisplay
-                            value={average}
-                            size={16}
-                            showLabel={false}
-                        />
-                        <p className="mt-1 text-xs text-stone-400">
-                            {ulasan.length} ulasan
-                        </p>
+                <div className="mb-6 flex flex-wrap items-center gap-4 rounded-xl border border-stone-100 bg-stone-50 p-4">
+                    <div className="flex items-center gap-3">
+                        <span className="font-serif text-4xl font-normal text-stone-800">
+                            {average.toFixed(1)}
+                        </span>
+                        <div>
+                            <RatingDisplay
+                                value={average}
+                                size={16}
+                                showLabel={false}
+                            />
+                            <p className="mt-1 text-xs text-stone-400">
+                                {ulasan.length} ulasan
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex flex-1 flex-col gap-1 min-w-[160px]">
+                        {[5, 4, 3, 2, 1].map((star) => {
+                            const count = ulasan.filter(
+                                (u) => Math.round(u.rating) === star,
+                            ).length;
+                            const pct =
+                                ulasan.length > 0
+                                    ? (count / ulasan.length) * 100
+                                    : 0;
+                            return (
+                                <div
+                                    key={star}
+                                    className="flex items-center gap-2"
+                                >
+                                    <span className="w-3 text-right text-[10px] text-stone-500">
+                                        {star}
+                                    </span>
+                                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-stone-200">
+                                        <div
+                                            className="h-full rounded-full bg-amber-400 transition-all"
+                                            style={{ width: `${pct}%` }}
+                                        />
+                                    </div>
+                                    <span className="w-5 text-[10px] text-stone-400">
+                                        {count}
+                                    </span>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             )}
