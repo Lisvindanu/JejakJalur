@@ -39,6 +39,18 @@ class DestinasiService
             $query->whereHas('stasiun', fn ($q) => $q->where('kota_id', $filter['kota_id']));
         }
 
+        if (! empty($filter['min_rating'])) {
+            $query->where('rating', '>=', (float) $filter['min_rating']);
+        }
+
+        if (! empty($filter['harga'])) {
+            match ($filter['harga']) {
+                'gratis' => $query->where('harga_min', 0),
+                'berbayar' => $query->where('harga_min', '>', 0),
+                default => null,
+            };
+        }
+
         match ($filter['urut'] ?? 'rating') {
             'terbaru' => $query->orderByDesc('created_at'),
             'ulasan' => $query->orderByDesc('ulasan_count'),

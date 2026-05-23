@@ -12,6 +12,8 @@ interface Filter {
     stasiun_id?: string;
     kategori?: string;
     urut?: string;
+    min_rating?: string;
+    harga?: string;
 }
 
 interface Props {

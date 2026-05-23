@@ -10,6 +10,8 @@ interface Filter {
     stasiun_id?: string;
     kategori?: string;
     urut?: string;
+    min_rating?: string;
+    harga?: string;
 }
 
 interface DestinasiFilterProps {
@@ -30,6 +32,20 @@ const URUT_OPTIONS = [
     { value: 'terbaru', label: 'Terbaru' },
 ];
 
+const MIN_RATING_OPTIONS = [
+    { value: '', label: 'Semua Rating' },
+    { value: '4.5', label: '★ 4.5+' },
+    { value: '4', label: '★ 4+' },
+    { value: '3', label: '★ 3+' },
+    { value: '2', label: '★ 2+' },
+];
+
+const HARGA_OPTIONS = [
+    { value: '', label: 'Semua Harga' },
+    { value: 'gratis', label: 'Gratis' },
+    { value: 'berbayar', label: 'Berbayar' },
+];
+
 function applyFilter(params: Filter) {
     const clean: Record<string, string> = {};
     if (params.kata_kunci) clean.kata_kunci = params.kata_kunci;
@@ -37,6 +53,8 @@ function applyFilter(params: Filter) {
     if (params.stasiun_id) clean.stasiun_id = params.stasiun_id;
     if (params.kategori) clean.kategori = params.kategori;
     if (params.urut && params.urut !== 'rating') clean.urut = params.urut;
+    if (params.min_rating) clean.min_rating = params.min_rating;
+    if (params.harga) clean.harga = params.harga;
     router.get('/destinasi', clean, { preserveState: true, replace: true });
 }
 
@@ -132,7 +150,9 @@ export default function DestinasiFilter({
         !!filter.kota_id ||
         !!filter.stasiun_id ||
         !!filter.kategori ||
-        !!filter.urut;
+        !!filter.urut ||
+        !!filter.min_rating ||
+        !!filter.harga;
 
     function handleKataKunci(value: string) {
         setKataKunci(value);
@@ -153,6 +173,14 @@ export default function DestinasiFilter({
 
     function handleUrut(urut: string) {
         applyFilter({ ...filter, urut });
+    }
+
+    function handleMinRating(min_rating: string) {
+        applyFilter({ ...filter, min_rating });
+    }
+
+    function handleHarga(harga: string) {
+        applyFilter({ ...filter, harga });
     }
 
     function handleReset() {
@@ -210,6 +238,20 @@ export default function DestinasiFilter({
                 onChange={handleUrut}
                 options={URUT_OPTIONS}
                 placeholder="Rating Tertinggi"
+            />
+
+            <FilterDropdown
+                value={filter.min_rating ?? ''}
+                onChange={handleMinRating}
+                options={MIN_RATING_OPTIONS}
+                placeholder="Semua Rating"
+            />
+
+            <FilterDropdown
+                value={filter.harga ?? ''}
+                onChange={handleHarga}
+                options={HARGA_OPTIONS}
+                placeholder="Semua Harga"
             />
 
             {hasFilter && (

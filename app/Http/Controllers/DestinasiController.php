@@ -23,7 +23,7 @@ class DestinasiController extends Controller
 
     public function indeks(Request $request): Response
     {
-        $filter = $request->only(['kata_kunci', 'kota_id', 'stasiun_id', 'kategori', 'urut']);
+        $filter = $request->only(['kata_kunci', 'kota_id', 'stasiun_id', 'kategori', 'urut', 'min_rating', 'harga']);
 
         $destinasi = $this->destinasiService->daftarDestinasiTerfilter($filter, hanyaVerified: true);
         $semuaKota = $this->kotaService->semuaKotaDenganStasiun();
