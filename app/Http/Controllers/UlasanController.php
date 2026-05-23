@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UlasanRequest;
 use App\Models\Destinasi;
 use App\Models\Ulasan;
+use App\Models\UlasanLike;
 use App\Services\UlasanService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class UlasanController extends Controller
 {
@@ -35,5 +37,24 @@ class UlasanController extends Controller
         $this->ulasanService->hapusUlasan($ulasan, request()->user());
 
         return back()->with('sukses', 'Ulasan berhasil dihapus.');
+    }
+
+    public function like(Request $request, Destinasi $destinasi, Ulasan $ulasan): RedirectResponse
+    {
+        UlasanLike::firstOrCreate([
+            'user_id' => $request->user()->id,
+            'ulasan_id' => $ulasan->id,
+        ]);
+
+        return back()->with('sukses', '');
+    }
+
+    public function unlike(Request $request, Destinasi $destinasi, Ulasan $ulasan): RedirectResponse
+    {
+        UlasanLike::where('user_id', $request->user()->id)
+            ->where('ulasan_id', $ulasan->id)
+            ->delete();
+
+        return back()->with('sukses', '');
     }
 }

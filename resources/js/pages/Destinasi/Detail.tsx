@@ -13,12 +13,14 @@ interface Props {
     destinasi?: Destinasi;
     is_bookmarked?: boolean;
     destinasi_terkait?: Destinasi[];
+    liked_ulasan_ids?: string[];
 }
 
 export default function Detail({
     destinasi: dest,
     is_bookmarked = false,
     destinasi_terkait = [],
+    liked_ulasan_ids = [],
 }: Props) {
     const destinasi: Destinasi = dest ?? {
         ...MOCK_DESTINASI[0],
@@ -78,6 +80,7 @@ export default function Detail({
                     ulasan={destinasi.ulasan ?? []}
                     currentUserId={auth?.user?.id}
                     destinasiId={destinasi.id}
+                    likedIds={liked_ulasan_ids}
                 />
             </div>
             {/* Destinasi terkait */}

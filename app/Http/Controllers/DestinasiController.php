@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\DestinasiSubmissionRequest;
 use App\Models\Destinasi;
 use App\Models\Stasiun;
+use App\Models\UlasanLike;
 use App\Services\DestinasiService;
 use App\Services\KotaService;
 use Illuminate\Database\Eloquent\Collection;
@@ -52,10 +53,18 @@ class DestinasiController extends Controller
         $isBookmarked = auth()->check()
             && auth()->user()->bookmarks()->where('destinasi_id', $destinasi->id)->exists();
 
+        $likedUlasanIds = auth()->check()
+            ? UlasanLike::where('user_id', auth()->id())
+                ->whereIn('ulasan_id', $destinasiLengkap->ulasan->pluck('id'))
+                ->pluck('ulasan_id')
+                ->toArray()
+            : [];
+
         return Inertia::render('Destinasi/Detail', [
             'destinasi' => $destinasiLengkap,
             'is_bookmarked' => $isBookmarked,
             'destinasi_terkait' => $this->destinasiService->destinasiTerkait($destinasi),
+            'liked_ulasan_ids' => $likedUlasanIds,
         ]);
     }
 

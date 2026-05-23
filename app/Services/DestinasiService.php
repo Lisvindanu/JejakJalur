@@ -63,6 +63,7 @@ class DestinasiService
     {
         return $destinasi->load([
             'stasiun.kota',
+            'ulasan' => fn ($q) => $q->withCount('likes')->latest(),
             'ulasan.user',
         ]);
     }

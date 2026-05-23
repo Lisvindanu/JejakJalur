@@ -10,12 +10,14 @@ interface UlasanListProps {
     ulasan: Ulasan[];
     currentUserId?: number;
     destinasiId: string;
+    likedIds?: string[];
 }
 
 export default function UlasanList({
     ulasan,
     currentUserId,
     destinasiId,
+    likedIds = [],
 }: UlasanListProps) {
     const [editTarget, setEditTarget] = useState<Ulasan | null>(null);
 
@@ -79,6 +81,9 @@ export default function UlasanList({
                             key={u.id}
                             ulasan={u}
                             canEdit={u.user.id === currentUserId}
+                            canLike={!!currentUserId}
+                            userLiked={likedIds.includes(u.id)}
+                            destinasiId={destinasiId}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                         />

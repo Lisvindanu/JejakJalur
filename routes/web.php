@@ -91,6 +91,8 @@ Route::middleware('auth')->prefix('destinasi/{destinasi}/ulasan')->name('ulasan.
     Route::post('/', [UlasanController::class, 'simpan'])->name('simpan');
     Route::patch('/{ulasan}', [UlasanController::class, 'perbarui'])->name('perbarui');
     Route::delete('/{ulasan}', [UlasanController::class, 'hapus'])->name('hapus');
+    Route::post('/{ulasan}/like', [UlasanController::class, 'like'])->name('like');
+    Route::delete('/{ulasan}/like', [UlasanController::class, 'unlike'])->name('unlike');
 });
 
 // Admin
