@@ -154,12 +154,34 @@ export default function LokasiPanel({ destinasi }: Props) {
                             iconAnchor: [15, 30],
                             className: '',
                         });
-                        L.marker([pos.coords.latitude, pos.coords.longitude], {
-                            icon: myIcon,
-                        })
+                        const userLat = pos.coords.latitude;
+                        const userLng = pos.coords.longitude;
+
+                        L.marker([userLat, userLng], { icon: myIcon })
                             .addTo(leafletMap.current)
                             .bindPopup('<b>Lokasi Saya</b>')
                             .openPopup();
+
+                        L.polyline(
+                            [
+                                [userLat, userLng],
+                                [destLat, destLng],
+                            ],
+                            {
+                                color: '#7c3aed',
+                                weight: 2,
+                                dashArray: '6 4',
+                                opacity: 0.7,
+                            },
+                        ).addTo(leafletMap.current);
+
+                        leafletMap.current.fitBounds(
+                            [
+                                [userLat, userLng],
+                                [destLat, destLng],
+                            ],
+                            { padding: [40, 40] },
+                        );
                     });
                 }
             },
