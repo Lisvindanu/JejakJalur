@@ -10,6 +10,15 @@ try {
     document.documentElement.classList.toggle('dark', dark);
 } catch {}
 
+// Register service worker (PWA)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {
+            // SW registration failure is non-critical
+        });
+    });
+}
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({

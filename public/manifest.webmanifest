@@ -1,0 +1,39 @@
+{
+  "name": "JejakJalur",
+  "short_name": "JejakJalur",
+  "description": "Direktori destinasi wisata, kuliner, dan UMKM terbaik di jalur kereta Pulau Jawa.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafaf9",
+  "theme_color": "#047857",
+  "orientation": "portrait-primary",
+  "lang": "id",
+  "categories": ["travel", "lifestyle"],
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Jelajahi Destinasi",
+      "url": "/destinasi",
+      "description": "Temukan destinasi wisata dekat stasiun"
+    },
+    {
+      "name": "Cari Rute",
+      "url": "/rute",
+      "description": "Rencanakan perjalanan kereta"
+    }
+  ]
+}

@@ -29,10 +29,15 @@
         <meta name="twitter:description" content="Direktori destinasi wisata, kuliner, dan UMKM di jalur kereta Pulau Jawa.">
         <meta name="twitter:image" content="{{ url('/og-image.png') }}">
 
-        {{-- Icons --}}
+        {{-- Icons & PWA --}}
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="manifest" href="/manifest.webmanifest">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <meta name="apple-mobile-web-app-title" content="JejakJalur">
 
         {{-- Schema.org --}}
         <script type="application/ld+json">{!! json_encode([
