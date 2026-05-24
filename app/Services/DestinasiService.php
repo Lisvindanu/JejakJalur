@@ -55,9 +55,31 @@ class DestinasiService
             };
         }
 
+        if (! empty($filter['musiman'])) {
+            $today = now()->format('m-d');
+            match ($filter['musiman']) {
+                'saja' => $query->whereNotNull('musim_mulai'),
+                'sekarang' => $query->where(function ($q) use ($today) {
+                    $q->whereNull('musim_mulai')
+                        ->orWhere(function ($q2) use ($today) {
+                            $q2->whereNotNull('musim_mulai')
+                                ->whereRaw('musim_mulai <= ?', [$today])
+                                ->whereRaw('musim_selesai >= ?', [$today]);
+                        });
+                }),
+                default => null,
+            };
+        }
+
+        $cutoff7 = now()->subDays(7)->toDateTimeString();
         match ($filter['urut'] ?? 'rating') {
             'terbaru' => $query->orderByDesc('created_at'),
             'ulasan' => $query->orderByDesc('ulasan_count'),
+            'trending' => $query->orderByRaw('(
+                (SELECT COUNT(*) FROM ulasan WHERE destinasi.id = ulasan.destinasi_id AND ulasan.created_at >= ?) * 0.5 +
+                (SELECT COUNT(*) FROM bookmarks WHERE destinasi.id = bookmarks.destinasi_id AND bookmarks.created_at >= ?) * 0.3 +
+                (SELECT COUNT(*) FROM kunjungan WHERE destinasi.id = kunjungan.destinasi_id AND kunjungan.created_at >= ?) * 0.2
+            ) DESC', [$cutoff7, $cutoff7, $cutoff7]),
             default => $query->orderByDesc('rating'),
         };
 

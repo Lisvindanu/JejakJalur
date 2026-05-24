@@ -47,8 +47,8 @@ Kolom `harga_min` dan `harga_max` sudah ada. Filter `gratis/berbayar` aktif di D
 **[x] 5. Nomor telepon & website**
 Kolom `telepon` dan `website` sudah ada via migration yang sama dengan harga.
 
-**[~] 6. Tag & kategori lanjutan**
-Kolom `tags` (JSON array) sudah ada + auto-fill via AI. Belum many-to-many `destinasi_tag` — tag masih plain array.
+**[x] 6. Tag & kategori lanjutan**
+Kolom `tags` (JSON array) auto-filled via AI (`JejakAiService::sarankanTag`). Tag tampil sebagai chip `#tag` di halaman detail. Many-to-many `destinasi_tag` tidak diperlukan.
 
 **[x] 7. Destinasi terkait**
 `destinasiTerkait()` ada di DestinasiService, di-load di `detailDestinasi()`. Section tampil di halaman detail.
@@ -59,8 +59,8 @@ Kolom `tags` (JSON array) sudah ada + auto-fill via AI. Belum many-to-many `dest
 **[x] 9. Destinasi baru bulan ini**
 `destinasiBaru()` aktif di DestinasiService. Section di homepage.
 
-**[~] 10. Destinasi musiman**
-Kolom `is_musiman` + `musim` sudah ada via migration. Filter dan frontend belum selesai.
+**[x] 10. Destinasi musiman**
+Kolom `musim_mulai` + `musim_selesai` (MM-DD). Filter "Tersedia Sekarang" dan "Musiman Saja" aktif di DestinasiService + DestinasiFilter.tsx.
 
 ---
 
@@ -72,8 +72,8 @@ Kolom `is_musiman` + `musim` sudah ada via migration. Filter dan frontend belum 
 **[~] 12. Filter kombinasi lanjutan**
 Filter `rating minimum`, `harga`, `kategori`, `kota`, `stasiun` sudah aktif. Belum: jarak dari stasiun (< 1km dst) dan jam buka sekarang.
 
-**[~] 13. Sort destinasi**
-Opsi urut `rating`, `ulasan`, `terbaru` sudah aktif. Belum: jarak terdekat dan trending sebagai opsi sort.
+**[x] 13. Sort destinasi**
+Opsi urut `rating`, `ulasan`, `terbaru`, `trending` semua aktif di DestinasiService + DestinasiFilter.tsx.
 
 **[x] 14. Pencarian stasiun di halaman Rute**
 `cariStasiun()` di RuteController, autocomplete di frontend `PerencanaRute.tsx`.
@@ -97,8 +97,8 @@ Belum ada.
 **[x] 19. Simpan rute favorit**
 Tabel `rute_favorit`, model `RuteFavorit`, ada tombol simpan di `PerencanaRute.tsx` (IconBookmark). Tampil di profil.
 
-**[~] 20. Share rute**
-Tombol share (IconLink) ada di `PerencanaRute.tsx`. URL params `?dari=&ke=` sudah work. OG meta belum.
+**[x] 20. Share rute**
+Tombol share (copy to clipboard) ada di `PerencanaRute.tsx`. URL params `?dari=&ke=&mode=` work. OG meta dinamis ditambahkan di `Rute/Tampilkan.tsx`.
 
 **[ ] 21. Offline map (PWA)**
 Belum ada.
@@ -138,8 +138,8 @@ Belum ada.
 
 ### Notifikasi & Engagement
 
-**[~] 31. Notifikasi in-app**
-Tabel `notifications` (UUID morph) sudah ada. Halaman `/notifikasi` ada. Pengiriman notif dari event belum terhubung semua.
+**[x] 31. Notifikasi in-app**
+Bell icon + unread badge di navbar. Halaman `/notifikasi` dengan pagination + tandai baca. Notif terkirim untuk: ulasan baru (ke pemilik destinasi) dan ulasan disukai.
 
 **[ ] 32. Email digest mingguan**
 Belum ada.
@@ -160,8 +160,8 @@ Belum ada.
 **[x] 36. Moderasi ulasan**
 Halaman `Admin/Ulasan/Indeks.tsx`. List ulasan yang di-report, tombol hide/delete, filter by status.
 
-**[~] 37. Klaim destinasi (owner)**
-Tabel `destinasi_klaim`, model `DestinasiKlaim`, halaman `Admin/Klaim/Indeks.tsx`. Alur user claim dan verifikasi admin belum lengkap.
+**[x] 37. Klaim destinasi (owner)**
+Tabel `destinasi_klaim`, `KlaimController` (formulir + simpan), halaman `Destinasi/Klaim.tsx` untuk user, `Admin/Klaim/Indeks.tsx` untuk review admin.
 
 **[x] 38. Analytics admin**
 `DashboardController` punya: views per destinasi, ulasan terbanyak, user growth, bookmark bulan ini.
@@ -182,8 +182,8 @@ Belum ada.
 **[ ] 42. Trip summary AI**
 Belum ada.
 
-**[~] 43. Review sentiment analysis**
-Kolom `sentiment` sudah ada di tabel ulasan via migration. Analisis dan pengisian otomatis belum diimplementasi.
+**[x] 43. Review sentiment analysis**
+`JejakAiService::analisisSentimen()` dipanggil otomatis di `UlasanService::buatUlasan`. Kolom `sentiment` tersimpan per ulasan. Tampil di admin sebagai insight.
 
 **[x] 44. Auto-tag destinasi dari deskripsi**
 `JejakAiService::sarankanTag()` dipanggil otomatis saat create/update destinasi di `DestinasiService`.
@@ -211,8 +211,8 @@ Belum ada.
 **[ ] 49. PWA (Progressive Web App)**
 Belum ada service worker atau manifest.
 
-**[~] 50. Dark mode / light mode toggle**
-Hook `useDarkMode.ts` sudah ada (baca `localStorage` + `prefers-color-scheme`). Toggle di UI belum dihubungkan.
+**[x] 50. Dark mode / light mode toggle**
+Toggle (IconSun/IconMoon) di Navbar menggunakan `useDarkMode.ts`. Simpan di `localStorage`, respek `prefers-color-scheme`. Semua komponen punya class `dark:` variants.
 
 ---
 

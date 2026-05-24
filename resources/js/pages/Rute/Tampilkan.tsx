@@ -27,12 +27,34 @@ export default function Tampilkan({ semuaKota: kotaProp }: Props) {
         return null;
     }, []);
 
+    const shareParams = useMemo(() => {
+        if (typeof window === 'undefined') return null;
+        const p = new URLSearchParams(window.location.search);
+        const dari = p.get('dari');
+        const ke = p.get('ke');
+        if (dari && ke) return { dari, ke };
+        return null;
+    }, []);
+
+    const pageTitle = shareParams
+        ? `Rute ${shareParams.dari} → ${shareParams.ke} — JejakJalur`
+        : 'Peta Rute — JejakJalur';
+
+    const pageDesc = shareParams
+        ? `Lihat rute kereta dari stasiun ${shareParams.dari} ke ${shareParams.ke} di JejakJalur.`
+        : 'Temukan rute kereta terbaik antar stasiun di seluruh Indonesia.';
+
     const [ruteAktif, setRuteAktif] = useState<StasiunRute[] | null>(null);
     const [segmentsAktif, setSegmentsAktif] = useState<RuteSegment[]>([]);
 
     return (
         <PublicLayout>
-            <Head title="Peta Rute — JejakJalur" />
+            <Head title={pageTitle}>
+                <meta name="description" content={pageDesc} />
+                <meta property="og:title" content={pageTitle} />
+                <meta property="og:description" content={pageDesc} />
+                <meta property="og:type" content="website" />
+            </Head>
 
             {/* Page header */}
             <div className="border-b border-stone-200 bg-stone-50 px-[max(24px,calc(50%-576px))] pt-24 pb-8">
