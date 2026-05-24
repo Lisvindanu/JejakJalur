@@ -54,9 +54,10 @@ class DashboardController extends Controller
                 'created_at' => $u->created_at->diffForHumans(),
             ]);
 
-        $topDestinasiUlasan = Destinasi::withCount(['ulasan as ulasan_bulan_ini' => fn ($q) => $q->where('created_at', '>=', now()->subDays(30))])
-            ->having('ulasan_bulan_ini', '>', 0)
-            ->orderByDesc('ulasan_bulan_ini')
+        $cutoff30 = now()->subDays(30)->toDateTimeString();
+        $topDestinasiUlasan = Destinasi::selectRaw('*, (SELECT COUNT(*) FROM ulasan WHERE destinasi.id = ulasan.destinasi_id AND ulasan.created_at >= ?) AS ulasan_bulan_ini', [$cutoff30])
+            ->whereRaw('(SELECT COUNT(*) FROM ulasan WHERE destinasi.id = ulasan.destinasi_id AND ulasan.created_at >= ?) > 0', [$cutoff30])
+            ->orderByRaw('(SELECT COUNT(*) FROM ulasan WHERE destinasi.id = ulasan.destinasi_id AND ulasan.created_at >= ?) DESC', [$cutoff30])
             ->limit(5)
             ->get()
             ->map(fn (Destinasi $d) => [
