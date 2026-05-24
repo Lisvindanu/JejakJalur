@@ -11,6 +11,7 @@ import { MOCK_DESTINASI, MOCK_STASIUN, mockPaginate } from '@/lib/mock-data';
 import { Head, Link, router } from '@inertiajs/react';
 import {
     IconCheck,
+    IconFileUpload,
     IconPencil,
     IconPlus,
     IconSearch,
@@ -178,15 +179,26 @@ export default function DestinasiIndeks({
                             {destinasi.total} destinasi terdaftar
                         </p>
                     </div>
-                    <Link href="/admin/destinasi/buat">
-                        <Button
-                            variant="primary"
-                            size="sm"
-                            leftIcon={<IconPlus size={15} />}
-                        >
-                            Tambah Destinasi
-                        </Button>
-                    </Link>
+                    <div className="flex items-center gap-2">
+                        <Link href="/admin/destinasi/import">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                leftIcon={<IconFileUpload size={15} />}
+                            >
+                                Import CSV
+                            </Button>
+                        </Link>
+                        <Link href="/admin/destinasi/buat">
+                            <Button
+                                variant="primary"
+                                size="sm"
+                                leftIcon={<IconPlus size={15} />}
+                            >
+                                Tambah Destinasi
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Filter bar */}

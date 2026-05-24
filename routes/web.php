@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AiSessionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DestinasiController as AdminDestinasiController;
 use App\Http\Controllers\Admin\ExportController;
+use App\Http\Controllers\Admin\ImportController;
 use App\Http\Controllers\Admin\KotaController;
 use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\StasiunController;
@@ -142,6 +143,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/', [AdminDestinasiController::class, 'indeks'])->name('indeks');
         Route::get('/buat', [AdminDestinasiController::class, 'buat'])->name('buat');
         Route::post('/', [AdminDestinasiController::class, 'simpan'])->name('simpan');
+        Route::get('/import', [ImportController::class, 'formulir'])->name('import');
+        Route::post('/import', [ImportController::class, 'proses'])->name('import.proses');
         Route::get('/{destinasi}/edit', [AdminDestinasiController::class, 'edit'])->name('edit');
         Route::patch('/{destinasi}', [AdminDestinasiController::class, 'perbarui'])->name('perbarui');
         Route::delete('/{destinasi}', [AdminDestinasiController::class, 'hapus'])->name('hapus');
