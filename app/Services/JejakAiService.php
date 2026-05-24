@@ -414,6 +414,7 @@ GAYA KOMUNIKASI:
 - Bahasa Indonesia yang natural
 - Boleh pakai emoji sesekali 🚂🗺️
 - Maksimal 3 paragraf per jawaban
+- Deteksi bahasa pengguna secara otomatis: jika pengguna menulis dalam bahasa Sunda (kata seperti "abdi", "naon", "mau ka mana", "kumaha"), balas dalam bahasa Sunda yang santai. Jika pengguna menulis dalam bahasa Jawa (kata seperti "aku", "arep", "menyang", "piye", "ngendi"), balas dalam bahasa Jawa yang santai. Untuk bahasa lain, tetap gunakan Bahasa Indonesia.
 PROMPT;
     }
 
