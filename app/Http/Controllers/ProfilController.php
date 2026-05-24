@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfilRequest;
+use App\Models\Destinasi;
 use App\Services\FotoService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -21,6 +22,7 @@ class ProfilController extends Controller
         $rata_rata_rating = $pengguna->ulasan()->avg('rating');
         $jumlah_destinasi_diulas = $pengguna->ulasan()->distinct('destinasi_id')->count('destinasi_id');
         $streak_ulasan = $this->hitungStreakUlasan($pengguna);
+        $badges = $this->hitungBadges($pengguna, $jumlah_ulasan, $rata_rata_rating, $streak_ulasan);
 
         $ulasan = $pengguna->ulasan()
             ->with('destinasi:id,nama,kategori,foto,stasiun_id')
@@ -80,11 +82,71 @@ class ProfilController extends Controller
             'rata_rata_rating' => $rata_rata_rating ? round($rata_rata_rating, 1) : null,
             'jumlah_destinasi_diulas' => $jumlah_destinasi_diulas,
             'streak_ulasan' => $streak_ulasan,
+            'badges' => $badges,
             'ulasan' => $ulasan,
             'bookmarks' => $bookmarks,
             'kunjungan' => $kunjungan,
             'ruteFavorit' => $ruteFavorit,
         ]);
+    }
+
+    /**
+     * @return array<array{id: string, label: string, deskripsi: string, icon: string}>
+     */
+    private function hitungBadges(mixed $pengguna, int $jumlahUlasan, mixed $rataRating, int $streak): array
+    {
+        $badges = [];
+
+        if ($jumlahUlasan >= 1) {
+            $badges[] = ['id' => 'penjelajah_pertama', 'label' => 'Penjelajah Pertama', 'deskripsi' => 'Menulis ulasan pertama', 'icon' => '🗺️'];
+        }
+        if ($jumlahUlasan >= 10) {
+            $badges[] = ['id' => 'kritikus', 'label' => 'Kritikus', 'deskripsi' => '10+ ulasan ditulis', 'icon' => '✍️'];
+        }
+        if ($jumlahUlasan >= 25) {
+            $badges[] = ['id' => 'pengulas_aktif', 'label' => 'Pengulas Aktif', 'deskripsi' => '25+ ulasan ditulis', 'icon' => '🏆'];
+        }
+
+        $jumlahKunjungan = $pengguna->kunjungan()->count();
+        if ($jumlahKunjungan >= 5) {
+            $badges[] = ['id' => 'petualang', 'label' => 'Petualang', 'deskripsi' => '5+ destinasi dikunjungi', 'icon' => '🎒'];
+        }
+        if ($jumlahKunjungan >= 20) {
+            $badges[] = ['id' => 'penjelajah_sejati', 'label' => 'Penjelajah Sejati', 'deskripsi' => '20+ destinasi dikunjungi', 'icon' => '🌟'];
+        }
+
+        $jumlahBookmark = $pengguna->bookmarks()->count();
+        if ($jumlahBookmark >= 5) {
+            $badges[] = ['id' => 'kolektor', 'label' => 'Kolektor', 'deskripsi' => '5+ destinasi di-wishlist', 'icon' => '🔖'];
+        }
+
+        $jumlahKuliner = $pengguna->bookmarks()
+            ->whereHas('destinasi', fn ($q) => $q->where('kategori', 'Kuliner'))
+            ->count();
+        if ($jumlahKuliner >= 5) {
+            $badges[] = ['id' => 'foodie', 'label' => 'Foodie', 'deskripsi' => '5+ destinasi kuliner di-bookmark', 'icon' => '🍜'];
+        }
+
+        if ($pengguna->ruteFavorit()->exists()) {
+            $badges[] = ['id' => 'railfan', 'label' => 'Railfan', 'deskripsi' => 'Menyimpan rute kereta favorit', 'icon' => '🚂'];
+        }
+
+        if ($streak >= 3) {
+            $badges[] = ['id' => 'streak_3', 'label' => 'Rutin 3 Bulan', 'deskripsi' => '3 bulan berturut-turut ulasan', 'icon' => '🔥'];
+        }
+        if ($streak >= 6) {
+            $badges[] = ['id' => 'streak_6', 'label' => 'Dedikasi 6 Bulan', 'deskripsi' => '6 bulan berturut-turut ulasan', 'icon' => '⚡'];
+        }
+
+        if ($rataRating !== null && $jumlahUlasan >= 5 && (float) $rataRating >= 4.5) {
+            $badges[] = ['id' => 'positif', 'label' => 'Jiwa Positif', 'deskripsi' => 'Rata-rata rating ≥ 4.5', 'icon' => '😊'];
+        }
+
+        if (Destinasi::where('user_id', $pengguna->id)->exists()) {
+            $badges[] = ['id' => 'kontributor', 'label' => 'Kontributor', 'deskripsi' => 'Mengajukan destinasi baru', 'icon' => '✨'];
+        }
+
+        return $badges;
     }
 
     private function hitungStreakUlasan(mixed $pengguna): int

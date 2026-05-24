@@ -46,12 +46,20 @@ interface Pengguna {
     is_admin?: boolean;
 }
 
+interface Badge {
+    id: string;
+    label: string;
+    deskripsi: string;
+    icon: string;
+}
+
 interface Props {
     pengguna?: Pengguna;
     jumlah_ulasan?: number;
     rata_rata_rating?: number | null;
     jumlah_destinasi_diulas?: number;
     streak_ulasan?: number;
+    badges?: Badge[];
     ulasan?: PaginatedData<UlasanProfil>;
     bookmarks?: PaginatedData<BookmarkProfil>;
     kunjungan?: PaginatedData<KunjunganProfil>;
@@ -439,6 +447,7 @@ export default function Tampilkan({
     rata_rata_rating = null,
     jumlah_destinasi_diulas = 0,
     streak_ulasan = 0,
+    badges = [],
     ulasan,
     bookmarks,
     kunjungan,
@@ -596,6 +605,30 @@ export default function Tampilkan({
                             </div>
                         </div>
                     </div>
+
+                    {/* Badges */}
+                    {badges.length > 0 && (
+                        <div className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">
+                            <h2 className="mb-4 font-semibold text-stone-800">
+                                Badge
+                                <span className="ml-2 rounded-full bg-stone-100 px-2 py-0.5 text-xs font-normal text-stone-500">
+                                    {badges.length}
+                                </span>
+                            </h2>
+                            <div className="flex flex-wrap gap-2">
+                                {badges.map((b) => (
+                                    <div
+                                        key={b.id}
+                                        title={b.deskripsi}
+                                        className="flex items-center gap-1.5 rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-sm"
+                                    >
+                                        <span>{b.icon}</span>
+                                        <span className="font-medium text-stone-700">{b.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Rekomendasi AI */}
                     <RekomendasiSection />
