@@ -3,7 +3,7 @@ const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
 // Assets to pre-cache on install
-const PRECACHE_URLS = ['/', '/destinasi', '/rute', '/offline'];
+const PRECACHE_URLS = ['/', '/destinasi', '/rute', '/offline.html'];
 
 // ─── Install ───
 self.addEventListener('install', (event) => {
@@ -82,7 +82,7 @@ self.addEventListener('fetch', (event) => {
                 .catch(() =>
                     caches
                         .match(request)
-                        .then((cached) => cached || caches.match('/')),
+                        .then((cached) => cached || caches.match('/offline.html')),
                 ),
         );
     }
