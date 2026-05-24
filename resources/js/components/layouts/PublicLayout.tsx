@@ -14,7 +14,7 @@ export default function PublicLayout({
     transparentNav = false,
 }: PublicLayoutProps) {
     return (
-        <div className="min-h-screen overflow-x-hidden bg-stone-50 text-stone-800">
+        <div className="min-h-screen overflow-x-hidden bg-stone-50 text-stone-800 dark:bg-stone-950 dark:text-stone-100">
             <Navbar transparent={transparentNav} />
             <Toast offsetPx={72} />
             <main>{children}</main>

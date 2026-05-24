@@ -16,10 +16,10 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
     const user = props.auth?.user;
 
     return (
-        <div className="min-h-screen bg-stone-50 text-stone-800">
+        <div className="min-h-screen bg-stone-50 text-stone-800 dark:bg-stone-950 dark:text-stone-100">
             <Toast offsetPx={64} />
             {/* Sticky top header */}
-            <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-stone-200 bg-white px-4 sm:px-6">
+            <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-stone-200 bg-white px-4 dark:border-stone-800 dark:bg-stone-900 sm:px-6">
                 <div className="flex items-center gap-3">
                     <Link
                         href="/"
@@ -67,8 +67,8 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
 
                 <div className="flex min-w-0 flex-1 flex-col">
                     {/* Page title bar */}
-                    <div className="border-b border-stone-100 bg-white px-4 py-4 sm:px-6">
-                        <h1 className="text-xl font-bold tracking-tight text-stone-900">
+                    <div className="border-b border-stone-100 bg-white px-4 py-4 dark:border-stone-800 dark:bg-stone-900 sm:px-6">
+                        <h1 className="text-xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
                             {title}
                         </h1>
                     </div>

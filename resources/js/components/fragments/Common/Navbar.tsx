@@ -4,12 +4,15 @@ import {
     IconLayoutDashboard,
     IconLogout,
     IconMapPin,
+    IconMoon,
     IconPlus,
+    IconSun,
     IconTrain,
     IconUser,
 } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import Avatar from '@/components/elements/Avatar';
+import { useDarkMode } from '@/hooks/useDarkMode';
 import type { SharedProps } from '@/types';
 
 interface NavbarProps {
@@ -21,6 +24,7 @@ export default function Navbar({ transparent = false }: NavbarProps) {
     const [scrolled, setScrolled] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const { dark, toggle } = useDarkMode();
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 24);
@@ -53,7 +57,7 @@ export default function Navbar({ transparent = false }: NavbarProps) {
         <nav
             className={`fixed top-0 z-[100] flex h-[60px] w-full items-center gap-10 px-[max(24px,calc(50%-576px))] transition-all duration-300 ${
                 isOpaque
-                    ? 'border-b border-stone-200 bg-white/90 backdrop-blur-[12px]'
+                    ? 'border-b border-stone-200 bg-white/90 backdrop-blur-[12px] dark:border-stone-800 dark:bg-stone-950/90'
                     : 'border-b border-transparent bg-transparent'
             }`}
         >
@@ -90,8 +94,22 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                 </Link>
             </div>
 
+            {/* Dark mode toggle */}
+            <button
+                type="button"
+                onClick={toggle}
+                title={dark ? 'Mode terang' : 'Mode gelap'}
+                className={`rounded-lg p-2 transition-colors ${
+                    isOpaque
+                        ? 'text-stone-500 hover:bg-stone-100 hover:text-stone-700'
+                        : 'text-white/70 hover:bg-white/10 hover:text-white'
+                }`}
+            >
+                {dark ? <IconSun size={16} /> : <IconMoon size={16} />}
+            </button>
+
             {/* Auth area */}
-            <div className="ml-auto flex items-center gap-2 md:ml-6">
+            <div className="flex items-center gap-2 md:ml-0">
                 {auth?.user ? (
                     <div ref={dropdownRef} className="relative">
                         <button
@@ -125,7 +143,7 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                         </button>
 
                         {dropdownOpen && (
-                            <div className="absolute top-full right-0 z-[200] mt-1.5 w-56 rounded-xl border border-stone-200 bg-white py-1.5 shadow-lg">
+                            <div className="absolute top-full right-0 z-[200] mt-1.5 w-56 rounded-xl border border-stone-200 bg-white py-1.5 shadow-lg dark:border-stone-700 dark:bg-stone-900">
                                 <div className="mb-1 border-b border-stone-100 px-3 pb-2">
                                     <div className="text-sm font-medium text-stone-800">
                                         {auth.user.name}

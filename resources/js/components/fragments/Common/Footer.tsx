@@ -28,7 +28,7 @@ export default function Footer() {
     ];
 
     return (
-        <footer className="bg-stone-800 px-[max(24px,calc(50%-576px))] pt-[52px] pb-10">
+        <footer className="bg-stone-800 px-[max(24px,calc(50%-576px))] pt-[52px] pb-10 dark:bg-stone-900 dark:border-t dark:border-stone-800">
             <div className="mb-9 grid grid-cols-1 gap-12 md:grid-cols-[1fr_2fr]">
                 {/* Brand */}
                 <div>
