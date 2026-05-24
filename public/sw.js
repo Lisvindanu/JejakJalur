@@ -23,7 +23,9 @@ self.addEventListener('activate', (event) => {
             .then((keys) =>
                 Promise.all(
                     keys
-                        .filter((k) => k !== STATIC_CACHE && k !== RUNTIME_CACHE)
+                        .filter(
+                            (k) => k !== STATIC_CACHE && k !== RUNTIME_CACHE,
+                        )
                         .map((k) => caches.delete(k)),
                 ),
             )
@@ -82,7 +84,9 @@ self.addEventListener('fetch', (event) => {
                 .catch(() =>
                     caches
                         .match(request)
-                        .then((cached) => cached || caches.match('/offline.html')),
+                        .then(
+                            (cached) => cached || caches.match('/offline.html'),
+                        ),
                 ),
         );
     }
