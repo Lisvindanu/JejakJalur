@@ -24,6 +24,7 @@ use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\RuteController;
 use App\Http\Controllers\RuteFavoritController;
 use App\Http\Controllers\UlasanController;
+use App\Http\Controllers\WishListController;
 use Illuminate\Support\Facades\Route;
 
 // Jejak AI
@@ -105,6 +106,12 @@ Route::middleware('auth')->prefix('notifikasi')->name('notifikasi.')->group(func
 Route::middleware('auth')->prefix('destinasi/{destinasi:id}')->name('bookmark.')->group(function () {
     Route::post('/bookmark', [BookmarkController::class, 'simpan'])->name('simpan');
     Route::delete('/bookmark', [BookmarkController::class, 'hapus'])->name('hapus');
+});
+
+// Wish List Trip
+Route::middleware('auth')->prefix('destinasi/{destinasi:id}')->name('wishlist.')->group(function () {
+    Route::post('/wishlist', [WishListController::class, 'simpan'])->name('simpan');
+    Route::delete('/wishlist', [WishListController::class, 'hapus'])->name('hapus');
 });
 
 // Kunjungan

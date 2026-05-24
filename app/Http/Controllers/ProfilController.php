@@ -77,6 +77,23 @@ class ProfilController extends Controller
             ->latest()
             ->paginate(10, ['*'], 'rute_page');
 
+        $wishList = $pengguna->wishList()
+            ->with('destinasi:id,nama,kategori,foto,rating,stasiun_id')
+            ->latest()
+            ->paginate(8, ['*'], 'wishlist_page')
+            ->through(fn ($w) => [
+                'id' => $w->id,
+                'tanggal_rencana' => $w->tanggal_rencana?->format('Y-m-d'),
+                'catatan' => $w->catatan,
+                'destinasi' => [
+                    'id' => $w->destinasi->id,
+                    'nama' => $w->destinasi->nama,
+                    'kategori' => $w->destinasi->kategori,
+                    'rating' => $w->destinasi->rating,
+                    'foto_url' => $w->destinasi->foto_url,
+                ],
+            ]);
+
         return Inertia::render('Profil/Tampilkan', [
             'pengguna' => $pengguna,
             'jumlah_ulasan' => $jumlah_ulasan,
@@ -89,6 +106,7 @@ class ProfilController extends Controller
             'bookmarks' => $bookmarks,
             'kunjungan' => $kunjungan,
             'ruteFavorit' => $ruteFavorit,
+            'wishList' => $wishList,
             'jumlah_following' => $pengguna->following()->count(),
             'jumlah_followers' => $pengguna->followers()->count(),
         ]);

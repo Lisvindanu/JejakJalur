@@ -119,7 +119,6 @@ class DestinasiService
                 'kunjungan as kunjungan_7hari' => fn ($q) => $q->where('kunjungan.created_at', '>=', $cutoff),
             ])
             ->orderByRaw('(ulasan_7hari * 0.5 + bookmark_7hari * 0.3 + kunjungan_7hari * 0.2) DESC')
-            ->having(\DB::raw('ulasan_7hari * 0.5 + bookmark_7hari * 0.3 + kunjungan_7hari * 0.2'), '>', 0)
             ->limit($jumlah)
             ->get();
     }
