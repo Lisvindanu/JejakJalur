@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Destinasi;
 use App\Models\KoneksiStasiun;
 use App\Models\Stasiun;
+use App\Services\JejakAiService;
 use App\Services\KotaService;
 use App\Services\StasiunService;
 use Illuminate\Database\Eloquent\Collection;
@@ -18,6 +19,7 @@ class RuteController extends Controller
     public function __construct(
         private KotaService $kotaService,
         private StasiunService $stasiunService,
+        private JejakAiService $aiService,
     ) {}
 
     public function tampilkan(): Response
@@ -175,6 +177,38 @@ class RuteController extends Controller
         }
 
         return response()->json(['rute' => $rute, 'segments' => $segments]);
+    }
+
+    public function ringkasanAi(Request $request): JsonResponse
+    {
+        $request->validate([
+            'dari_nama' => 'required|string|max:100',
+            'ke_nama' => 'required|string|max:100',
+            'jumlah_stasiun' => 'required|integer|min:2',
+            'jarak_km' => 'required|numeric|min:0',
+            'estimasi_menit' => 'required|integer|min:0',
+            'mode' => 'required|string|in:antarkota,commuter,kcic',
+        ]);
+
+        $modeLabel = match ($request->input('mode')) {
+            'commuter' => 'KRL Commuter',
+            'kcic' => 'Kereta Cepat (KCIC)',
+            default => 'Kereta Antarkota',
+        };
+
+        $jam = intdiv($request->integer('estimasi_menit'), 60);
+        $menit = $request->integer('estimasi_menit') % 60;
+        $durasiTeks = $jam > 0 ? "{$jam} jam {$menit} menit" : "{$menit} menit";
+
+        $prompt = "Buatkan ringkasan singkat (2-3 kalimat, santai) perjalanan naik {$modeLabel} dari {$request->input('dari_nama')} ke {$request->input('ke_nama')} melewati {$request->integer('jumlah_stasiun')} stasiun, jarak sekitar {$request->input('jarak_km')} km, estimasi {$durasiTeks}. Sebutkan tips singkat perjalanan jika ada.";
+
+        try {
+            $ringkasan = $this->aiService->chat($prompt, []);
+        } catch (\RuntimeException) {
+            return response()->json(['error' => 'AI tidak tersedia saat ini.'], 503);
+        }
+
+        return response()->json(['ringkasan' => $ringkasan]);
     }
 
     public function destinasiStasiun(string $stasiunId): JsonResponse

@@ -523,6 +523,32 @@ export default function PerencanaRute({
         }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+    async function handleRingkasanAi() {
+        if (!asal || !tujuan || !rute || rute.length < 2) return;
+        setRingkasanLoading(true);
+        setRingkasan(null);
+        try {
+            const res = await fetch('/rute/ringkasan-ai', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': (document.querySelector('meta[name=csrf-token]') as HTMLMetaElement)?.content ?? '' },
+                body: JSON.stringify({
+                    dari_nama: asal.nama,
+                    ke_nama: tujuan.nama,
+                    jumlah_stasiun: rute.length,
+                    jarak_km: totalJarak.toFixed(1),
+                    estimasi_menit: estimasiMenit,
+                    mode,
+                }),
+            });
+            const data = await res.json();
+            setRingkasan(data.ringkasan ?? data.error ?? 'Gagal memuat ringkasan.');
+        } catch {
+            setRingkasan('Gagal memuat ringkasan AI.');
+        } finally {
+            setRingkasanLoading(false);
+        }
+    }
+
     function handleShare() {
         if (!asal || !tujuan) return;
         const url = new URL('/rute', window.location.origin);
@@ -548,6 +574,8 @@ export default function PerencanaRute({
     const [showSaveForm, setShowSaveForm] = useState(false);
     const [namaRute, setNamaRute] = useState('');
     const [saving, setSaving] = useState(false);
+    const [ringkasan, setRingkasan] = useState<string | null>(null);
+    const [ringkasanLoading, setRingkasanLoading] = useState(false);
 
     const SPEED_KMPH: Record<Mode, number> = {
         antarkota: 80,
@@ -631,6 +659,7 @@ export default function PerencanaRute({
         setError(null);
         setShowSaveForm(false);
         setNamaRute('');
+        setRingkasan(null);
         onRuteClear();
     }
 
@@ -937,6 +966,30 @@ export default function PerencanaRute({
                                 )}
                             </div>
                         )}
+
+                        {/* AI Trip Summary */}
+                        <div className="mt-4">
+                            {!ringkasan && !ringkasanLoading && (
+                                <button
+                                    type="button"
+                                    onClick={handleRingkasanAi}
+                                    className="flex items-center gap-1.5 rounded-lg border border-stone-200 px-3 py-1.5 text-xs font-medium text-stone-600 transition-colors hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+                                >
+                                    ✨ Ringkasan AI
+                                </button>
+                            )}
+                            {ringkasanLoading && (
+                                <div className="rounded-lg border border-stone-100 bg-stone-50 px-3 py-2.5 text-xs text-stone-400">
+                                    Membuat ringkasan...
+                                </div>
+                            )}
+                            {ringkasan && (
+                                <div className="rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2.5 text-xs leading-relaxed text-stone-700">
+                                    <span className="mr-1.5 font-semibold text-emerald-700">JejakAI:</span>
+                                    {ringkasan}
+                                </div>
+                            )}
+                        </div>
 
                         {/* Endpoint cards */}
                         <div className="grid gap-4 sm:grid-cols-2">
