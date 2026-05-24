@@ -1,0 +1,299 @@
+# Instincts generated from https://github.com/Lisvindanu/JejakJalur
+# Generated: 2026-05-24T09:43:31.836Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: JejakJalur-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/Lisvindanu/JejakJalur
+---
+
+# JejakJalur Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: feat
+
+## Evidence
+
+- 1 commits analyzed
+- Detected conventional commit pattern
+- Examples: feat: klaim kepemilikan destinasi (#37) — formulir klaim user, review admin setujui/tolak + transfer ownership
+
+---
+id: JejakJalur-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/Lisvindanu/JejakJalur
+---
+
+# JejakJalur Commit Length
+
+## Action
+
+Write detailed commit messages (~110 characters for first line)
+
+## Evidence
+
+- Average commit message length: 110 chars
+- Based on 1 commits
+
+---
+id: JejakJalur-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/Lisvindanu/JejakJalur
+---
+
+# JejakJalur Naming Files
+
+## Action
+
+Use PascalCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: PascalCase
+
+---
+id: JejakJalur-import-alias
+trigger: "when importing modules"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/Lisvindanu/JejakJalur
+---
+
+# JejakJalur Import Alias
+
+## Action
+
+Use path aliases (@/, ~/) instead of relative imports
+
+## Evidence
+
+- Import analysis shows alias pattern
+- Example: import { x } from '@/lib/x'
+
+---
+id: JejakJalur-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/Lisvindanu/JejakJalur
+---
+
+# JejakJalur Export Style
+
+## Action
+
+Prefer default exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: default
+
+---
+id: JejakJalur-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/Lisvindanu/JejakJalur
+---
+
+# JejakJalur Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: jejakjalur-instinct-file-naming-pascalcase
+trigger: "When creating a new file in the codebase"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: Lisvindanu/JejakJalur
+---
+
+# Jejakjalur Instinct File Naming Pascalcase
+
+## Action
+
+Name the file using PascalCase (e.g., MyComponent.ts)
+
+## Evidence
+
+- Pattern in namingConventions.files: PascalCase
+
+---
+id: jejakjalur-instinct-function-naming-camelcase
+trigger: "When defining a new function"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: Lisvindanu/JejakJalur
+---
+
+# Jejakjalur Instinct Function Naming Camelcase
+
+## Action
+
+Name the function using camelCase (e.g., getUserData)
+
+## Evidence
+
+- Pattern in namingConventions.functions: camelCase
+
+---
+id: jejakjalur-instinct-class-naming-pascalcase
+trigger: "When defining a new class"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: Lisvindanu/JejakJalur
+---
+
+# Jejakjalur Instinct Class Naming Pascalcase
+
+## Action
+
+Name the class using PascalCase (e.g., UserService)
+
+## Evidence
+
+- Pattern in namingConventions.classes: PascalCase
+
+---
+id: jejakjalur-instinct-constant-naming-screaming-snake-case
+trigger: "When declaring a constant"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: Lisvindanu/JejakJalur
+---
+
+# Jejakjalur Instinct Constant Naming Screaming Snake Case
+
+## Action
+
+Name the constant using SCREAMING_SNAKE_CASE (e.g., MAX_RETRIES)
+
+## Evidence
+
+- Pattern in namingConventions.constants: SCREAMING_SNAKE_CASE
+
+---
+id: jejakjalur-instinct-import-alias
+trigger: "When importing modules"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: Lisvindanu/JejakJalur
+---
+
+# Jejakjalur Instinct Import Alias
+
+## Action
+
+Use import aliases instead of relative paths
+
+## Evidence
+
+- Pattern in importStyle: alias
+
+---
+id: jejakjalur-instinct-export-default
+trigger: "When exporting modules or components"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: Lisvindanu/JejakJalur
+---
+
+# Jejakjalur Instinct Export Default
+
+## Action
+
+Use default exports
+
+## Evidence
+
+- Pattern in exportStyle: default
+
+---
+id: jejakjalur-instinct-commit-conventional-feat
+trigger: "When making a commit for a new feature"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: Lisvindanu/JejakJalur
+---
+
+# Jejakjalur Instinct Commit Conventional Feat
+
+## Action
+
+Prefix the commit message with 'feat:' following conventional commit format
+
+## Evidence
+
+- Seen in commit: feat: klaim kepemilikan destinasi (#37)
+- Pattern in commits.prefixes: feat
+
+---
+id: jejakjalur-instinct-commit-average-length
+trigger: "When writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: Lisvindanu/JejakJalur
+---
+
+# Jejakjalur Instinct Commit Average Length
+
+## Action
+
+Write a descriptive commit message around 110 characters on average
+
+## Evidence
+
+- Pattern in commits.averageLength: 110
+
+---
+id: jejakjalur-instinct-test-location-separate
+trigger: "When adding new tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: Lisvindanu/JejakJalur
+---
+
+# Jejakjalur Instinct Test Location Separate
+
+## Action
+
+Place test files in a separate directory from source code
+
+## Evidence
+
+- Pattern in folderStructure.testLocation: separate
+
