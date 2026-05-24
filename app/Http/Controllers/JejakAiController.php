@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AiSession;
+use App\Models\Destinasi;
 use App\Services\JejakAiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -65,6 +66,63 @@ class JejakAiController extends Controller
             'links' => $links,
             'usage' => ['count' => $session->message_count, 'limit' => $limit],
         ]);
+    }
+
+    public function rekomendasiPersonal(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $bookmarkedIds = $user->bookmarks()->pluck('destinasi_id');
+        $visitedIds = $user->kunjungan()->pluck('destinasi_id');
+        $excludeIds = $bookmarkedIds->merge($visitedIds)->unique();
+
+        // Cari kategori favorit user dari bookmarks
+        $topKategori = $user->bookmarks()
+            ->with('destinasi:id,kategori')
+            ->get()
+            ->pluck('destinasi.kategori')
+            ->filter()
+            ->countBy()
+            ->sortByDesc(fn ($c) => $c)
+            ->keys()
+            ->first() ?? 'Wisata';
+
+        $rekomendasi = Destinasi::with('stasiun:id,nama,kota_id', 'stasiun.kota:id,nama')
+            ->verified()
+            ->where('kategori', $topKategori)
+            ->whereNotIn('id', $excludeIds)
+            ->orderByDesc('rating')
+            ->limit(4)
+            ->get();
+
+        if ($rekomendasi->isEmpty()) {
+            $rekomendasi = Destinasi::with('stasiun:id,nama,kota_id', 'stasiun.kota:id,nama')
+                ->verified()
+                ->whereNotIn('id', $excludeIds)
+                ->orderByDesc('rating')
+                ->limit(4)
+                ->get();
+        }
+
+        if ($rekomendasi->isEmpty()) {
+            return response()->json(['destinasi' => [], 'narasi' => null, 'kategori' => $topKategori]);
+        }
+
+        $namaList = $rekomendasi->map(fn ($d) => "{$d->nama} ({$d->stasiun->kota->nama})")->implode(', ');
+        $jumlahBookmark = $bookmarkedIds->count();
+        $konteks = $jumlahBookmark > 0
+            ? "User sudah menyimpan {$jumlahBookmark} destinasi, terutama kategori {$topKategori}."
+            : 'User baru bergabung.';
+
+        $prompt = "{$konteks} Rekomendasikan secara singkat (1-2 kalimat, santai) mengapa destinasi berikut cocok untuk mereka: {$namaList}. Mulai kalimat dengan \"Karena kamu suka {$topKategori}...\"";
+
+        try {
+            $narasi = $this->aiService->chat($prompt, []);
+        } catch (\RuntimeException) {
+            $narasi = null;
+        }
+
+        return response()->json(['destinasi' => $rekomendasi, 'narasi' => $narasi, 'kategori' => $topKategori]);
     }
 
     public function status(Request $request): JsonResponse

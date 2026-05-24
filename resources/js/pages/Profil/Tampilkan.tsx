@@ -11,6 +11,7 @@ import {
     IconPencil,
     IconRoute,
     IconShoppingBag,
+    IconSparkles,
     IconStar,
     IconToolsKitchen2,
     IconTrash,
@@ -334,6 +335,104 @@ function UlasanCard({ ulasan }: { ulasan: UlasanProfil }) {
     );
 }
 
+interface RekomendasiItem {
+    id: string;
+    nama: string;
+    kategori: string;
+    rating: number;
+    foto_url?: string | null;
+    stasiun: { nama: string; kota: { nama: string } };
+}
+
+function RekomendasiSection() {
+    const [data, setData] = useState<{ destinasi: RekomendasiItem[]; narasi: string | null; kategori: string } | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [done, setDone] = useState(false);
+
+    async function handleMuat() {
+        setLoading(true);
+        try {
+            const res = await fetch('/ai/rekomendasi', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (res.ok) {
+                setData(await res.json());
+            }
+        } catch {
+            // silent
+        } finally {
+            setLoading(false);
+            setDone(true);
+        }
+    }
+
+    return (
+        <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-6 sm:p-8">
+            <div className="mb-4 flex items-center gap-2">
+                <IconSparkles size={18} className="text-emerald-600" />
+                <h2 className="font-semibold text-stone-800">Rekomendasi Untukmu</h2>
+            </div>
+
+            {!done && !loading && (
+                <div className="text-center py-4">
+                    <p className="mb-3 text-sm text-stone-500">
+                        JejakAI akan merekomendasikan destinasi berdasarkan riwayat kamu.
+                    </p>
+                    <button
+                        onClick={handleMuat}
+                        className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-800"
+                    >
+                        <IconSparkles size={14} />
+                        Dapatkan Rekomendasi
+                    </button>
+                </div>
+            )}
+
+            {loading && (
+                <div className="flex items-center gap-2 py-4 text-sm text-stone-400">
+                    <IconLoader2 size={15} className="animate-spin" />
+                    JejakAI sedang memilihkan rekomendasi...
+                </div>
+            )}
+
+            {done && data && (
+                <>
+                    {data.narasi && (
+                        <div className="mb-4 rounded-lg border border-emerald-100 bg-white px-3 py-2.5 text-sm leading-relaxed text-stone-700">
+                            <span className="mr-1.5 font-semibold text-emerald-700">JejakAI:</span>
+                            {data.narasi}
+                        </div>
+                    )}
+                    {data.destinasi.length > 0 ? (
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                            {data.destinasi.map((d) => {
+                                const ph = kategoriPlaceholder(d.kategori);
+                                return (
+                                    <Link
+                                        key={d.id}
+                                        href={`/destinasi/${d.id}`}
+                                        className="flex flex-col overflow-hidden rounded-xl border border-stone-200 bg-white no-underline transition-shadow hover:shadow-md"
+                                    >
+                                        <div className={`flex h-24 items-center justify-center bg-gradient-to-br ${ph.gradient}`}>
+                                            {d.foto_url ? (
+                                                <img src={d.foto_url} alt={d.nama} className="h-full w-full object-cover" />
+                                            ) : ph.icon}
+                                        </div>
+                                        <div className="p-2.5">
+                                            <p className="line-clamp-2 text-xs font-medium text-stone-800">{d.nama}</p>
+                                            <p className="mt-0.5 text-[10px] text-stone-400">{d.stasiun.kota.nama}</p>
+                                        </div>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <p className="text-sm text-stone-400">Belum ada rekomendasi. Coba simpan beberapa destinasi dulu!</p>
+                    )}
+                </>
+            )}
+        </div>
+    );
+}
+
 export default function Tampilkan({
     pengguna: penggunaProp,
     jumlah_ulasan = 0,
@@ -497,6 +596,9 @@ export default function Tampilkan({
                             </div>
                         </div>
                     </div>
+
+                    {/* Rekomendasi AI */}
+                    <RekomendasiSection />
 
                     {/* Wishlist */}
                     <div className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">

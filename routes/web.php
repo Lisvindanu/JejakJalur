@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('ai')->name('ai.')->group(function () {
     Route::post('/chat', [JejakAiController::class, 'chat'])->name('chat')->middleware('throttle:30,1');
     Route::get('/status', [JejakAiController::class, 'status'])->name('status');
+    Route::get('/rekomendasi', [JejakAiController::class, 'rekomendasiPersonal'])->name('rekomendasi')->middleware(['auth', 'throttle:5,1']);
 });
 
 // Publik
