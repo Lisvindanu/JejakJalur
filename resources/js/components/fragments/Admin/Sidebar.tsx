@@ -1,6 +1,7 @@
 import {
     IconArrowLeft,
     IconBuilding,
+    IconClipboardList,
     IconLayoutDashboard,
     IconMapPin,
     IconMessageCircle,
@@ -51,6 +52,12 @@ const navItems: NavItem[] = [
         label: 'Sesi AI',
         href: '/admin/ai-session',
         icon: <IconRobot size={16} />,
+    },
+    {
+        label: 'Activity Log',
+        href: '/admin/activity-log',
+        icon: <IconClipboardList size={16} />,
+        separator: true,
     },
 ];
 

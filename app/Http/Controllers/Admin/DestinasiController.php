@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DestinasiRequest;
+use App\Models\AdminLog;
 use App\Models\Destinasi;
 use App\Models\Stasiun;
 use App\Services\DestinasiService;
@@ -38,10 +39,11 @@ class DestinasiController extends Controller
 
     public function simpan(DestinasiRequest $request): RedirectResponse
     {
-        $this->destinasiService->buatDestinasi(
+        $destinasi = $this->destinasiService->buatDestinasi(
             data: $request->safe()->except('foto'),
             foto: $request->file('foto'),
         );
+        AdminLog::catat('buat_destinasi', Destinasi::class, $destinasi->id, "Buat destinasi: {$destinasi->nama}");
 
         return redirect()->route('admin.destinasi.indeks')->with('sukses', 'Destinasi berhasil ditambahkan.');
     }
@@ -61,6 +63,7 @@ class DestinasiController extends Controller
             data: $request->safe()->except('foto'),
             fotoBaru: $request->file('foto'),
         );
+        AdminLog::catat('edit_destinasi', Destinasi::class, $destinasi->id, "Edit destinasi: {$destinasi->nama}");
 
         return redirect()->route('admin.destinasi.indeks')->with('sukses', 'Destinasi berhasil diperbarui.');
     }
@@ -74,6 +77,7 @@ class DestinasiController extends Controller
 
     public function hapus(Destinasi $destinasi): RedirectResponse
     {
+        AdminLog::catat('hapus_destinasi', Destinasi::class, $destinasi->id, "Hapus destinasi: {$destinasi->nama}");
         $this->destinasiService->hapusDestinasi($destinasi);
 
         return redirect()->route('admin.destinasi.indeks')->with('sukses', 'Destinasi berhasil dihapus.');
@@ -82,9 +86,10 @@ class DestinasiController extends Controller
     public function verifikasi(Destinasi $destinasi): RedirectResponse
     {
         $destinasi->update(['is_verified' => ! $destinasi->is_verified]);
+        $aksi = $destinasi->is_verified ? 'verifikasi_destinasi' : 'batalkan_verifikasi_destinasi';
+        $status = $destinasi->is_verified ? 'diverifikasi' : 'dibatalkan verifikasinya';
+        AdminLog::catat($aksi, Destinasi::class, $destinasi->id, "Destinasi {$destinasi->nama} {$status}");
 
-        $statusVerifikasi = $destinasi->is_verified ? 'diverifikasi' : 'dibatalkan verifikasinya';
-
-        return back()->with('sukses', "Destinasi berhasil {$statusVerifikasi}.");
+        return back()->with('sukses', "Destinasi berhasil {$status}.");
     }
 }

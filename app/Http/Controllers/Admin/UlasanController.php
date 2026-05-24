@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminLog;
 use App\Models\Ulasan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -53,6 +54,7 @@ class UlasanController extends Controller
     public function sembunyikan(Ulasan $ulasan): RedirectResponse
     {
         $ulasan->update(['is_hidden' => true]);
+        AdminLog::catat('sembunyikan_ulasan', Ulasan::class, $ulasan->id, "Sembunyikan ulasan ID {$ulasan->id}");
 
         return back()->with('sukses', 'Ulasan disembunyikan.');
     }
@@ -60,12 +62,14 @@ class UlasanController extends Controller
     public function tampilkan(Ulasan $ulasan): RedirectResponse
     {
         $ulasan->update(['is_hidden' => false]);
+        AdminLog::catat('tampilkan_ulasan', Ulasan::class, $ulasan->id, "Tampilkan ulasan ID {$ulasan->id}");
 
         return back()->with('sukses', 'Ulasan ditampilkan kembali.');
     }
 
     public function hapus(Ulasan $ulasan): RedirectResponse
     {
+        AdminLog::catat('hapus_ulasan', Ulasan::class, $ulasan->id, "Hapus ulasan ID {$ulasan->id}");
         $ulasan->delete();
 
         return back()->with('sukses', 'Ulasan berhasil dihapus.');

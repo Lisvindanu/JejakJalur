@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\AiSessionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DestinasiController as AdminDestinasiController;
@@ -164,6 +165,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::patch('/{aiSession}/reset', [AiSessionController::class, 'reset'])->name('reset');
         Route::delete('/{aiSession}', [AiSessionController::class, 'hapus'])->name('hapus');
     });
+
+    Route::get('/activity-log', [ActivityLogController::class, 'indeks'])->name('activity-log');
 
     Route::prefix('export')->name('export.')->group(function () {
         Route::get('/destinasi', [ExportController::class, 'destinasi'])->name('destinasi');
