@@ -65,6 +65,11 @@ class User extends Authenticatable
         return $this->hasMany(RuteFavorit::class);
     }
 
+    public function wishList(): HasMany
+    {
+        return $this->hasMany(WishList::class);
+    }
+
     public function following(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_follows', 'follower_id', 'following_id')->withTimestamps();

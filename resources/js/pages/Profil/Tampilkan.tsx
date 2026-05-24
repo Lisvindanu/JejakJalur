@@ -2,6 +2,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     IconBookmark,
     IconBookmarkFilled,
+    IconCalendarPlus,
     IconCheck,
     IconFlame,
     IconLayoutDashboard,
@@ -35,6 +36,7 @@ import type {
     RuteFavoritProfil,
     SharedProps,
     UlasanProfil,
+    WishListProfil,
 } from '@/types';
 
 interface Pengguna {
@@ -73,6 +75,7 @@ interface Props {
     bookmarks?: PaginatedData<BookmarkProfil>;
     kunjungan?: PaginatedData<KunjunganProfil>;
     ruteFavorit?: PaginatedData<RuteFavoritProfil>;
+    wishList?: PaginatedData<WishListProfil>;
 }
 
 function StatItem({
@@ -229,6 +232,70 @@ function KunjunganCard({ kunjungan }: { kunjungan: KunjunganProfil }) {
                             <IconLoader2 size={15} className="animate-spin" />
                         ) : (
                             <IconCheck size={15} />
+                        )}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function WishListTripCard({ item }: { item: WishListProfil }) {
+    const [removing, setRemoving] = useState(false);
+    const { destinasi } = item;
+    const ph = kategoriPlaceholder(destinasi.kategori);
+
+    function hapus() {
+        setRemoving(true);
+        router.visit(`/destinasi/${destinasi.id}/wishlist`, {
+            method: 'delete',
+            preserveScroll: true,
+            onFinish: () => setRemoving(false),
+        });
+    }
+
+    return (
+        <div className="group flex flex-col overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+            <Link href={`/destinasi/${destinasi.id}`} className="no-underline">
+                <div
+                    className={`flex h-32 items-center justify-center bg-gradient-to-br ${ph.gradient}`}
+                >
+                    {destinasi.foto_url ? (
+                        <img
+                            src={destinasi.foto_url}
+                            alt={destinasi.nama}
+                            className="h-full w-full object-cover"
+                        />
+                    ) : (
+                        ph.icon
+                    )}
+                </div>
+            </Link>
+
+            <div className="flex flex-1 flex-col gap-1 p-3">
+                <Link
+                    href={`/destinasi/${destinasi.id}`}
+                    className="line-clamp-2 text-sm font-medium text-stone-800 no-underline hover:text-emerald-700"
+                >
+                    {destinasi.nama}
+                </Link>
+                {item.tanggal_rencana && (
+                    <p className="text-[11px] text-sky-600">
+                        {new Date(item.tanggal_rencana).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </p>
+                )}
+                <div className="flex items-center justify-between">
+                    <RatingDisplay value={Number(destinasi.rating)} size={13} />
+                    <button
+                        onClick={hapus}
+                        disabled={removing}
+                        title="Hapus dari rencana trip"
+                        className="text-sky-400 transition-colors hover:text-red-500 disabled:opacity-50"
+                    >
+                        {removing ? (
+                            <IconLoader2 size={15} className="animate-spin" />
+                        ) : (
+                            <IconCalendarPlus size={15} />
                         )}
                     </button>
                 </div>
@@ -462,6 +529,7 @@ export default function Tampilkan({
     bookmarks,
     kunjungan,
     ruteFavorit,
+    wishList,
 }: Props) {
     const emptyUlasan: PaginatedData<UlasanProfil> = {
         data: [],
@@ -503,10 +571,21 @@ export default function Tampilkan({
         to: null,
         links: [],
     };
+    const emptyWishList: PaginatedData<WishListProfil> = {
+        data: [],
+        current_page: 1,
+        last_page: 1,
+        per_page: 8,
+        total: 0,
+        from: null,
+        to: null,
+        links: [],
+    };
     const ulasanData = ulasan ?? emptyUlasan;
     const bookmarksData = bookmarks ?? emptyBookmarks;
     const kunjunganData = kunjungan ?? emptyKunjungan;
     const ruteFavoritData = ruteFavorit ?? emptyRuteFavorit;
+    const wishListData = wishList ?? emptyWishList;
     const pengguna = penggunaProp ?? MOCK_PENGGUNA;
     const { auth } = usePage<SharedProps>().props;
     const isAdmin = pengguna.is_admin ?? auth?.user?.is_admin ?? false;
@@ -819,6 +898,55 @@ export default function Tampilkan({
                                 {ruteFavoritData.last_page > 1 && (
                                     <div className="mt-4 border-t border-stone-100 pt-4">
                                         <Pagination data={ruteFavoritData} />
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+
+                    {/* Rencana Trip */}
+                    <div className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">
+                        <div className="mb-4 flex items-center gap-2">
+                            <IconCalendarPlus
+                                size={18}
+                                className="text-sky-600"
+                            />
+                            <h2 className="font-semibold text-stone-800">
+                                Rencana Trip
+                            </h2>
+                            {wishListData.total > 0 && (
+                                <span className="ml-auto rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-500">
+                                    {wishListData.total}
+                                </span>
+                            )}
+                        </div>
+
+                        {wishListData.total === 0 ? (
+                            <div className="rounded-xl border border-dashed border-stone-200 py-10 text-center">
+                                <IconCalendarPlus
+                                    size={32}
+                                    className="mx-auto mb-2 text-stone-300"
+                                />
+                                <p className="text-sm text-stone-400">
+                                    Belum ada destinasi di rencana trip.
+                                </p>
+                                <Link
+                                    href="/destinasi"
+                                    className="mt-2 inline-block text-sm font-medium text-emerald-700 no-underline hover:text-emerald-800"
+                                >
+                                    Temukan destinasi
+                                </Link>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                                    {wishListData.data.map((w) => (
+                                        <WishListTripCard key={w.id} item={w} />
+                                    ))}
+                                </div>
+                                {wishListData.last_page > 1 && (
+                                    <div className="mt-4 border-t border-stone-100 pt-4">
+                                        <Pagination data={wishListData} />
                                     </div>
                                 )}
                             </>

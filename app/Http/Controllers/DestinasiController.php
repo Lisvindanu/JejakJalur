@@ -56,6 +56,9 @@ class DestinasiController extends Controller
         $isVisited = auth()->check()
             && auth()->user()->kunjungan()->where('destinasi_id', $destinasi->id)->exists();
 
+        $isInWishlist = auth()->check()
+            && auth()->user()->wishList()->where('destinasi_id', $destinasi->id)->exists();
+
         $likedUlasanIds = auth()->check()
             ? UlasanLike::where('user_id', auth()->id())
                 ->whereIn('ulasan_id', $destinasiLengkap->ulasan->pluck('id'))
@@ -67,6 +70,7 @@ class DestinasiController extends Controller
             'destinasi' => $destinasiLengkap,
             'is_bookmarked' => $isBookmarked,
             'is_visited' => $isVisited,
+            'is_in_wishlist' => $isInWishlist,
             'destinasi_terkait' => $this->destinasiService->destinasiTerkait($destinasi),
             'liked_ulasan_ids' => $likedUlasanIds,
         ]);

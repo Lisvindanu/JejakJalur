@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import BookmarkButton from '@/components/elements/BookmarkButton';
 import VisitButton from '@/components/elements/VisitButton';
+import WishListButton from '@/components/elements/WishListButton';
 import DestinasiCard from '@/components/fragments/Destinasi/DestinasiCard';
 import DestinasiDetail from '@/components/fragments/Destinasi/DestinasiDetail';
 import LokasiPanel from '@/components/fragments/Destinasi/LokasiPanel';
@@ -14,6 +15,7 @@ interface Props {
     destinasi?: Destinasi;
     is_bookmarked?: boolean;
     is_visited?: boolean;
+    is_in_wishlist?: boolean;
     destinasi_terkait?: Destinasi[];
     liked_ulasan_ids?: string[];
 }
@@ -22,6 +24,7 @@ export default function Detail({
     destinasi: dest,
     is_bookmarked = false,
     is_visited = false,
+    is_in_wishlist = false,
     destinasi_terkait = [],
     liked_ulasan_ids = [],
 }: Props) {
@@ -50,6 +53,10 @@ export default function Detail({
                         <VisitButton
                             destinasiId={destinasi.id}
                             isVisited={is_visited}
+                        />
+                        <WishListButton
+                            destinasiId={destinasi.id}
+                            isInWishlist={is_in_wishlist}
                         />
                     </>
                 )}

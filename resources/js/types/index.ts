@@ -153,6 +153,19 @@ export type KunjunganProfil = {
     };
 };
 
+export type WishListProfil = {
+    id: string;
+    tanggal_rencana: string | null;
+    catatan: string | null;
+    destinasi: {
+        id: string;
+        nama: string;
+        kategori: string;
+        rating: string;
+        foto_url?: string | null;
+    };
+};
+
 export type RuteFavoritProfil = {
     id: number;
     nama: string;
