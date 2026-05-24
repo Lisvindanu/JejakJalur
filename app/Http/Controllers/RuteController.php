@@ -234,10 +234,15 @@ class RuteController extends Controller
         $menit = $request->integer('estimasi_menit') % 60;
         $durasiTeks = $jam > 0 ? "{$jam} jam {$menit} menit" : "{$menit} menit";
 
-        $prompt = "Buatkan ringkasan singkat (2-3 kalimat, santai) perjalanan naik {$modeLabel} dari {$request->input('dari_nama')} ke {$request->input('ke_nama')} melewati {$request->integer('jumlah_stasiun')} stasiun, jarak sekitar {$request->input('jarak_km')} km, estimasi {$durasiTeks}. Sebutkan tips singkat perjalanan jika ada.";
-
         try {
-            $ringkasan = $this->aiService->chat($prompt, []);
+            $ringkasan = $this->aiService->ringkasanPerjalanan(
+                $request->input('dari_nama'),
+                $request->input('ke_nama'),
+                $modeLabel,
+                $request->integer('jumlah_stasiun'),
+                (float) $request->input('jarak_km'),
+                $durasiTeks,
+            );
         } catch (\RuntimeException) {
             return response()->json(['error' => 'AI tidak tersedia saat ini.'], 503);
         }
