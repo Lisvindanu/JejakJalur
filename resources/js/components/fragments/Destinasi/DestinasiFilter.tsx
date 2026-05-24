@@ -12,6 +12,7 @@ interface Filter {
     urut?: string;
     min_rating?: string;
     harga?: string;
+    musiman?: string;
 }
 
 interface DestinasiFilterProps {
@@ -30,6 +31,13 @@ const URUT_OPTIONS = [
     { value: 'rating', label: 'Rating Tertinggi' },
     { value: 'ulasan', label: 'Ulasan Terbanyak' },
     { value: 'terbaru', label: 'Terbaru' },
+    { value: 'trending', label: 'Trending' },
+];
+
+const MUSIMAN_OPTIONS = [
+    { value: '', label: 'Semua Destinasi' },
+    { value: 'sekarang', label: 'Tersedia Sekarang' },
+    { value: 'saja', label: 'Musiman Saja' },
 ];
 
 const MIN_RATING_OPTIONS = [
@@ -55,6 +63,7 @@ function applyFilter(params: Filter) {
     if (params.urut && params.urut !== 'rating') clean.urut = params.urut;
     if (params.min_rating) clean.min_rating = params.min_rating;
     if (params.harga) clean.harga = params.harga;
+    if (params.musiman) clean.musiman = params.musiman;
     router.get('/destinasi', clean, { preserveState: true, replace: true });
 }
 
@@ -152,7 +161,8 @@ export default function DestinasiFilter({
         !!filter.kategori ||
         !!filter.urut ||
         !!filter.min_rating ||
-        !!filter.harga;
+        !!filter.harga ||
+        !!filter.musiman;
 
     function handleKataKunci(value: string) {
         setKataKunci(value);
@@ -181,6 +191,10 @@ export default function DestinasiFilter({
 
     function handleHarga(harga: string) {
         applyFilter({ ...filter, harga });
+    }
+
+    function handleMusiman(musiman: string) {
+        applyFilter({ ...filter, musiman });
     }
 
     function handleReset() {
@@ -252,6 +266,13 @@ export default function DestinasiFilter({
                 onChange={handleHarga}
                 options={HARGA_OPTIONS}
                 placeholder="Semua Harga"
+            />
+
+            <FilterDropdown
+                value={filter.musiman ?? ''}
+                onChange={handleMusiman}
+                options={MUSIMAN_OPTIONS}
+                placeholder="Semua Destinasi"
             />
 
             {hasFilter && (
