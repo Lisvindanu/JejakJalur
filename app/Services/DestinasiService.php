@@ -14,7 +14,10 @@ class DestinasiService
 
     private const DIREKTORI_FOTO = 'destinasi';
 
-    public function __construct(private FotoService $fotoService) {}
+    public function __construct(
+        private FotoService $fotoService,
+        private JejakAiService $jejakAi,
+    ) {}
 
     public function daftarDestinasiTerfilter(array $filter, bool $hanyaVerified = false): LengthAwarePaginator
     {
@@ -153,7 +156,10 @@ class DestinasiService
             $data['foto'] = $this->fotoService->simpan($foto, self::DIREKTORI_FOTO);
         }
 
-        return Destinasi::create($data);
+        $destinasi = Destinasi::create($data);
+        $this->terapkanTagAi($destinasi);
+
+        return $destinasi;
     }
 
     /**
@@ -184,7 +190,33 @@ class DestinasiService
 
         $destinasi->update($data);
 
+        // Regenerate tags if description changed
+        if (isset($data['deskripsi'])) {
+            $this->terapkanTagAi($destinasi->fresh());
+        }
+
         return $destinasi->fresh();
+    }
+
+    private function terapkanTagAi(Destinasi $destinasi): void
+    {
+        if (empty($destinasi->deskripsi)) {
+            return;
+        }
+
+        try {
+            $tags = $this->jejakAi->sarankanTag(
+                $destinasi->nama,
+                $destinasi->deskripsi,
+                $destinasi->kategori,
+            );
+
+            if (! empty($tags)) {
+                $destinasi->update(['tags' => $tags]);
+            }
+        } catch (\Exception) {
+            // Non-critical — tags stay null if AI unavailable
+        }
     }
 
     public function hapusDestinasi(Destinasi $destinasi): void

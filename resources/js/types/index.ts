@@ -52,6 +52,7 @@ export type Destinasi = {
     harga_min?: number | null;
     harga_max?: number | null;
     jam_operasional?: Record<string, { buka: string; tutup: string } | null> | null;
+    tags?: string[] | null;
     galeri?: Array<{ id: string; url: string; url_resolved: string | null; urutan: number }>;
     stasiun: {
         id?: string;
@@ -85,6 +86,7 @@ export type Ulasan = {
     updated_at: string;
     likes_count?: number;
     foto_urls?: string[];
+    sentiment?: 'positif' | 'negatif' | 'netral' | null;
     komentar?: UlasanKomentar[];
     user: {
         id: number;

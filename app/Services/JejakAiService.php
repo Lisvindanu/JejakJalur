@@ -136,6 +136,54 @@ class JejakAiService
     }
 
     /**
+     * Analyse review sentiment. Returns 'positif', 'negatif', or 'netral'.
+     */
+    public function analisisSentimen(string $konten, float $rating): string
+    {
+        $messages = [
+            ['role' => 'system', 'content' => 'Kamu adalah pengklasifikasi sentimen. Jawab HANYA dengan satu kata: positif, negatif, atau netral.'],
+            ['role' => 'user', 'content' => "Klasifikasikan sentimen ulasan ini (rating {$rating}/5):\n\"{$konten}\"\n\nJawab satu kata: positif / negatif / netral"],
+        ];
+
+        $result = strtolower(trim($this->callOllama($messages)));
+
+        if (str_contains($result, 'positif')) {
+            return 'positif';
+        }
+        if (str_contains($result, 'negatif')) {
+            return 'negatif';
+        }
+
+        return 'netral';
+    }
+
+    /**
+     * Suggest 3-5 short tags for a destination based on its description.
+     *
+     * @return string[]
+     */
+    public function sarankanTag(string $nama, string $deskripsi, string $kategori): array
+    {
+        $messages = [
+            ['role' => 'system', 'content' => 'Kamu adalah asisten tag destinasi wisata. Berikan tag singkat (1-2 kata). Jawab HANYA dengan tag dipisah koma, tanpa penjelasan.'],
+            ['role' => 'user', 'content' => "Nama: {$nama}\nKategori: {$kategori}\nDeskripsi: {$deskripsi}\n\nBerikan 3-5 tag relevan (contoh: halal, parkir, keluarga, outdoor, murah):"],
+        ];
+
+        $raw = $this->callOllama($messages);
+
+        // Strip any markdown or extra text — keep only comma-separated tokens
+        $tags = array_filter(
+            array_map(
+                fn ($t) => preg_replace('/[^a-zA-Z0-9\s\-]/u', '', trim($t)),
+                explode(',', $raw),
+            ),
+            fn ($t) => strlen($t) > 0 && strlen($t) <= 30,
+        );
+
+        return array_values(array_slice($tags, 0, 6));
+    }
+
+    /**
      * @return array<int, array{type: string, id?: string, nama: string, url: string}>
      */
     public function extractLinks(string $reply, string $query): array

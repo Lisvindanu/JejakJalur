@@ -164,6 +164,27 @@ export default function UlasanCard({
                 </div>
             )}
 
+            {/* Sentiment badge */}
+            {ulasan.sentiment && (
+                <div className="mt-2 mb-1">
+                    <span
+                        className={`inline-block rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                            ulasan.sentiment === 'positif'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : ulasan.sentiment === 'negatif'
+                                  ? 'bg-red-100 text-red-600'
+                                  : 'bg-stone-100 text-stone-500'
+                        }`}
+                    >
+                        {ulasan.sentiment === 'positif'
+                            ? 'Positif'
+                            : ulasan.sentiment === 'negatif'
+                              ? 'Negatif'
+                              : 'Netral'}
+                    </span>
+                </div>
+            )}
+
             {/* Like + Report + Reply */}
             <div className="mt-3 flex items-center justify-between">
                 <div className="flex items-center gap-1">

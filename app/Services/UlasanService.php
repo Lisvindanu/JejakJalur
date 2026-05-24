@@ -10,7 +10,10 @@ use Illuminate\Http\UploadedFile;
 
 class UlasanService
 {
-    public function __construct(private FotoService $fotoService) {}
+    public function __construct(
+        private FotoService $fotoService,
+        private JejakAiService $jejakAi,
+    ) {}
 
     /** @param UploadedFile[] $fotoFiles */
     public function buatUlasan(array $data, User $pengguna, Destinasi $destinasi, array $fotoFiles = []): Ulasan
@@ -20,13 +23,22 @@ class UlasanService
             $fotoFiles,
         );
 
-        return $destinasi->ulasan()->create([
+        $ulasan = $destinasi->ulasan()->create([
             'user_id' => $pengguna->id,
             'judul' => $data['judul'] ?? null,
             'konten' => $data['konten'],
             'rating' => $data['rating'],
             'foto' => $fotoArr ?: null,
         ]);
+
+        try {
+            $sentiment = $this->jejakAi->analisisSentimen($ulasan->konten, (float) $ulasan->rating);
+            $ulasan->update(['sentiment' => $sentiment]);
+        } catch (\Exception) {
+            // Non-critical — sentiment stays null if AI unavailable
+        }
+
+        return $ulasan->fresh();
     }
 
     public function perbaruiUlasan(Ulasan $ulasan, array $data, User $pengguna): Ulasan

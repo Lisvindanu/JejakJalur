@@ -17,7 +17,7 @@ class Ulasan extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'user_id', 'destinasi_id', 'judul', 'konten', 'rating', 'foto', 'reports_count', 'is_hidden',
+        'user_id', 'destinasi_id', 'judul', 'konten', 'rating', 'foto', 'reports_count', 'is_hidden', 'sentiment',
     ];
 
     protected $appends = ['foto_urls'];

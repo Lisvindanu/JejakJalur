@@ -205,6 +205,20 @@ export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
                     {destinasi.deskripsi}
                 </p>
 
+                {/* Tags */}
+                {(destinasi.tags ?? []).length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                        {destinasi.tags!.map((tag) => (
+                            <span
+                                key={tag}
+                                className="rounded-full border border-stone-200 bg-stone-50 px-3 py-0.5 text-xs text-stone-500"
+                            >
+                                #{tag}
+                            </span>
+                        ))}
+                    </div>
+                )}
+
                 {/* Info tambahan */}
                 {(destinasi.telepon ||
                     destinasi.website ||
