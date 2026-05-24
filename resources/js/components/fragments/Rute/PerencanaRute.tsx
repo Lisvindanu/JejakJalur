@@ -8,6 +8,7 @@ import {
     IconLink,
     IconLoader2,
     IconMapPin,
+    IconPlus,
     IconRoute,
     IconTrain,
     IconX,
@@ -245,7 +246,7 @@ function KotaStasiunPicker({
     semuaKota,
     excludeKotaId,
 }: {
-    accent?: 'emerald' | 'amber';
+    accent?: 'emerald' | 'amber' | 'stone';
     value: StasiunFlat | null;
     onChange: (s: StasiunFlat | null) => void;
     semuaKota: Kota[];
@@ -335,7 +336,7 @@ function KotaStasiunPicker({
                     <div className="flex items-center gap-2.5">
                         <IconTrain
                             size={12}
-                            className={`shrink-0 ${accent === 'amber' ? 'text-amber-600' : 'text-emerald-600'}`}
+                            className={`shrink-0 ${accent === 'amber' ? 'text-amber-600' : accent === 'stone' ? 'text-stone-500' : 'text-emerald-600'}`}
                         />
                         <div>
                             <span className="text-stone-800">{s.nama}</span>
@@ -497,6 +498,7 @@ export default function PerencanaRute({
     });
     const [asal, setAsal] = useState<StasiunFlat | null>(null);
     const [tujuan, setTujuan] = useState<StasiunFlat | null>(null);
+    const [waypoints, setWaypoints] = useState<(StasiunFlat | null)[]>([]);
     const [copied, setCopied] = useState(false);
     const kotaFiltered = useMemo(
         () => filterKotaByMode(semuaKota, mode),
@@ -663,6 +665,22 @@ export default function PerencanaRute({
         onRuteClear();
     }
 
+    function addWaypoint() {
+        if (waypoints.length >= 5) return;
+        setWaypoints((prev) => [...prev, null]);
+        resetRute();
+    }
+
+    function removeWaypoint(idx: number) {
+        setWaypoints((prev) => prev.filter((_, i) => i !== idx));
+        resetRute();
+    }
+
+    function setWaypoint(idx: number, station: StasiunFlat | null) {
+        setWaypoints((prev) => prev.map((w, i) => (i === idx ? station : w)));
+        resetRute();
+    }
+
     function handleSimpanRute() {
         if (!asal || !tujuan || !namaRute.trim()) return;
         setSaving(true);
@@ -692,6 +710,7 @@ export default function PerencanaRute({
         setMode(newMode);
         setAsal(null);
         setTujuan(null);
+        setWaypoints([]);
         resetRute();
     }
 
@@ -702,10 +721,16 @@ export default function PerencanaRute({
         setRute(null);
         onRuteClear();
 
+        const filledWaypoints = waypoints.filter((w): w is StasiunFlat => w !== null);
+        const params = new URLSearchParams({
+            dari: asal.id,
+            ke: tujuan.id,
+            mode,
+        });
+        filledWaypoints.forEach((w) => params.append('waypoints[]', w.id));
+
         try {
-            const res = await fetch(
-                `/rute/cari-rute?dari=${asal.id}&ke=${tujuan.id}&mode=${mode}`,
-            );
+            const res = await fetch(`/rute/cari-rute?${params.toString()}`);
             const data = await res.json();
 
             if (!res.ok) {
@@ -725,6 +750,7 @@ export default function PerencanaRute({
     function handleHapus() {
         setAsal(null);
         setTujuan(null);
+        setWaypoints([]);
         resetRute();
     }
 
@@ -746,10 +772,10 @@ export default function PerencanaRute({
                 {/* Mode selector */}
                 <ModeSelector mode={mode} onChange={handleModeChange} />
 
-                {/* Picker row: stacked on mobile, side-by-side on md+ */}
-                <div className="flex flex-col gap-3 md:flex-row md:items-stretch">
-                    {/* ── DARI (left) ── */}
-                    <div className="min-w-0 flex-1 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
+                {/* Picker row */}
+                <div className="flex flex-col gap-2">
+                    {/* ── DARI ── */}
+                    <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
                         <div className="mb-2 flex items-center justify-between">
                             <span className="text-xs font-semibold tracking-wider text-emerald-700 uppercase">
                                 Dari
@@ -761,10 +787,7 @@ export default function PerencanaRute({
                                 className="flex items-center gap-1 rounded-lg px-2 py-0.5 text-[10px] font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
                             >
                                 {loadingGps ? (
-                                    <IconLoader2
-                                        size={11}
-                                        className="animate-spin"
-                                    />
+                                    <IconLoader2 size={11} className="animate-spin" />
                                 ) : (
                                     <IconCurrentLocation size={11} />
                                 )}
@@ -774,24 +797,50 @@ export default function PerencanaRute({
                         <KotaStasiunPicker
                             accent="emerald"
                             value={asal}
-                            onChange={(s) => {
-                                setAsal(s);
-                                resetRute();
-                            }}
+                            onChange={(s) => { setAsal(s); resetRute(); }}
                             semuaKota={kotaFiltered}
                         />
                     </div>
 
-                    {/* ── Separator ── */}
-                    <div className="hidden shrink-0 flex-col items-center justify-center gap-1 self-center md:flex">
-                        <IconChevronRight
-                            size={18}
-                            className="text-stone-300"
-                        />
-                    </div>
+                    {/* ── WAYPOINTS ── */}
+                    {waypoints.map((wp, idx) => (
+                        <div key={idx} className="rounded-xl border border-stone-200 bg-stone-50/60 p-4">
+                            <div className="mb-2 flex items-center justify-between">
+                                <span className="text-xs font-semibold tracking-wider text-stone-500 uppercase">
+                                    Pemberhentian {idx + 1}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => removeWaypoint(idx)}
+                                    className="rounded p-0.5 text-stone-400 hover:bg-stone-200 hover:text-stone-600"
+                                    title="Hapus pemberhentian"
+                                >
+                                    <IconX size={12} />
+                                </button>
+                            </div>
+                            <KotaStasiunPicker
+                                accent="stone"
+                                value={wp}
+                                onChange={(s) => setWaypoint(idx, s)}
+                                semuaKota={kotaFiltered}
+                            />
+                        </div>
+                    ))}
 
-                    {/* ── KE (right) ── */}
-                    <div className="min-w-0 flex-1 rounded-xl border border-amber-100 bg-amber-50/50 p-4">
+                    {/* Add waypoint button */}
+                    {waypoints.length < 5 && (
+                        <button
+                            type="button"
+                            onClick={addWaypoint}
+                            className="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-stone-200 py-2.5 text-xs font-medium text-stone-400 transition-colors hover:border-emerald-300 hover:text-emerald-600"
+                        >
+                            <IconPlus size={13} />
+                            Tambah pemberhentian
+                        </button>
+                    )}
+
+                    {/* ── KE ── */}
+                    <div className="rounded-xl border border-amber-100 bg-amber-50/50 p-4">
                         <div className="mb-2">
                             <span className="text-xs font-semibold tracking-wider text-amber-700 uppercase">
                                 Ke
@@ -800,10 +849,7 @@ export default function PerencanaRute({
                         <KotaStasiunPicker
                             accent="amber"
                             value={tujuan}
-                            onChange={(s) => {
-                                setTujuan(s);
-                                resetRute();
-                            }}
+                            onChange={(s) => { setTujuan(s); resetRute(); }}
                             semuaKota={kotaFiltered}
                         />
                     </div>

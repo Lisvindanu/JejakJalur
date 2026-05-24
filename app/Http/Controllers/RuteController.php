@@ -49,14 +49,21 @@ class RuteController extends Controller
         $validated = $request->validate([
             'dari' => ['required', 'string', 'uuid'],
             'ke' => ['required', 'string', 'uuid'],
+            'waypoints' => ['nullable', 'array', 'max:5'],
+            'waypoints.*' => ['string', 'uuid'],
             'mode' => ['nullable', 'string', 'in:antarkota,commuter,kcic'],
         ]);
 
-        $dariId = $validated['dari'];
-        $keId = $validated['ke'];
         $mode = $validated['mode'] ?? 'antarkota';
+        $stops = array_merge(
+            [$validated['dari']],
+            $validated['waypoints'] ?? [],
+            [$validated['ke']]
+        );
 
-        if ($dariId === $keId) {
+        // Pastikan tidak ada stasiun duplikat berturutan
+        $stops = array_values(array_unique($stops));
+        if (count($stops) < 2) {
             return response()->json(['error' => 'Stasiun asal dan tujuan harus berbeda.'], 422);
         }
 
@@ -72,8 +79,7 @@ class RuteController extends Controller
             ->keyBy('id')
             ->map(fn ($s) => [(float) $s->lat, (float) $s->lng]);
 
-        // Edge map untuk reconstruct segments setelah Dijkstra. Key = "dari|ke",
-        // disimpan dua arah supaya path direction-agnostic.
+        // Build graph + edge map once, reuse for all legs
         $edgeMap = [];
         $graph = [];
         foreach ($koneksi as $k) {
@@ -101,11 +107,69 @@ class RuteController extends Controller
             }
         }
 
-        // Dijkstra
-        $dist = [$dariId => 0.0];
-        $parent = [$dariId => null];
+        // Run Dijkstra for each consecutive leg and concatenate
+        $fullPath = [];
+        $allSegments = [];
+
+        for ($leg = 0; $leg < count($stops) - 1; $leg++) {
+            $fromId = $stops[$leg];
+            $toId = $stops[$leg + 1];
+
+            $path = $this->dijkstra($graph, $fromId, $toId);
+            if ($path === null) {
+                return response()->json(['error' => 'Rute tidak ditemukan antara dua stasiun yang kamu pilih.'], 404);
+            }
+
+            // Remove duplicate junction node between legs
+            if (! empty($fullPath)) {
+                $path = array_slice($path, 1);
+            }
+            $fullPath = array_merge($fullPath, $path);
+
+            // Build segments for this leg
+            for ($i = 0; $i < count($path) - 1; $i++) {
+                $from = $path[$i];
+                $to = $path[$i + 1];
+                $edge = $edgeMap[$from.'|'.$to] ?? null;
+                $geometry = $edge['geometry'] ?? null;
+
+                if ($geometry !== null && ($edge['reversed'] ?? false) && isset($geometry['coordinates'])) {
+                    $geometry['coordinates'] = array_reverse($geometry['coordinates']);
+                }
+
+                $allSegments[] = [
+                    'dari_id' => $from,
+                    'ke_id' => $to,
+                    'jarak_km' => $edge['jarak_km'] ?? null,
+                    'geometry' => $geometry,
+                ];
+            }
+        }
+
+        $stasiunMap = Stasiun::with('kota')
+            ->withCount('destinasi')
+            ->whereIn('id', $fullPath)
+            ->get()
+            ->keyBy('id');
+
+        $rute = array_values(array_map(fn (string $id) => $stasiunMap[$id], $fullPath));
+
+        return response()->json(['rute' => $rute, 'segments' => $allSegments]);
+    }
+
+    /**
+     * Run Dijkstra from $fromId to $toId using $graph.
+     * Returns path as array of station IDs, or null if not found.
+     *
+     * @param  array<string, array<string, float>>  $graph
+     * @return string[]|null
+     */
+    private function dijkstra(array $graph, string $fromId, string $toId): ?array
+    {
+        $dist = [$fromId => 0.0];
+        $parent = [$fromId => null];
         $visited = [];
-        $pq = [[$dariId, 0.0]];
+        $pq = [[$fromId, 0.0]];
         $found = false;
 
         while (! empty($pq)) {
@@ -117,7 +181,7 @@ class RuteController extends Controller
             }
             $visited[$current] = true;
 
-            if ($current === $keId) {
+            if ($current === $toId) {
                 $found = true;
                 break;
             }
@@ -136,47 +200,17 @@ class RuteController extends Controller
         }
 
         if (! $found) {
-            return response()->json(['error' => 'Rute tidak ditemukan antara kedua stasiun ini.'], 404);
+            return null;
         }
 
         $path = [];
-        $node = $keId;
+        $node = $toId;
         while ($node !== null) {
             $path[] = $node;
             $node = $parent[$node];
         }
-        $path = array_reverse($path);
 
-        $stasiunMap = Stasiun::with('kota')
-            ->withCount('destinasi')
-            ->whereIn('id', $path)
-            ->get()
-            ->keyBy('id');
-
-        $rute = array_values(array_map(fn (string $id) => $stasiunMap[$id], $path));
-
-        // Build segments per consecutive pair untuk render polyline ikut geometry rel.
-        $segments = [];
-        for ($i = 0; $i < count($path) - 1; $i++) {
-            $from = $path[$i];
-            $to = $path[$i + 1];
-            $edge = $edgeMap[$from.'|'.$to] ?? null;
-            $geometry = $edge['geometry'] ?? null;
-
-            // Kalau edge direction reversed, flip coordinates supaya polyline match arah path.
-            if ($geometry !== null && ($edge['reversed'] ?? false) && isset($geometry['coordinates'])) {
-                $geometry['coordinates'] = array_reverse($geometry['coordinates']);
-            }
-
-            $segments[] = [
-                'dari_id' => $from,
-                'ke_id' => $to,
-                'jarak_km' => $edge['jarak_km'] ?? null,
-                'geometry' => $geometry,
-            ];
-        }
-
-        return response()->json(['rute' => $rute, 'segments' => $segments]);
+        return array_reverse($path);
     }
 
     public function ringkasanAi(Request $request): JsonResponse
