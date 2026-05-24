@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from '@inertiajs/react';
 import {
     IconArrowLeft,
+    IconCalendarEvent,
     IconCash,
     IconClock,
     IconExternalLink,
@@ -92,6 +93,23 @@ const HARI_LABEL: Record<string, string> = {
     jumat: 'Jumat', sabtu: 'Sabtu', minggu: 'Minggu',
 };
 
+const BULAN_LABEL = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+
+function formatMusim(mmdd: string): string {
+    const [mm, dd] = mmdd.split('-').map(Number);
+    return `${dd} ${BULAN_LABEL[(mm - 1)] ?? ''}`;
+}
+
+function isInSeason(mulai: string, selesai: string): boolean {
+    const now = new Date();
+    const mmdd = `${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    if (mulai <= selesai) {
+        return mmdd >= mulai && mmdd <= selesai;
+    }
+    // Wraps year-end (e.g. 11-01 to 01-31)
+    return mmdd >= mulai || mmdd <= selesai;
+}
+
 function isOpenNow(jam: NonNullable<NonNullable<import('@/types').Destinasi['jam_operasional']>>): boolean {
     const now = new Date();
     const dayKey = HARI[now.getDay()];
@@ -167,6 +185,18 @@ export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
                     </Badge>
                     {destinasi.is_verified && (
                         <Badge verified>Terverifikasi</Badge>
+                    )}
+                    {destinasi.musim_mulai && destinasi.musim_selesai && (
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            isInSeason(destinasi.musim_mulai, destinasi.musim_selesai)
+                                ? 'bg-sky-100 text-sky-700'
+                                : 'bg-stone-100 text-stone-500'
+                        }`}>
+                            <IconCalendarEvent size={11} />
+                            {isInSeason(destinasi.musim_mulai, destinasi.musim_selesai)
+                                ? 'Sedang Musimnya'
+                                : `Musim ${formatMusim(destinasi.musim_mulai)}–${formatMusim(destinasi.musim_selesai)}`}
+                        </span>
                     )}
                 </div>
 

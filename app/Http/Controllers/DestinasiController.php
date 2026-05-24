@@ -48,6 +48,9 @@ class DestinasiController extends Controller
             abort_unless($user && ($user->is_admin || $destinasi->user_id === $user->id), 404);
         }
 
+        // Increment view counter tanpa menyentuh timestamps
+        $destinasi->incrementQuietly('views');
+
         $destinasiLengkap = $this->destinasiService->detailDestinasi($destinasi);
 
         $isBookmarked = auth()->check()

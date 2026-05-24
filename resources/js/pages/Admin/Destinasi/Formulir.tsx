@@ -67,6 +67,8 @@ export default function DestinasiFormulir({
         website: string;
         harga_min: string;
         harga_max: string;
+        musim_mulai: string;
+        musim_selesai: string;
         jam_operasional: JamOperasional;
         _method?: string;
     }>({
@@ -86,6 +88,8 @@ export default function DestinasiFormulir({
             destinasi?.harga_min != null ? String(destinasi.harga_min) : '',
         harga_max:
             destinasi?.harga_max != null ? String(destinasi.harga_max) : '',
+        musim_mulai: (destinasi as any)?.musim_mulai ?? '',
+        musim_selesai: (destinasi as any)?.musim_selesai ?? '',
         jam_operasional: (destinasi?.jam_operasional as JamOperasional) ?? {},
         ...(isEdit ? { _method: 'PATCH' } : {}),
     });
@@ -288,6 +292,41 @@ export default function DestinasiFormulir({
                             <p className="mt-1 text-xs text-stone-400">
                                 Isi 0 untuk menandai gratis. Kosongkan kalau
                                 belum diketahui.
+                            </p>
+                        </div>
+
+                        {/* Musim */}
+                        <div>
+                            <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                                Musim / Periode Tersedia (opsional)
+                            </label>
+                            <div className="flex items-center gap-3">
+                                <div className="flex-1">
+                                    <label className="mb-1 block text-xs text-stone-500">Mulai (MM-DD)</label>
+                                    <input
+                                        type="text"
+                                        value={data.musim_mulai}
+                                        onChange={(e) => setData('musim_mulai', e.target.value)}
+                                        placeholder="cth. 12-20"
+                                        maxLength={5}
+                                        className="w-full rounded-xl border border-stone-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+                                    />
+                                </div>
+                                <span className="shrink-0 text-stone-400">–</span>
+                                <div className="flex-1">
+                                    <label className="mb-1 block text-xs text-stone-500">Selesai (MM-DD)</label>
+                                    <input
+                                        type="text"
+                                        value={data.musim_selesai}
+                                        onChange={(e) => setData('musim_selesai', e.target.value)}
+                                        placeholder="cth. 01-10"
+                                        maxLength={5}
+                                        className="w-full rounded-xl border border-stone-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+                                    />
+                                </div>
+                            </div>
+                            <p className="mt-1 text-xs text-stone-400">
+                                Kosongkan jika tersedia sepanjang tahun. Contoh: Durian musim 12-01 s.d. 02-28.
                             </p>
                         </div>
 

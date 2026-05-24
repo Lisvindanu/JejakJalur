@@ -29,6 +29,8 @@ class DestinasiRequest extends FormRequest
             'website' => ['nullable', 'url', 'max:255'],
             'harga_min' => ['nullable', 'integer', 'min:0'],
             'harga_max' => ['nullable', 'integer', 'min:0', 'gte:harga_min'],
+            'musim_mulai' => ['nullable', 'string', 'regex:/^\d{2}-\d{2}$/'],
+            'musim_selesai' => ['nullable', 'string', 'regex:/^\d{2}-\d{2}$/', 'required_with:musim_mulai'],
             'jam_operasional' => ['nullable', 'array'],
             'jam_operasional.*' => ['nullable', 'array'],
             'jam_operasional.*.buka' => ['required_with:jam_operasional.*', 'nullable', 'string', 'date_format:H:i'],

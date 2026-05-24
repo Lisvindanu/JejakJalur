@@ -67,6 +67,18 @@ class DashboardController extends Controller
                 'rating' => $d->rating,
             ]);
 
+        $topDestinasiViews = Destinasi::orderByDesc('views')
+            ->where('views', '>', 0)
+            ->limit(5)
+            ->get(['id', 'nama', 'kategori', 'views', 'rating'])
+            ->map(fn (Destinasi $d) => [
+                'id' => $d->id,
+                'nama' => $d->nama,
+                'kategori' => $d->kategori,
+                'views' => $d->views,
+                'rating' => $d->rating,
+            ]);
+
         $pengguna_baru_bulan_ini = User::where('created_at', '>=', now()->startOfMonth())->count();
         $pengguna_baru_bulan_lalu = User::whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()])->count();
 
@@ -85,6 +97,7 @@ class DashboardController extends Controller
             'destinasiPending' => $destinasiPending,
             'ulasanTerbaru' => $ulasanTerbaru,
             'topDestinasiUlasan' => $topDestinasiUlasan,
+            'topDestinasiViews' => $topDestinasiViews,
         ]);
     }
 }
