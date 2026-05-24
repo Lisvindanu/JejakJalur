@@ -23,6 +23,7 @@ class ProfilController extends Controller
         $jumlah_destinasi_diulas = $pengguna->ulasan()->distinct('destinasi_id')->count('destinasi_id');
         $streak_ulasan = $this->hitungStreakUlasan($pengguna);
         $badges = $this->hitungBadges($pengguna, $jumlah_ulasan, $rata_rata_rating, $streak_ulasan);
+        $gamifikasi = $this->hitungGamifikasi($pengguna, $jumlah_ulasan, $jumlah_destinasi_diulas);
 
         $ulasan = $pengguna->ulasan()
             ->with('destinasi:id,nama,kategori,foto,stasiun_id')
@@ -83,11 +84,54 @@ class ProfilController extends Controller
             'jumlah_destinasi_diulas' => $jumlah_destinasi_diulas,
             'streak_ulasan' => $streak_ulasan,
             'badges' => $badges,
+            'gamifikasi' => $gamifikasi,
             'ulasan' => $ulasan,
             'bookmarks' => $bookmarks,
             'kunjungan' => $kunjungan,
             'ruteFavorit' => $ruteFavorit,
         ]);
+    }
+
+    /**
+     * @return array{poin: int, level: string, level_idx: int, poin_ke_level_berikutnya: int|null, nama_level_berikutnya: string|null}
+     */
+    private function hitungGamifikasi(mixed $pengguna, int $jumlahUlasan, int $jumlahDestinasiDiulas): array
+    {
+        $jumlahKunjungan = $pengguna->kunjungan()->count();
+        $jumlahBookmark = $pengguna->bookmarks()->count();
+        $jumlahFotoUlasan = $pengguna->ulasan()->whereNotNull('foto')->count();
+        $jumlahDestinasiBaru = Destinasi::where('user_id', $pengguna->id)->count();
+
+        $poin = ($jumlahUlasan * 10)
+            + ($jumlahDestinasiDiulas * 3)
+            + ($jumlahFotoUlasan * 5)
+            + ($jumlahKunjungan * 2)
+            + ($jumlahBookmark * 1)
+            + ($jumlahDestinasiBaru * 20);
+
+        $levels = [
+            ['nama' => 'Pejalan Baru', 'min' => 0],
+            ['nama' => 'Railfan', 'min' => 100],
+            ['nama' => 'Penjelajah', 'min' => 300],
+            ['nama' => 'Maestro Jalur', 'min' => 700],
+        ];
+
+        $levelIdx = 0;
+        foreach ($levels as $i => $l) {
+            if ($poin >= $l['min']) {
+                $levelIdx = $i;
+            }
+        }
+
+        $levelBerikutnya = $levels[$levelIdx + 1] ?? null;
+
+        return [
+            'poin' => $poin,
+            'level' => $levels[$levelIdx]['nama'],
+            'level_idx' => $levelIdx,
+            'poin_ke_level_berikutnya' => $levelBerikutnya ? $levelBerikutnya['min'] - $poin : null,
+            'nama_level_berikutnya' => $levelBerikutnya ? $levelBerikutnya['nama'] : null,
+        ];
     }
 
     /**

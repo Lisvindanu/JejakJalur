@@ -53,6 +53,14 @@ interface Badge {
     icon: string;
 }
 
+interface Gamifikasi {
+    poin: number;
+    level: string;
+    level_idx: number;
+    poin_ke_level_berikutnya: number | null;
+    nama_level_berikutnya: string | null;
+}
+
 interface Props {
     pengguna?: Pengguna;
     jumlah_ulasan?: number;
@@ -60,6 +68,7 @@ interface Props {
     jumlah_destinasi_diulas?: number;
     streak_ulasan?: number;
     badges?: Badge[];
+    gamifikasi?: Gamifikasi;
     ulasan?: PaginatedData<UlasanProfil>;
     bookmarks?: PaginatedData<BookmarkProfil>;
     kunjungan?: PaginatedData<KunjunganProfil>;
@@ -448,6 +457,7 @@ export default function Tampilkan({
     jumlah_destinasi_diulas = 0,
     streak_ulasan = 0,
     badges = [],
+    gamifikasi,
     ulasan,
     bookmarks,
     kunjungan,
@@ -567,6 +577,38 @@ export default function Tampilkan({
                                 </div>
                             </div>
                         </div>
+
+                        {/* Level & Points */}
+                        {gamifikasi && (
+                            <div className="mt-5 rounded-xl border border-stone-100 bg-stone-50 p-4">
+                                <div className="mb-2 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-lg">{['🌱', '🚂', '🗺️', '⭐'][gamifikasi.level_idx] ?? '🌱'}</span>
+                                        <span className="font-semibold text-stone-800">{gamifikasi.level}</span>
+                                    </div>
+                                    <span className="text-sm font-bold text-emerald-700">{gamifikasi.poin.toLocaleString('id-ID')} poin</span>
+                                </div>
+                                {gamifikasi.poin_ke_level_berikutnya !== null && (
+                                    <div>
+                                        <div className="mb-1 flex justify-between text-xs text-stone-400">
+                                            <span>Menuju {gamifikasi.nama_level_berikutnya}</span>
+                                            <span>{gamifikasi.poin_ke_level_berikutnya} poin lagi</span>
+                                        </div>
+                                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-stone-200">
+                                            <div
+                                                className="h-full rounded-full bg-emerald-500 transition-all"
+                                                style={{
+                                                    width: `${Math.min(100, 100 - (gamifikasi.poin_ke_level_berikutnya / (gamifikasi.poin + gamifikasi.poin_ke_level_berikutnya)) * 100)}%`,
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                                {gamifikasi.poin_ke_level_berikutnya === null && (
+                                    <p className="text-xs text-emerald-600">Level maksimal tercapai!</p>
+                                )}
+                            </div>
+                        )}
 
                         {/* Stats row */}
                         <div className="mt-6 grid grid-cols-2 gap-4 border-t border-stone-100 pt-6 sm:grid-cols-4">
