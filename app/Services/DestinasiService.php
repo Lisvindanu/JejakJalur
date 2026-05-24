@@ -55,6 +55,24 @@ class DestinasiService
             };
         }
 
+        if (! empty($filter['jarak'])) {
+            $haversine = '(6371 * acos(LEAST(1.0,
+                cos(radians((SELECT lat FROM stasiun WHERE stasiun.id = destinasi.stasiun_id))) *
+                cos(radians(destinasi.lat)) *
+                cos(radians(destinasi.lng) - radians((SELECT lng FROM stasiun WHERE stasiun.id = destinasi.stasiun_id))) +
+                sin(radians((SELECT lat FROM stasiun WHERE stasiun.id = destinasi.stasiun_id))) *
+                sin(radians(destinasi.lat))
+            )))';
+
+            if ($filter['jarak'] === '<1') {
+                $query->whereRaw("{$haversine} <= 1");
+            } elseif ($filter['jarak'] === '1-5') {
+                $query->whereRaw("{$haversine} > 1")->whereRaw("{$haversine} <= 5");
+            } elseif ($filter['jarak'] === '>5') {
+                $query->whereRaw("{$haversine} > 5");
+            }
+        }
+
         if (! empty($filter['musiman'])) {
             $today = now()->format('m-d');
             match ($filter['musiman']) {

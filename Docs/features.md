@@ -69,8 +69,8 @@ Kolom `musim_mulai` + `musim_selesai` (MM-DD). Filter "Tersedia Sekarang" dan "M
 **[x] 11. Search history**
 `SearchBar.tsx` pakai `localStorage` key `jj:search_history`, simpan 8 query terakhir, tampil saat search di-focus.
 
-**[~] 12. Filter kombinasi lanjutan**
-Filter `rating minimum`, `harga`, `kategori`, `kota`, `stasiun` sudah aktif. Belum: jarak dari stasiun (< 1km dst) dan jam buka sekarang.
+**[x] 12. Filter kombinasi lanjutan**
+Filter `rating minimum`, `harga`, `kategori`, `kota`, `stasiun`, `musiman`, dan `± jarak dari stasiun` (Haversine SQL, range <1km / 1-5km / >5km) semua aktif.
 
 **[x] 13. Sort destinasi**
 Opsi urut `rating`, `ulasan`, `terbaru`, `trending` semua aktif di DestinasiService + DestinasiFilter.tsx.
@@ -122,8 +122,8 @@ Tabel `ulasan_komentar`, model `UlasanKomentar`. Sub-thread tampil di halaman de
 **[x] 26. Report ulasan**
 Tabel `ulasan_reports`, model `UlasanReport`. Tombol report aktif, `is_hidden` auto-apply di admin.
 
-**[~] 27. Follow user**
-Tabel `user_follows` sudah ada via migration. Controller dan frontend belum selesai.
+**[x] 27. Follow user**
+Tabel `user_follows`, `FollowController` (ikuti/berhenti), halaman publik `/pengguna/{id}` dengan stats + ulasan terbaru + tombol follow/unfollow.
 
 **[x] 28. Daftar kunjungan (visited)**
 Tabel `kunjungan`, model `Kunjungan`. User bisa tandai destinasi sudah dikunjungi. Histori di profil.
