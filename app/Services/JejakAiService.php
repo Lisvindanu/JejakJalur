@@ -136,6 +136,19 @@ class JejakAiService
     }
 
     /**
+     * Generate a short trip summary narrative (bypasses chatbot system prompt).
+     */
+    public function ringkasanPerjalanan(string $dari, string $ke, string $modeLabel, int $jumlahStasiun, float $jarakKm, string $durasiTeks): string
+    {
+        $messages = [
+            ['role' => 'system', 'content' => 'Kamu adalah asisten perjalanan kereta Indonesia. Tulis ringkasan perjalanan yang singkat, santai, dan informatif dalam 2-3 kalimat bahasa Indonesia. Boleh tambahkan tips singkat. Jangan tanya balik, langsung tulis narasi.'],
+            ['role' => 'user', 'content' => "Buat ringkasan perjalanan naik {$modeLabel} dari {$dari} ke {$ke}, melewati {$jumlahStasiun} stasiun, jarak sekitar {$jarakKm} km, estimasi {$durasiTeks}."],
+        ];
+
+        return $this->callOllama($messages);
+    }
+
+    /**
      * Analyse review sentiment. Returns 'positif', 'negatif', or 'netral'.
      */
     public function analisisSentimen(string $konten, float $rating): string
