@@ -99,8 +99,9 @@ Route::middleware('auth')->prefix('destinasi/{destinasi:id}')->name('klaim.')->g
     Route::post('/klaim', [KlaimController::class, 'simpan'])->name('simpan');
 });
 
-// Profil publik pengguna
+// Profil publik pengguna & leaderboard
 Route::get('/pengguna/{user:id}', [PublikPenggunaController::class, 'tampilkan'])->name('pengguna.tampilkan');
+Route::get('/leaderboard', [PublikPenggunaController::class, 'leaderboard'])->name('leaderboard');
 
 // Follow
 Route::middleware('auth')->prefix('pengguna/{user}')->name('follow.')->group(function () {

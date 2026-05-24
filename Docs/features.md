@@ -35,8 +35,8 @@
 **[x] 1. Multi-foto destinasi**
 Tabel `destinasi_galeri`, model `DestinasiGaleri`, service `simpanGaleri`. Backend selesai. Slider di halaman detail.
 
-**[ ] 2. Video preview destinasi**
-Upload video singkat (max 30 detik) atau embed YouTube/Instagram Reels. Tampil di atas galeri foto.
+**[-] 2. Video preview destinasi**
+Di-skip — tidak diprioritaskan.
 
 **[x] 3. Jam operasional**
 Kolom `jam_operasional` (JSON) sudah ada di tabel destinasi via migration. Backend done. Frontend belum render badge "Buka/Tutup".
@@ -103,8 +103,8 @@ Tombol share (copy to clipboard) ada di `PerencanaRute.tsx`. URL params `?dari=&
 **[ ] 21. Offline map (PWA)**
 Belum ada.
 
-**[ ] 22. Rute dari lokasi saya ke stasiun**
-`LokasiPanel.tsx` ada untuk GPS, tapi hanya tampilkan jarak — belum routing ke stasiun via Maps/ORS.
+**[x] 22. Rute dari lokasi saya ke stasiun**
+`LokasiPanel.tsx`: GPS deteksi lokasi, tampil jarak Haversine dari saya ke destinasi + dari stasiun ke destinasi, tombol "Peta Rute" link ke `/rute` dengan koordinat.
 
 ---
 
@@ -166,8 +166,8 @@ Tabel `destinasi_klaim`, `KlaimController` (formulir + simpan), halaman `Destina
 **[x] 38. Analytics admin**
 `DashboardController` punya: views per destinasi, ulasan terbanyak, user growth, bookmark bulan ini.
 
-**[ ] 39. Export data**
-Belum ada (ImportController hanya import, tidak export).
+**[x] 39. Export data**
+`ExportController` — CSV download destinasi, ulasan, pengguna. Tombol ekspor di Admin Dashboard.
 
 **[x] 40. Activity log admin**
 Tabel `admin_logs`, model `AdminLog`, halaman `Admin/ActivityLog/Indeks.tsx`.
@@ -176,11 +176,11 @@ Tabel `admin_logs`, model `AdminLog`, halaman `Admin/ActivityLog/Indeks.tsx`.
 
 ### AI & Personalisasi
 
-**[ ] 41. Rekomendasi personal**
-Belum ada.
+**[x] 41. Rekomendasi personal**
+`JejakAiController::rekomendasiPersonal()` — berdasarkan histori bookmark user, AI generate narasi + daftar destinasi yang belum dikunjungi. Endpoint `/ai/rekomendasi`.
 
-**[ ] 42. Trip summary AI**
-Belum ada.
+**[x] 42. Trip summary AI**
+`RuteController::ringkasanAi()` — generate narasi 2-3 kalimat via JejakAI setelah rute ditemukan. Tampil di `PerencanaRute.tsx`.
 
 **[x] 43. Review sentiment analysis**
 `JejakAiService::analisisSentimen()` dipanggil otomatis di `UlasanService::buatUlasan`. Kolom `sentiment` tersimpan per ulasan. Tampil di admin sebagai insight.
@@ -195,14 +195,14 @@ Belum ada.
 
 ### Gamifikasi
 
-**[ ] 46. Badge / achievement user**
-Belum ada.
+**[x] 46. Badge / achievement user**
+`ProfilController::hitungBadges()` — 11 badge otomatis (Penjelajah Pertama, Kritikus, Railfan, Foodie, dll). Tampil di halaman profil.
 
-**[ ] 47. Streak kunjungan**
-Belum ada.
+**[x] 47. Streak kunjungan**
+`ProfilController::hitungStreakUlasan()` — hitung bulan berturut-turut dengan ulasan. Tampil di profil + trigger badge streak.
 
-**[ ] 48. Points & level**
-Belum ada.
+**[x] 48. Points & level**
+`ProfilController::hitungGamifikasi()` — sistem poin dari ulasan/kunjungan/bookmark/destinasi. 4 level: Pejalan Baru → Railfan → Penjelajah → Maestro Jalur.
 
 ---
 
