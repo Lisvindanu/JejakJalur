@@ -208,8 +208,8 @@ Belum ada.
 
 ### Tech & Performance
 
-**[ ] 49. PWA (Progressive Web App)**
-Belum ada service worker atau manifest.
+**[x] 49. PWA (Progressive Web App)**
+`manifest.webmanifest` di `/public` dengan nama, ikon, shortcuts, theme_color. `sw.js` — cache-first untuk static assets, network-first untuk navigasi, offline fallback ke `/offline.html`. SW di-register di `app.tsx`. Meta PWA lengkap di `app.blade.php` (apple-mobile-web-app-capable, theme-color, apple-touch-icon).
 
 **[x] 50. Dark mode / light mode toggle**
 Toggle (IconSun/IconMoon) di Navbar menggunakan `useDarkMode.ts`. Simpan di `localStorage`, respek `prefers-color-scheme`. Semua komponen punya class `dark:` variants.
