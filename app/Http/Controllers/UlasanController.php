@@ -6,6 +6,7 @@ use App\Http\Requests\UlasanRequest;
 use App\Models\Destinasi;
 use App\Models\Ulasan;
 use App\Models\UlasanLike;
+use App\Models\UlasanReport;
 use App\Services\UlasanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -57,5 +58,32 @@ class UlasanController extends Controller
             ->delete();
 
         return back()->with('sukses', '');
+    }
+
+    public function report(Request $request, Destinasi $destinasi, Ulasan $ulasan): RedirectResponse
+    {
+        $request->validate(['alasan' => 'nullable|string|max:200']);
+
+        $alreadyReported = UlasanReport::where('user_id', $request->user()->id)
+            ->where('ulasan_id', $ulasan->id)
+            ->exists();
+
+        if ($alreadyReported) {
+            return back()->with('sukses', 'Kamu sudah melaporkan ulasan ini.');
+        }
+
+        UlasanReport::create([
+            'user_id' => $request->user()->id,
+            'ulasan_id' => $ulasan->id,
+            'alasan' => $request->input('alasan'),
+        ]);
+
+        $ulasan->increment('reports_count');
+
+        if ($ulasan->reports_count >= 5) {
+            $ulasan->update(['is_hidden' => true]);
+        }
+
+        return back()->with('sukses', 'Ulasan telah dilaporkan.');
     }
 }

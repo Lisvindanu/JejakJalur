@@ -17,13 +17,14 @@ class Ulasan extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'user_id', 'destinasi_id', 'judul', 'konten', 'rating', 'foto',
+        'user_id', 'destinasi_id', 'judul', 'konten', 'rating', 'foto', 'reports_count', 'is_hidden',
     ];
 
     protected $appends = ['foto_urls'];
 
     protected $casts = [
         'foto' => 'array',
+        'is_hidden' => 'boolean',
     ];
 
     protected function fotoUrls(): Attribute
@@ -61,5 +62,10 @@ class Ulasan extends Model
     public function likes(): HasMany
     {
         return $this->hasMany(UlasanLike::class);
+    }
+
+    public function reports(): HasMany
+    {
+        return $this->hasMany(UlasanReport::class);
     }
 }

@@ -114,6 +114,7 @@ export default function UlasanList({
                             ulasan={u}
                             canEdit={u.user.id === currentUserId}
                             canLike={!!currentUserId}
+                            canReport={!!currentUserId && u.user.id !== currentUserId}
                             userLiked={likedIds.includes(u.id)}
                             destinasiId={destinasiId}
                             onEdit={handleEdit}

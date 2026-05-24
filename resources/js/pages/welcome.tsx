@@ -5,6 +5,7 @@ import HeroSection from '@/components/fragments/Home/HeroSection';
 import KotaSection from '@/components/fragments/Home/KotaSection';
 import PopulerSection from '@/components/fragments/Home/PopulerSection';
 import TopReviewerSection from '@/components/fragments/Home/TopReviewerSection';
+import TrendingSection from '@/components/fragments/Home/TrendingSection';
 import PublicLayout from '@/components/layouts/PublicLayout';
 import { MOCK_DESTINASI, MOCK_KOTA } from '@/lib/mock-data';
 import type { Destinasi, Kota } from '@/types';
@@ -39,10 +40,11 @@ interface Props {
     semuaKota?: Kota[];
     destinasiPopuler?: Destinasi[];
     destinasiBaru?: Destinasi[];
+    destinasiTrending?: Destinasi[];
     topReviewer?: Reviewer[];
 }
 
-export default function Welcome({ destinasiFeatured, semuaKota, destinasiPopuler = [], destinasiBaru = [], topReviewer = [] }: Props) {
+export default function Welcome({ destinasiFeatured, semuaKota, destinasiPopuler = [], destinasiBaru = [], destinasiTrending = [], topReviewer = [] }: Props) {
     const featured =
         destinasiFeatured && destinasiFeatured.length > 0
             ? destinasiFeatured
@@ -69,6 +71,7 @@ export default function Welcome({ destinasiFeatured, semuaKota, destinasiPopuler
             <HeroSection destinations={featured} />
             <KotaSection kota={kota} />
             <PopulerSection destinasi={destinasiPopuler} />
+            <TrendingSection destinasi={destinasiTrending} />
             <BaruSection destinasi={destinasiBaru} />
             <TopReviewerSection reviewers={topReviewer} />
             <FeaturedDestinasi destinasi={featured} />

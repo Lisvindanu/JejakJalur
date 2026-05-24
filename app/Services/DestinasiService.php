@@ -75,7 +75,7 @@ class DestinasiService
     {
         return $destinasi->load([
             'stasiun.kota',
-            'ulasan' => fn ($q) => $q->withCount('likes')->latest(),
+            'ulasan' => fn ($q) => $q->where('is_hidden', false)->withCount('likes')->latest(),
             'ulasan.user',
         ]);
     }
@@ -97,6 +97,23 @@ class DestinasiService
             ->verified()
             ->where('created_at', '>=', now()->subDays(30))
             ->orderByDesc('created_at')
+            ->limit($jumlah)
+            ->get();
+    }
+
+    public function destinasiTrending(int $jumlah = 6): Collection
+    {
+        $cutoff = now()->subDays(7);
+
+        return Destinasi::with('stasiun.kota')
+            ->verified()
+            ->withCount([
+                'ulasan as ulasan_7hari' => fn ($q) => $q->where('ulasan.created_at', '>=', $cutoff),
+                'bookmarks as bookmark_7hari' => fn ($q) => $q->where('bookmarks.created_at', '>=', $cutoff),
+                'kunjungan as kunjungan_7hari' => fn ($q) => $q->where('kunjungan.created_at', '>=', $cutoff),
+            ])
+            ->orderByRaw('(ulasan_7hari * 0.5 + bookmark_7hari * 0.3 + kunjungan_7hari * 0.2) DESC')
+            ->having(\DB::raw('ulasan_7hari * 0.5 + bookmark_7hari * 0.3 + kunjungan_7hari * 0.2'), '>', 0)
             ->limit($jumlah)
             ->get();
     }

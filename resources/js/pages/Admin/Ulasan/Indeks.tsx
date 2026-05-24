@@ -5,13 +5,16 @@ import ConfirmModal from '@/components/fragments/Admin/ConfirmModal';
 import { useConfirm } from '@/hooks/useConfirm';
 import type { PaginatedData } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { IconStar, IconTrash } from '@tabler/icons-react';
+import { IconEye, IconEyeOff, IconFlag, IconStar, IconTrash } from '@tabler/icons-react';
+import { cn } from '@/lib/utils';
 
 interface Ulasan {
     id: string;
     judul: string;
     konten: string;
     rating: number;
+    reports_count: number;
+    is_hidden: boolean;
     user_name: string | null;
     user_id: string;
     destinasi_nama: string | null;
@@ -22,10 +25,22 @@ interface Ulasan {
 
 interface Props {
     ulasan: PaginatedData<Ulasan>;
+    filter: string;
+    counts: { semua: number; dilaporkan: number; disembunyikan: number };
 }
 
-export default function UlasanIndeks({ ulasan }: Props) {
+const TABS = [
+    { key: 'semua', label: 'Semua' },
+    { key: 'dilaporkan', label: 'Dilaporkan' },
+    { key: 'disembunyikan', label: 'Disembunyikan' },
+];
+
+export default function UlasanIndeks({ ulasan, filter, counts }: Props) {
     const { isOpen, confirm, handleConfirm, handleCancel } = useConfirm();
+
+    function goFilter(f: string) {
+        router.get('/admin/ulasan', { filter: f }, { preserveState: true });
+    }
 
     const columns = [
         {
@@ -51,7 +66,14 @@ export default function UlasanIndeks({ ulasan }: Props) {
             header: 'Ulasan',
             render: (row: Ulasan) => (
                 <div>
-                    <p className="text-sm font-medium text-stone-800">{row.judul}</p>
+                    <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-stone-800">{row.judul}</p>
+                        {row.is_hidden && (
+                            <span className="rounded-full bg-stone-100 px-1.5 py-0.5 text-[10px] font-medium text-stone-500">
+                                Disembunyikan
+                            </span>
+                        )}
+                    </div>
                     <p className="line-clamp-1 text-xs text-stone-400">{row.konten}</p>
                 </div>
             ),
@@ -67,6 +89,19 @@ export default function UlasanIndeks({ ulasan }: Props) {
             ),
         },
         {
+            key: 'reports_count',
+            header: 'Laporan',
+            render: (row: Ulasan) =>
+                row.reports_count > 0 ? (
+                    <div className="flex items-center gap-1 text-xs font-medium text-red-500">
+                        <IconFlag size={12} />
+                        {row.reports_count}
+                    </div>
+                ) : (
+                    <span className="text-xs text-stone-300">—</span>
+                ),
+        },
+        {
             key: 'user_name',
             header: 'Pengguna',
             render: (row: Ulasan) => <span className="text-sm text-stone-600">{row.user_name ?? '—'}</span>,
@@ -75,16 +110,37 @@ export default function UlasanIndeks({ ulasan }: Props) {
         {
             key: 'aksi',
             header: 'Aksi',
-            className: 'w-24',
+            className: 'w-40',
             render: (row: Ulasan) => (
-                <Button
-                    variant="danger"
-                    size="sm"
-                    leftIcon={<IconTrash size={12} />}
-                    onClick={() => confirm(() => router.delete(`/admin/ulasan/${row.id}`))}
-                >
-                    Hapus
-                </Button>
+                <div className="flex items-center gap-1.5">
+                    {row.is_hidden ? (
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            leftIcon={<IconEye size={12} />}
+                            onClick={() => router.patch(`/admin/ulasan/${row.id}/tampilkan`, {}, { preserveScroll: true })}
+                        >
+                            Tampilkan
+                        </Button>
+                    ) : (
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            leftIcon={<IconEyeOff size={12} />}
+                            onClick={() => router.patch(`/admin/ulasan/${row.id}/sembunyikan`, {}, { preserveScroll: true })}
+                        >
+                            Sembunyikan
+                        </Button>
+                    )}
+                    <Button
+                        variant="danger"
+                        size="sm"
+                        leftIcon={<IconTrash size={12} />}
+                        onClick={() => confirm(() => router.delete(`/admin/ulasan/${row.id}`))}
+                    >
+                        Hapus
+                    </Button>
+                </div>
             ),
         },
     ];
@@ -97,6 +153,31 @@ export default function UlasanIndeks({ ulasan }: Props) {
                 <div>
                     <h2 className="text-base font-semibold text-stone-800">Moderasi Ulasan</h2>
                     <p className="text-sm text-stone-500">{ulasan.total} ulasan</p>
+                </div>
+
+                {/* Filter tabs */}
+                <div className="flex gap-2 border-b border-stone-200">
+                    {TABS.map((tab) => (
+                        <button
+                            key={tab.key}
+                            type="button"
+                            onClick={() => goFilter(tab.key)}
+                            className={cn(
+                                'flex items-center gap-1.5 border-b-2 px-3 pb-2 text-sm font-medium transition-colors',
+                                filter === tab.key
+                                    ? 'border-emerald-600 text-emerald-700'
+                                    : 'border-transparent text-stone-500 hover:text-stone-700',
+                            )}
+                        >
+                            {tab.label}
+                            <span className={cn(
+                                'rounded-full px-1.5 py-0.5 text-[10px] font-semibold',
+                                filter === tab.key ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-100 text-stone-500',
+                            )}>
+                                {counts[tab.key as keyof typeof counts]}
+                            </span>
+                        </button>
+                    ))}
                 </div>
 
                 <DataTable

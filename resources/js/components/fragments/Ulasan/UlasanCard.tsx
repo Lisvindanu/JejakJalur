@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { IconHeart, IconHeartFilled, IconPencil, IconTrash } from '@tabler/icons-react';
+import { IconFlag, IconHeart, IconHeartFilled, IconPencil, IconTrash, IconX } from '@tabler/icons-react';
 import { useState } from 'react';
 import Avatar from '@/components/elements/Avatar';
 import Button from '@/components/elements/Button';
@@ -11,6 +11,7 @@ interface UlasanCardProps {
     ulasan: Ulasan;
     canEdit?: boolean;
     canLike?: boolean;
+    canReport?: boolean;
     userLiked?: boolean;
     destinasiId?: string;
     onEdit?: (ulasan: Ulasan) => void;
@@ -21,6 +22,7 @@ export default function UlasanCard({
     ulasan,
     canEdit,
     canLike,
+    canReport,
     userLiked = false,
     destinasiId,
     onEdit,
@@ -28,6 +30,26 @@ export default function UlasanCard({
 }: UlasanCardProps) {
     const [liked, setLiked] = useState(userLiked);
     const [count, setCount] = useState(ulasan.likes_count ?? 0);
+    const [showReportForm, setShowReportForm] = useState(false);
+    const [alasan, setAlasan] = useState('');
+    const [reported, setReported] = useState(false);
+
+    function handleReport() {
+        if (!destinasiId || reported) return;
+        router.post(
+            `/destinasi/${destinasiId}/ulasan/${ulasan.id}/report`,
+            { alasan: alasan || null },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    setReported(true);
+                    setShowReportForm(false);
+                    setAlasan('');
+                },
+            },
+        );
+    }
 
     function handleLike() {
         if (!canLike || !destinasiId) return;
@@ -109,8 +131,8 @@ export default function UlasanCard({
                 </div>
             )}
 
-            {/* Like button */}
-            <div className="mt-3 flex items-center">
+            {/* Like + Report */}
+            <div className="mt-3 flex items-center justify-between">
                 <button
                     type="button"
                     onClick={handleLike}
@@ -130,7 +152,52 @@ export default function UlasanCard({
                     )}
                     {count > 0 && <span>{count}</span>}
                 </button>
+
+                {canReport && !reported && (
+                    <button
+                        type="button"
+                        onClick={() => setShowReportForm((v) => !v)}
+                        className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-stone-300 transition-colors hover:text-amber-500"
+                        title="Laporkan ulasan"
+                    >
+                        <IconFlag size={13} />
+                        Laporkan
+                    </button>
+                )}
+                {reported && (
+                    <span className="text-xs text-stone-400">Sudah dilaporkan</span>
+                )}
             </div>
+
+            {showReportForm && canReport && !reported && (
+                <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                        <p className="text-xs font-medium text-amber-700">Alasan laporan (opsional)</p>
+                        <button
+                            type="button"
+                            onClick={() => setShowReportForm(false)}
+                            className="text-amber-400 hover:text-amber-600"
+                        >
+                            <IconX size={13} />
+                        </button>
+                    </div>
+                    <input
+                        type="text"
+                        value={alasan}
+                        onChange={(e) => setAlasan(e.target.value)}
+                        maxLength={200}
+                        placeholder="Mis: konten tidak pantas, spam..."
+                        className="w-full rounded border border-amber-200 bg-white px-2 py-1.5 text-xs text-stone-700 focus:outline-none focus:ring-1 focus:ring-amber-400"
+                    />
+                    <button
+                        type="button"
+                        onClick={handleReport}
+                        className="mt-2 rounded-lg bg-amber-500 px-3 py-1 text-xs font-medium text-white hover:bg-amber-600"
+                    >
+                        Kirim Laporan
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

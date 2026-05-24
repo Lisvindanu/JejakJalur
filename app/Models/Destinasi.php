@@ -49,6 +49,16 @@ class Destinasi extends Model
         return $this->hasMany(Ulasan::class);
     }
 
+    public function bookmarks(): HasMany
+    {
+        return $this->hasMany(Bookmark::class);
+    }
+
+    public function kunjungan(): HasMany
+    {
+        return $this->hasMany(Kunjungan::class);
+    }
+
     public function scopeVerified(Builder $query): Builder
     {
         return $query->where('is_verified', true);

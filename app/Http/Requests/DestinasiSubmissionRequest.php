@@ -36,6 +36,10 @@ class DestinasiSubmissionRequest extends FormRequest
             'kategori' => ['required', 'string', Rule::in(['Wisata', 'Kuliner', 'UMKM'])],
             'lat' => ['nullable', 'numeric', 'between:-90,90'],
             'lng' => ['nullable', 'numeric', 'between:-180,180'],
+            'telepon' => ['nullable', 'string', 'max:20'],
+            'website' => ['nullable', 'url', 'max:255'],
+            'harga_min' => ['nullable', 'integer', 'min:0'],
+            'harga_max' => ['nullable', 'integer', 'min:0', 'gte:harga_min'],
             'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ];
     }

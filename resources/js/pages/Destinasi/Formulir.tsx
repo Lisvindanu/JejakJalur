@@ -45,6 +45,10 @@ export default function Formulir({ destinasi, semuaStasiun }: Props) {
         lng: string;
         kategori: string;
         stasiun_id: string;
+        telepon: string;
+        website: string;
+        harga_min: string;
+        harga_max: string;
         foto: File | null;
         _method?: string;
     }>({
@@ -55,6 +59,10 @@ export default function Formulir({ destinasi, semuaStasiun }: Props) {
         lng: destinasi?.lng != null ? String(destinasi.lng) : '',
         kategori: destinasi?.kategori ?? '',
         stasiun_id: destinasi?.stasiun?.id ?? '',
+        telepon: (destinasi as any)?.telepon ?? '',
+        website: (destinasi as any)?.website ?? '',
+        harga_min: (destinasi as any)?.harga_min != null ? String((destinasi as any).harga_min) : '',
+        harga_max: (destinasi as any)?.harga_max != null ? String((destinasi as any).harga_max) : '',
         foto: null,
         ...(isEdit ? { _method: 'PATCH' } : {}),
     });
@@ -193,6 +201,50 @@ export default function Formulir({ destinasi, semuaStasiun }: Props) {
                         placeholder="Pilih stasiun..."
                         error={errors.stasiun_id}
                     />
+
+                    {/* Info tambahan opsional */}
+                    <div className="rounded-xl border border-stone-200 bg-stone-50/50 p-4 space-y-4">
+                        <p className="text-sm font-medium text-stone-700">
+                            Info Tambahan <span className="font-normal text-stone-400">(opsional)</span>
+                        </p>
+                        <div className="grid grid-cols-2 gap-3">
+                            <Input
+                                label="No. Telepon / WA"
+                                value={data.telepon}
+                                onChange={(e) => setData('telepon', e.target.value)}
+                                error={errors.telepon}
+                                placeholder="cth. 08123456789"
+                            />
+                            <Input
+                                label="Website"
+                                value={data.website}
+                                onChange={(e) => setData('website', e.target.value)}
+                                error={errors.website}
+                                placeholder="cth. https://..."
+                                type="url"
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <Input
+                                label="Harga Min (Rp)"
+                                value={data.harga_min}
+                                onChange={(e) => setData('harga_min', e.target.value)}
+                                error={errors.harga_min}
+                                placeholder="0 = gratis"
+                                type="number"
+                                min="0"
+                            />
+                            <Input
+                                label="Harga Maks (Rp)"
+                                value={data.harga_max}
+                                onChange={(e) => setData('harga_max', e.target.value)}
+                                error={errors.harga_max}
+                                placeholder="Kosongkan jika tidak ada"
+                                type="number"
+                                min="0"
+                            />
+                        </div>
+                    </div>
 
                     {/* Koordinat */}
                     <div className="rounded-xl border border-stone-200 bg-stone-50/50 p-4">

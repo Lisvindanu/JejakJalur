@@ -21,6 +21,7 @@ class HomeController extends Controller
         $semuaKota = $this->kotaService->semuaKotaDenganStasiun();
         $destinasiPopuler = $this->destinasiService->destinasiPopulerBulanIni(6);
         $destinasiBaru = $this->destinasiService->destinasiBaru(6);
+        $destinasiTrending = $this->destinasiService->destinasiTrending(6);
 
         $topReviewer = Ulasan::selectRaw(
             'user_id, COUNT(*) as jumlah_ulasan, ROUND(AVG(rating)::numeric, 1) as rata_rating'
@@ -45,6 +46,7 @@ class HomeController extends Controller
             'semuaKota' => $semuaKota,
             'destinasiPopuler' => $destinasiPopuler,
             'destinasiBaru' => $destinasiBaru,
+            'destinasiTrending' => $destinasiTrending,
             'topReviewer' => $topReviewer,
         ]);
     }

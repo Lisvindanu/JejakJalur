@@ -108,6 +108,7 @@ Route::middleware('auth')->prefix('destinasi/{destinasi}/ulasan')->name('ulasan.
     Route::delete('/{ulasan}', [UlasanController::class, 'hapus'])->name('hapus');
     Route::post('/{ulasan}/like', [UlasanController::class, 'like'])->name('like');
     Route::delete('/{ulasan}/like', [UlasanController::class, 'unlike'])->name('unlike');
+    Route::post('/{ulasan}/report', [UlasanController::class, 'report'])->name('report');
 });
 
 // Admin
@@ -151,6 +152,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::prefix('ulasan')->name('ulasan.')->group(function () {
         Route::get('/', [AdminUlasanController::class, 'indeks'])->name('indeks');
+        Route::patch('/{ulasan}/sembunyikan', [AdminUlasanController::class, 'sembunyikan'])->name('sembunyikan');
+        Route::patch('/{ulasan}/tampilkan', [AdminUlasanController::class, 'tampilkan'])->name('tampilkan');
         Route::delete('/{ulasan}', [AdminUlasanController::class, 'hapus'])->name('hapus');
     });
 
