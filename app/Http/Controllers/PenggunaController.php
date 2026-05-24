@@ -52,4 +52,32 @@ class PenggunaController extends Controller
             'is_own_profile' => $pengguna?->id === $user->id,
         ]);
     }
+
+    public function leaderboard(): Response
+    {
+        $top = User::selectRaw('
+            users.*,
+            (SELECT COUNT(*) FROM ulasan WHERE ulasan.user_id = users.id AND ulasan.is_hidden = false) AS jumlah_ulasan,
+            (SELECT COUNT(*) FROM kunjungan WHERE kunjungan.user_id = users.id) AS jumlah_kunjungan,
+            (SELECT COUNT(*) FROM user_follows WHERE user_follows.following_id = users.id) AS jumlah_followers,
+            (SELECT COALESCE(AVG(rating), 0) FROM ulasan WHERE ulasan.user_id = users.id AND ulasan.is_hidden = false) AS avg_rating
+        ')
+            ->whereNull('deleted_at')
+            ->orderByDesc('jumlah_ulasan')
+            ->limit(20)
+            ->get()
+            ->map(fn ($u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'avatar' => $u->avatar,
+                'jumlah_ulasan' => (int) $u->jumlah_ulasan,
+                'jumlah_kunjungan' => (int) $u->jumlah_kunjungan,
+                'jumlah_followers' => (int) $u->jumlah_followers,
+                'avg_rating' => round((float) $u->avg_rating, 1),
+            ]);
+
+        return Inertia::render('Leaderboard/Tampilkan', [
+            'top' => $top,
+        ]);
+    }
 }
