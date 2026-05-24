@@ -44,6 +44,7 @@ export type Destinasi = {
     foto: string | null;
     foto_url?: string | null;
     is_verified: boolean;
+    user_id?: string | null;
     ulasan_count?: number;
     created_at?: string | null;
     telepon?: string | null;
@@ -62,6 +63,18 @@ export type Destinasi = {
     ulasan?: Ulasan[];
 };
 
+export type UlasanKomentar = {
+    id: number;
+    konten: string;
+    is_admin: boolean;
+    created_at: string;
+    user: {
+        id: number;
+        name: string;
+        avatar?: string | null;
+    };
+};
+
 export type Ulasan = {
     id: string;
     rating: number;
@@ -71,6 +84,7 @@ export type Ulasan = {
     updated_at: string;
     likes_count?: number;
     foto_urls?: string[];
+    komentar?: UlasanKomentar[];
     user: {
         id: number;
         name: string;

@@ -68,4 +68,9 @@ class Ulasan extends Model
     {
         return $this->hasMany(UlasanReport::class);
     }
+
+    public function komentar(): HasMany
+    {
+        return $this->hasMany(UlasanKomentar::class);
+    }
 }

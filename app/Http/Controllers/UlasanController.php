@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UlasanRequest;
 use App\Models\Destinasi;
 use App\Models\Ulasan;
+use App\Models\UlasanKomentar;
 use App\Models\UlasanLike;
 use App\Models\UlasanReport;
 use App\Services\UlasanService;
@@ -58,6 +59,37 @@ class UlasanController extends Controller
             ->delete();
 
         return back()->with('sukses', '');
+    }
+
+    public function balas(Request $request, Destinasi $destinasi, Ulasan $ulasan): RedirectResponse
+    {
+        $request->validate(['konten' => 'required|string|max:500']);
+
+        $isAdmin = $request->user()->is_admin;
+        $isOwner = $destinasi->user_id === $request->user()->id;
+
+        abort_unless($isAdmin || $isOwner, 403);
+
+        UlasanKomentar::create([
+            'ulasan_id' => $ulasan->id,
+            'user_id' => $request->user()->id,
+            'konten' => $request->input('konten'),
+            'is_admin' => $isAdmin,
+        ]);
+
+        return back()->with('sukses', 'Balasan berhasil ditambahkan.');
+    }
+
+    public function hapusKomentar(Request $request, Destinasi $destinasi, Ulasan $ulasan, UlasanKomentar $komentar): RedirectResponse
+    {
+        $isAdmin = $request->user()->is_admin;
+        $isOwner = $komentar->user_id === $request->user()->id;
+
+        abort_unless($isAdmin || $isOwner, 403);
+
+        $komentar->delete();
+
+        return back()->with('sukses', 'Balasan dihapus.');
     }
 
     public function report(Request $request, Destinasi $destinasi, Ulasan $ulasan): RedirectResponse

@@ -77,6 +77,7 @@ class DestinasiService
             'stasiun.kota',
             'ulasan' => fn ($q) => $q->where('is_hidden', false)->withCount('likes')->latest(),
             'ulasan.user',
+            'ulasan.komentar.user',
         ]);
     }
 

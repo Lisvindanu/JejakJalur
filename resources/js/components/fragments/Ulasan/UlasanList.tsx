@@ -10,6 +10,8 @@ interface UlasanListProps {
     ulasan: Ulasan[];
     currentUserId?: number;
     destinasiId: string;
+    destinasiOwnerId?: string;
+    isAdmin?: boolean;
     likedIds?: string[];
 }
 
@@ -17,6 +19,8 @@ export default function UlasanList({
     ulasan,
     currentUserId,
     destinasiId,
+    destinasiOwnerId,
+    isAdmin = false,
     likedIds = [],
 }: UlasanListProps) {
     const [editTarget, setEditTarget] = useState<Ulasan | null>(null);
@@ -115,6 +119,8 @@ export default function UlasanList({
                             canEdit={u.user.id === currentUserId}
                             canLike={!!currentUserId}
                             canReport={!!currentUserId && u.user.id !== currentUserId}
+                            canReply={isAdmin || (!!destinasiOwnerId && String(currentUserId) === destinasiOwnerId)}
+                            currentUserId={currentUserId}
                             userLiked={likedIds.includes(u.id)}
                             destinasiId={destinasiId}
                             onEdit={handleEdit}

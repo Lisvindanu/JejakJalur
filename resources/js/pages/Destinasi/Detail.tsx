@@ -89,6 +89,8 @@ export default function Detail({
                     ulasan={destinasi.ulasan ?? []}
                     currentUserId={auth?.user?.id}
                     destinasiId={destinasi.id}
+                    destinasiOwnerId={destinasi.user_id ?? undefined}
+                    isAdmin={auth?.user?.is_admin ?? false}
                     likedIds={liked_ulasan_ids}
                 />
             </div>

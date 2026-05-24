@@ -109,6 +109,8 @@ Route::middleware('auth')->prefix('destinasi/{destinasi}/ulasan')->name('ulasan.
     Route::post('/{ulasan}/like', [UlasanController::class, 'like'])->name('like');
     Route::delete('/{ulasan}/like', [UlasanController::class, 'unlike'])->name('unlike');
     Route::post('/{ulasan}/report', [UlasanController::class, 'report'])->name('report');
+    Route::post('/{ulasan}/balas', [UlasanController::class, 'balas'])->name('balas');
+    Route::delete('/{ulasan}/komentar/{komentar}', [UlasanController::class, 'hapusKomentar'])->name('komentar.hapus');
 });
 
 // Admin
