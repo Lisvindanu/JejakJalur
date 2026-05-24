@@ -8,6 +8,7 @@ use App\Models\AdminLog;
 use App\Models\Destinasi;
 use App\Models\DestinasiGaleri;
 use App\Models\Stasiun;
+use App\Notifications\DestinasiDiverifikasiNotification;
 use App\Services\DestinasiService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
@@ -109,6 +110,14 @@ class DestinasiController extends Controller
         $aksi = $destinasi->is_verified ? 'verifikasi_destinasi' : 'batalkan_verifikasi_destinasi';
         $status = $destinasi->is_verified ? 'diverifikasi' : 'dibatalkan verifikasinya';
         AdminLog::catat($aksi, Destinasi::class, $destinasi->id, "Destinasi {$destinasi->nama} {$status}");
+
+        // Notify destinasi owner when verified
+        if ($destinasi->is_verified && $destinasi->user_id) {
+            $pemilik = $destinasi->user;
+            if ($pemilik) {
+                $pemilik->notify(new DestinasiDiverifikasiNotification($destinasi));
+            }
+        }
 
         return back()->with('sukses', "Destinasi berhasil {$status}.");
     }

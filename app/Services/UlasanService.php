@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Destinasi;
 use App\Models\Ulasan;
 use App\Models\User;
+use App\Notifications\UlasanBaruNotification;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\UploadedFile;
 
@@ -36,6 +37,13 @@ class UlasanService
             $ulasan->update(['sentiment' => $sentiment]);
         } catch (\Exception) {
             // Non-critical — sentiment stays null if AI unavailable
+        }
+
+        // Notify destinasi owner (if different from reviewer)
+        $pemilik = $ulasan->destinasi->user;
+        if ($pemilik && $pemilik->id !== $pengguna->id) {
+            $ulasan->load(['user', 'destinasi']);
+            $pemilik->notify(new UlasanBaruNotification($ulasan));
         }
 
         return $ulasan->fresh();

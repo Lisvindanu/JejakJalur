@@ -41,6 +41,9 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'notifikasi_belum_dibaca' => fn () => $request->user()
+                ? $request->user()->unreadNotifications()->count()
+                : 0,
             'flash' => [
                 'sukses' => session('sukses'),
                 'error' => session('error'),

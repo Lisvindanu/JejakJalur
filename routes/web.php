@@ -18,6 +18,7 @@ use App\Http\Controllers\DestinasiController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JejakAiController;
 use App\Http\Controllers\KunjunganController;
+use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\RuteController;
 use App\Http\Controllers\RuteFavoritController;
@@ -85,6 +86,12 @@ Route::middleware('auth')->prefix('profil')->name('profil.')->group(function () 
     Route::get('/edit', [ProfilController::class, 'edit'])->name('edit');
     Route::patch('/', [ProfilController::class, 'perbarui'])->name('perbarui');
     Route::delete('/', [ProfilController::class, 'hapus'])->name('hapus');
+});
+
+// Notifikasi
+Route::middleware('auth')->prefix('notifikasi')->name('notifikasi.')->group(function () {
+    Route::get('/', [NotifikasiController::class, 'indeks'])->name('indeks');
+    Route::patch('/baca', [NotifikasiController::class, 'tandaiSudahDibaca'])->name('baca');
 });
 
 // Bookmark

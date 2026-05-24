@@ -1,5 +1,6 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import {
+    IconBell,
     IconChevronDown,
     IconLayoutDashboard,
     IconLogout,
@@ -20,7 +21,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ transparent = false }: NavbarProps) {
-    const { auth } = usePage<SharedProps>().props;
+    const { auth, notifikasi_belum_dibaca } = usePage<SharedProps>().props;
     const [scrolled, setScrolled] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -93,6 +94,26 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                     Rute
                 </Link>
             </div>
+
+            {/* Bell notification */}
+            {auth?.user && (
+                <Link
+                    href="/notifikasi"
+                    title="Notifikasi"
+                    className={`relative rounded-lg p-2 transition-colors ${
+                        isOpaque
+                            ? 'text-stone-500 hover:bg-stone-100 hover:text-stone-700'
+                            : 'text-white/70 hover:bg-white/10 hover:text-white'
+                    }`}
+                >
+                    <IconBell size={16} />
+                    {notifikasi_belum_dibaca > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                            {notifikasi_belum_dibaca > 9 ? '9+' : notifikasi_belum_dibaca}
+                        </span>
+                    )}
+                </Link>
+            )}
 
             {/* Dark mode toggle */}
             <button

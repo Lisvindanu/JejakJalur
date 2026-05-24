@@ -6,6 +6,7 @@ export type Flash = {
 };
 
 export type SharedProps = {
+    notifikasi_belum_dibaca: number;
     auth: import('./auth').Auth;
     flash: Flash;
     name: string;

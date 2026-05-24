@@ -8,6 +8,7 @@ use App\Models\Ulasan;
 use App\Models\UlasanKomentar;
 use App\Models\UlasanLike;
 use App\Models\UlasanReport;
+use App\Notifications\UlasanDisukaiNotification;
 use App\Services\UlasanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -44,10 +45,18 @@ class UlasanController extends Controller
 
     public function like(Request $request, Destinasi $destinasi, Ulasan $ulasan): RedirectResponse
     {
-        UlasanLike::firstOrCreate([
-            'user_id' => $request->user()->id,
-            'ulasan_id' => $ulasan->id,
-        ]);
+        [$like, $created] = [
+            UlasanLike::firstOrCreate([
+                'user_id' => $request->user()->id,
+                'ulasan_id' => $ulasan->id,
+            ]),
+            false,
+        ];
+
+        if ($like->wasRecentlyCreated && $ulasan->user_id !== $request->user()->id) {
+            $ulasan->load(['user', 'destinasi']);
+            $ulasan->user->notify(new UlasanDisukaiNotification($ulasan, $request->user()));
+        }
 
         return back()->with('sukses', '');
     }
