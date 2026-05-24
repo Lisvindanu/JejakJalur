@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Destinasi;
+use App\Models\DestinasiGaleri;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -75,6 +76,7 @@ class DestinasiService
     {
         return $destinasi->load([
             'stasiun.kota',
+            'galeri',
             'ulasan' => fn ($q) => $q->where('is_hidden', false)->withCount('likes')->latest(),
             'ulasan.user',
             'ulasan.komentar.user',
@@ -126,6 +128,23 @@ class DestinasiService
             ->orderByDesc('rating')
             ->limit($jumlah)
             ->get();
+    }
+
+    /**
+     * @param  UploadedFile[]  $files
+     */
+    public function simpanGaleri(Destinasi $destinasi, array $files): void
+    {
+        $urutan = $destinasi->galeri()->max('urutan') ?? -1;
+        foreach ($files as $file) {
+            $url = $this->fotoService->simpan($file, self::DIREKTORI_FOTO);
+            DestinasiGaleri::create(['destinasi_id' => $destinasi->id, 'url' => $url, 'urutan' => ++$urutan]);
+        }
+    }
+
+    public function hapusGaleriFoto(DestinasiGaleri $foto): void
+    {
+        $foto->delete();
     }
 
     public function buatDestinasi(array $data, ?UploadedFile $foto = null): Destinasi

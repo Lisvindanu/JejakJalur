@@ -59,6 +59,11 @@ class Destinasi extends Model
         return $this->hasMany(Kunjungan::class);
     }
 
+    public function galeri(): HasMany
+    {
+        return $this->hasMany(DestinasiGaleri::class)->orderBy('urutan');
+    }
+
     public function scopeVerified(Builder $query): Builder
     {
         return $query->where('is_verified', true);

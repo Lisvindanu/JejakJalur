@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { IconArrowLeft, IconPhoto } from '@tabler/icons-react';
+import { IconArrowLeft, IconPhoto, IconTrash } from '@tabler/icons-react';
 import Button from '@/components/elements/Button';
 import Input from '@/components/elements/Input';
 import TextArea from '@/components/elements/TextArea';
@@ -9,8 +9,15 @@ import AdminLayout from '@/components/layouts/AdminLayout';
 import { MOCK_STASIUN } from '@/lib/mock-data';
 import type { Destinasi } from '@/types';
 
+interface GaleriItem {
+    id: string;
+    url: string;
+    url_resolved: string | null;
+    urutan: number;
+}
+
 interface Props {
-    destinasi?: Destinasi;
+    destinasi?: Destinasi & { galeri?: GaleriItem[] };
     semuaStasiun?: Array<{ id: string; nama: string; kota: { nama: string } }>;
 }
 
@@ -54,6 +61,8 @@ export default function DestinasiFormulir({
         kategori: string;
         stasiun_id: string;
         foto: File | null;
+        galeri: File[];
+        hapus_galeri: string[];
         telepon: string;
         website: string;
         harga_min: string;
@@ -69,6 +78,8 @@ export default function DestinasiFormulir({
         kategori: destinasi?.kategori ?? '',
         stasiun_id: destinasi?.stasiun?.id ?? '',
         foto: null,
+        galeri: [],
+        hapus_galeri: [],
         telepon: destinasi?.telepon ?? '',
         website: destinasi?.website ?? '',
         harga_min:
@@ -416,6 +427,61 @@ export default function DestinasiFormulir({
                                     {errors.foto}
                                 </p>
                             )}
+                        </div>
+
+                        {/* Galeri foto tambahan */}
+                        <div>
+                            <label className="mb-1.5 block text-sm font-medium text-stone-700">
+                                Galeri Foto (opsional, maks. 10)
+                            </label>
+
+                            {/* Existing galeri */}
+                            {isEdit && (destinasi as any)?.galeri?.length > 0 && (
+                                <div className="mb-3 flex flex-wrap gap-2">
+                                    {((destinasi as any).galeri as GaleriItem[]).map((g) => {
+                                        const isMarked = data.hapus_galeri.includes(g.id);
+                                        return (
+                                            <div key={g.id} className="relative">
+                                                <img
+                                                    src={g.url_resolved ?? g.url}
+                                                    alt=""
+                                                    className={`h-20 w-24 rounded-lg border object-cover transition-opacity ${isMarked ? 'border-red-400 opacity-40' : 'border-stone-200'}`}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setData('hapus_galeri', isMarked
+                                                            ? data.hapus_galeri.filter((id) => id !== g.id)
+                                                            : [...data.hapus_galeri, g.id])
+                                                    }
+                                                    className={`absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full border ${isMarked ? 'border-red-400 bg-red-500 text-white' : 'border-stone-300 bg-white text-stone-500 hover:bg-red-50 hover:text-red-500'}`}
+                                                    title={isMarked ? 'Batalkan hapus' : 'Hapus foto ini'}
+                                                >
+                                                    <IconTrash size={11} />
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-stone-300 bg-stone-50 px-4 py-3 text-sm text-stone-500 transition-colors hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700">
+                                <IconPhoto size={16} />
+                                <span>
+                                    {data.galeri.length > 0
+                                        ? `${data.galeri.length} foto dipilih`
+                                        : 'Tambah foto galeri...'}
+                                </span>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    className="hidden"
+                                    onChange={(e) =>
+                                        setData('galeri', Array.from(e.target.files ?? []))
+                                    }
+                                />
+                            </label>
                         </div>
                     </FormCard>
                 </form>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DestinasiRequest;
 use App\Models\AdminLog;
 use App\Models\Destinasi;
+use App\Models\DestinasiGaleri;
 use App\Models\Stasiun;
 use App\Services\DestinasiService;
 use Illuminate\Database\Eloquent\Collection;
@@ -40,9 +41,14 @@ class DestinasiController extends Controller
     public function simpan(DestinasiRequest $request): RedirectResponse
     {
         $destinasi = $this->destinasiService->buatDestinasi(
-            data: $request->safe()->except('foto'),
+            data: $request->safe()->except(['foto', 'galeri', 'hapus_galeri']),
             foto: $request->file('foto'),
         );
+
+        if ($request->hasFile('galeri')) {
+            $this->destinasiService->simpanGaleri($destinasi, $request->file('galeri'));
+        }
+
         AdminLog::catat('buat_destinasi', Destinasi::class, $destinasi->id, "Buat destinasi: {$destinasi->nama}");
 
         return redirect()->route('admin.destinasi.indeks')->with('sukses', 'Destinasi berhasil ditambahkan.');
@@ -50,6 +56,8 @@ class DestinasiController extends Controller
 
     public function edit(Destinasi $destinasi): Response
     {
+        $destinasi->load('galeri');
+
         return Inertia::render('Admin/Destinasi/Formulir', [
             'destinasi' => $destinasi,
             'semuaStasiun' => $this->daftarStasiunUntukDropdown(),
@@ -60,9 +68,21 @@ class DestinasiController extends Controller
     {
         $this->destinasiService->perbaruiDestinasi(
             destinasi: $destinasi,
-            data: $request->safe()->except('foto'),
+            data: $request->safe()->except(['foto', 'galeri', 'hapus_galeri']),
             fotoBaru: $request->file('foto'),
         );
+
+        // Hapus foto galeri yang dipilih
+        if ($request->has('hapus_galeri')) {
+            DestinasiGaleri::whereIn('id', $request->input('hapus_galeri', []))
+                ->where('destinasi_id', $destinasi->id)
+                ->delete();
+        }
+
+        if ($request->hasFile('galeri')) {
+            $this->destinasiService->simpanGaleri($destinasi, $request->file('galeri'));
+        }
+
         AdminLog::catat('edit_destinasi', Destinasi::class, $destinasi->id, "Edit destinasi: {$destinasi->nama}");
 
         return redirect()->route('admin.destinasi.indeks')->with('sukses', 'Destinasi berhasil diperbarui.');

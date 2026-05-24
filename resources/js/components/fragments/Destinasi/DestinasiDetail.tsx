@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from '@inertiajs/react';
 import {
     IconArrowLeft,
@@ -105,17 +106,40 @@ function isOpenNow(jam: NonNullable<NonNullable<import('@/types').Destinasi['jam
 export default function DestinasiDetail({ destinasi }: DestinasiDetailProps) {
     const placeholder = placeholderConfig(destinasi.kategori);
     const ulasanCount = destinasi.ulasan?.length ?? 0;
+    const [activeIdx, setActiveIdx] = useState(0);
+
+    const allImages: string[] = [];
+    if (destinasi.foto_url) allImages.push(destinasi.foto_url);
+    (destinasi.galeri ?? []).forEach((g) => {
+        const url = g.url_resolved ?? g.url;
+        if (url && !allImages.includes(url)) allImages.push(url);
+    });
 
     return (
         <div>
-            {/* Image */}
+            {/* Image / Gallery */}
             <div className="px-[max(24px,calc(50%-576px))] py-5">
-                {destinasi.foto_url ? (
-                    <img
-                        src={destinasi.foto_url}
-                        alt={destinasi.nama}
-                        className="mx-auto block max-h-[340px] max-w-full rounded-2xl shadow-md ring-1 ring-stone-200"
-                    />
+                {allImages.length > 0 ? (
+                    <div className="flex flex-col gap-2">
+                        <img
+                            src={allImages[activeIdx]}
+                            alt={destinasi.nama}
+                            className="mx-auto block max-h-[340px] max-w-full rounded-2xl shadow-md ring-1 ring-stone-200 object-cover"
+                        />
+                        {allImages.length > 1 && (
+                            <div className="flex gap-2 overflow-x-auto pb-1">
+                                {allImages.map((src, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => setActiveIdx(i)}
+                                        className={`shrink-0 overflow-hidden rounded-lg ring-2 transition-all ${i === activeIdx ? 'ring-emerald-500' : 'ring-transparent opacity-60 hover:opacity-100'}`}
+                                    >
+                                        <img src={src} alt="" className="h-16 w-20 object-cover" />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 ) : (
                     <div
                         className={`flex h-[220px] w-full items-center justify-center rounded-2xl bg-gradient-to-br sm:h-[280px] ${placeholder.gradient}`}

@@ -52,6 +52,7 @@ export type Destinasi = {
     harga_min?: number | null;
     harga_max?: number | null;
     jam_operasional?: Record<string, { buka: string; tutup: string } | null> | null;
+    galeri?: Array<{ id: string; url: string; url_resolved: string | null; urutan: number }>;
     stasiun: {
         id?: string;
         nama: string;
