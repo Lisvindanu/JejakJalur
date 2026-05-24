@@ -41,6 +41,14 @@ interface TopDestinasi {
     rating: string;
 }
 
+interface TopDestinasiViews {
+    id: string;
+    nama: string;
+    kategori: string;
+    views: number;
+    rating: string;
+}
+
 interface Props {
     statistik?: {
         jumlah_kota: number;
@@ -59,6 +67,7 @@ interface Props {
     destinasiPending?: DestinasiPending[];
     ulasanTerbaru?: UlasanTerbaru[];
     topDestinasiUlasan?: TopDestinasi[];
+    topDestinasiViews?: TopDestinasiViews[];
 }
 
 const KATEGORI_COLOR: Record<string, string> = {
@@ -72,6 +81,7 @@ export default function Dashboard({
     destinasiPending = [],
     ulasanTerbaru = [],
     topDestinasiUlasan = [],
+    topDestinasiViews = [],
 }: Props) {
     const statistik = stat ?? {
         ...MOCK_STATISTIK,
@@ -357,6 +367,52 @@ export default function Dashboard({
                                         <IconStar size={11} className="fill-current" />
                                         {Number(d.rating).toFixed(1)}
                                     </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Top destinasi by views */}
+                {topDestinasiViews.length > 0 && (
+                    <div className="rounded-2xl border border-stone-200 bg-white">
+                        <div className="border-b border-stone-100 px-5 py-4">
+                            <h2 className="text-sm font-semibold text-stone-800">
+                                Destinasi Paling Banyak Dilihat
+                            </h2>
+                            <p className="text-xs text-stone-400">
+                                Total page views sejak fitur aktif
+                            </p>
+                        </div>
+                        <div className="divide-y divide-stone-100">
+                            {topDestinasiViews.map((d, i) => (
+                                <div
+                                    key={d.id}
+                                    className="flex items-center gap-3 px-5 py-3"
+                                >
+                                    <span className="w-5 shrink-0 text-center text-xs font-bold text-stone-400">
+                                        {i + 1}
+                                    </span>
+                                    <div className="min-w-0 flex-1">
+                                        <Link
+                                            href={`/destinasi/${d.id}`}
+                                            className="truncate text-sm font-medium text-stone-800 no-underline hover:text-emerald-700"
+                                        >
+                                            {d.nama}
+                                        </Link>
+                                    </div>
+                                    <span
+                                        className={cn(
+                                            'rounded-full px-2 py-0.5 text-[10px] font-semibold',
+                                            KATEGORI_COLOR[d.kategori] ??
+                                                'bg-stone-100 text-stone-600',
+                                        )}
+                                    >
+                                        {d.kategori}
+                                    </span>
+                                    <span className="shrink-0 text-xs font-semibold text-stone-500">
+                                        {d.views.toLocaleString('id-ID')} views
+                                    </span>
                                 </div>
                             ))}
                         </div>
