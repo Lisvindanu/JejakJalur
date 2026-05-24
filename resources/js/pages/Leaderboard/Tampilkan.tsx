@@ -1,5 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
-import { IconMapPin, IconStar, IconTrophy, IconUsers, IconWalk } from '@tabler/icons-react';
+import {
+    IconMapPin,
+    IconStar,
+    IconTrophy,
+    IconUsers,
+    IconWalk,
+} from '@tabler/icons-react';
 import Avatar from '@/components/elements/Avatar';
 import PublicLayout from '@/components/layouts/PublicLayout';
 
@@ -23,7 +29,10 @@ export default function LeaderboardTampilkan({ top }: Props) {
     return (
         <PublicLayout>
             <Head title="Leaderboard — JejakJalur">
-                <meta property="og:title" content="Leaderboard Reviewer — JejakJalur" />
+                <meta
+                    property="og:title"
+                    content="Leaderboard Reviewer — JejakJalur"
+                />
                 <meta
                     property="og:description"
                     content="Reviewer paling aktif di JejakJalur berdasarkan jumlah ulasan."
@@ -45,7 +54,9 @@ export default function LeaderboardTampilkan({ top }: Props) {
                     </div>
 
                     {top.length === 0 ? (
-                        <p className="py-12 text-center text-sm text-stone-400">Belum ada data.</p>
+                        <p className="py-12 text-center text-sm text-stone-400">
+                            Belum ada data.
+                        </p>
                     ) : (
                         <div className="space-y-2">
                             {top.map((user, index) => (
@@ -57,7 +68,9 @@ export default function LeaderboardTampilkan({ top }: Props) {
                                     {/* Rank */}
                                     <div className="w-8 shrink-0 text-center">
                                         {index < 3 ? (
-                                            <span className="text-xl">{MEDAL[index]}</span>
+                                            <span className="text-xl">
+                                                {MEDAL[index]}
+                                            </span>
                                         ) : (
                                             <span className="text-sm font-bold text-stone-400">
                                                 #{index + 1}
@@ -78,18 +91,23 @@ export default function LeaderboardTampilkan({ top }: Props) {
                                         </p>
                                         <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-stone-500">
                                             <span className="flex items-center gap-1">
-                                                <IconStar size={11} className="text-amber-400" />
+                                                <IconStar
+                                                    size={11}
+                                                    className="text-amber-400"
+                                                />
                                                 {user.avg_rating > 0
                                                     ? user.avg_rating.toFixed(1)
                                                     : '—'}
                                             </span>
                                             <span className="flex items-center gap-1">
                                                 <IconMapPin size={11} />
-                                                {user.jumlah_kunjungan} kunjungan
+                                                {user.jumlah_kunjungan}{' '}
+                                                kunjungan
                                             </span>
                                             <span className="flex items-center gap-1">
                                                 <IconUsers size={11} />
-                                                {user.jumlah_followers} followers
+                                                {user.jumlah_followers}{' '}
+                                                followers
                                             </span>
                                         </div>
                                     </div>
@@ -99,7 +117,9 @@ export default function LeaderboardTampilkan({ top }: Props) {
                                         <span className="block text-xl font-bold text-emerald-700">
                                             {user.jumlah_ulasan}
                                         </span>
-                                        <span className="text-[11px] text-stone-400">ulasan</span>
+                                        <span className="text-[11px] text-stone-400">
+                                            ulasan
+                                        </span>
                                     </div>
                                 </Link>
                             ))}
