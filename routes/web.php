@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DestinasiController as AdminDestinasiController;
 use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\Admin\ImportController;
+use App\Http\Controllers\Admin\KlaimController as AdminKlaimController;
 use App\Http\Controllers\Admin\KotaController;
 use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\StasiunController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\DestinasiController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JejakAiController;
+use App\Http\Controllers\KlaimController;
 use App\Http\Controllers\KunjunganController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\ProfilController;
@@ -88,6 +90,12 @@ Route::middleware('auth')->prefix('profil')->name('profil.')->group(function () 
     Route::get('/edit', [ProfilController::class, 'edit'])->name('edit');
     Route::patch('/', [ProfilController::class, 'perbarui'])->name('perbarui');
     Route::delete('/', [ProfilController::class, 'hapus'])->name('hapus');
+});
+
+// Klaim destinasi
+Route::middleware('auth')->prefix('destinasi/{destinasi:id}')->name('klaim.')->group(function () {
+    Route::get('/klaim', [KlaimController::class, 'formulir'])->name('formulir');
+    Route::post('/klaim', [KlaimController::class, 'simpan'])->name('simpan');
 });
 
 // Follow
@@ -184,6 +192,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::patch('/{ulasan}/sembunyikan', [AdminUlasanController::class, 'sembunyikan'])->name('sembunyikan');
         Route::patch('/{ulasan}/tampilkan', [AdminUlasanController::class, 'tampilkan'])->name('tampilkan');
         Route::delete('/{ulasan}', [AdminUlasanController::class, 'hapus'])->name('hapus');
+    });
+
+    Route::prefix('klaim')->name('klaim.')->group(function () {
+        Route::get('/', [AdminKlaimController::class, 'indeks'])->name('indeks');
+        Route::patch('/{klaim}/setujui', [AdminKlaimController::class, 'setujui'])->name('setujui');
+        Route::patch('/{klaim}/tolak', [AdminKlaimController::class, 'tolak'])->name('tolak');
     });
 
     Route::prefix('ai-session')->name('ai-session.')->group(function () {
