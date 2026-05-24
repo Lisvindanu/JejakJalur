@@ -19,6 +19,18 @@
 - [x] KCIC/KRL routing dengan polyline geometry
 - [x] Filter destinasi (kategori, kota, stasiun)
 - [x] User profile page
+- [x] Multi-foto destinasi / galeri (#1)
+- [x] Harga tiket / estimasi budget (#4)
+- [x] Destinasi trending (#8)
+- [x] Destinasi baru bulan ini (#9)
+- [x] Like ulasan (#23)
+- [x] Reply ulasan / komentar (#25)
+- [x] Report ulasan (#26)
+- [x] Daftar kunjungan / visited (#28)
+- [x] Wish list trip (#29)
+- [x] Notifikasi in-app — infrastructure (#31)
+- [x] Simpan rute favorit (#19)
+- [x] Auto-tag destinasi dari deskripsi via AI (#44)
 
 ---
 
