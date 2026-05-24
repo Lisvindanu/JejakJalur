@@ -13,6 +13,7 @@ interface Filter {
     min_rating?: string;
     harga?: string;
     musiman?: string;
+    jarak?: string;
 }
 
 interface DestinasiFilterProps {
@@ -32,6 +33,13 @@ const URUT_OPTIONS = [
     { value: 'ulasan', label: 'Ulasan Terbanyak' },
     { value: 'terbaru', label: 'Terbaru' },
     { value: 'trending', label: 'Trending' },
+];
+
+const JARAK_OPTIONS = [
+    { value: '', label: '± Semua Jarak' },
+    { value: '<1', label: '± < 1 km' },
+    { value: '1-5', label: '± 1 – 5 km' },
+    { value: '>5', label: '± > 5 km' },
 ];
 
 const MUSIMAN_OPTIONS = [
@@ -64,6 +72,7 @@ function applyFilter(params: Filter) {
     if (params.min_rating) clean.min_rating = params.min_rating;
     if (params.harga) clean.harga = params.harga;
     if (params.musiman) clean.musiman = params.musiman;
+    if (params.jarak) clean.jarak = params.jarak;
     router.get('/destinasi', clean, { preserveState: true, replace: true });
 }
 
@@ -162,7 +171,8 @@ export default function DestinasiFilter({
         !!filter.urut ||
         !!filter.min_rating ||
         !!filter.harga ||
-        !!filter.musiman;
+        !!filter.musiman ||
+        !!filter.jarak;
 
     function handleKataKunci(value: string) {
         setKataKunci(value);
@@ -195,6 +205,10 @@ export default function DestinasiFilter({
 
     function handleMusiman(musiman: string) {
         applyFilter({ ...filter, musiman });
+    }
+
+    function handleJarak(jarak: string) {
+        applyFilter({ ...filter, jarak });
     }
 
     function handleReset() {
@@ -266,6 +280,13 @@ export default function DestinasiFilter({
                 onChange={handleHarga}
                 options={HARGA_OPTIONS}
                 placeholder="Semua Harga"
+            />
+
+            <FilterDropdown
+                value={filter.jarak ?? ''}
+                onChange={handleJarak}
+                options={JARAK_OPTIONS}
+                placeholder="± Semua Jarak"
             />
 
             <FilterDropdown

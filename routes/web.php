@@ -22,6 +22,7 @@ use App\Http\Controllers\JejakAiController;
 use App\Http\Controllers\KlaimController;
 use App\Http\Controllers\KunjunganController;
 use App\Http\Controllers\NotifikasiController;
+use App\Http\Controllers\PenggunaController as PublikPenggunaController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\RuteController;
 use App\Http\Controllers\RuteFavoritController;
@@ -97,6 +98,9 @@ Route::middleware('auth')->prefix('destinasi/{destinasi:id}')->name('klaim.')->g
     Route::get('/klaim', [KlaimController::class, 'formulir'])->name('formulir');
     Route::post('/klaim', [KlaimController::class, 'simpan'])->name('simpan');
 });
+
+// Profil publik pengguna
+Route::get('/pengguna/{user:id}', [PublikPenggunaController::class, 'tampilkan'])->name('pengguna.tampilkan');
 
 // Follow
 Route::middleware('auth')->prefix('pengguna/{user}')->name('follow.')->group(function () {
