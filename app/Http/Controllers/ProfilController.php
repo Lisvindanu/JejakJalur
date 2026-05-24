@@ -89,6 +89,8 @@ class ProfilController extends Controller
             'bookmarks' => $bookmarks,
             'kunjungan' => $kunjungan,
             'ruteFavorit' => $ruteFavorit,
+            'jumlah_following' => $pengguna->following()->count(),
+            'jumlah_followers' => $pengguna->followers()->count(),
         ]);
     }
 

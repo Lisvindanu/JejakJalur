@@ -15,6 +15,7 @@ use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\DestinasiController;
+use App\Http\Controllers\FollowController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JejakAiController;
 use App\Http\Controllers\KunjunganController;
@@ -86,6 +87,12 @@ Route::middleware('auth')->prefix('profil')->name('profil.')->group(function () 
     Route::get('/edit', [ProfilController::class, 'edit'])->name('edit');
     Route::patch('/', [ProfilController::class, 'perbarui'])->name('perbarui');
     Route::delete('/', [ProfilController::class, 'hapus'])->name('hapus');
+});
+
+// Follow
+Route::middleware('auth')->prefix('pengguna/{user}')->name('follow.')->group(function () {
+    Route::post('/ikuti', [FollowController::class, 'ikuti'])->name('ikuti');
+    Route::delete('/ikuti', [FollowController::class, 'berhenti'])->name('berhenti');
 });
 
 // Notifikasi
