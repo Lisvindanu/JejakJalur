@@ -109,16 +109,15 @@ class DestinasiService
 
     public function destinasiTrending(int $jumlah = 6): Collection
     {
-        $cutoff = now()->subDays(7);
+        $cutoff = now()->subDays(7)->toDateTimeString();
 
         return Destinasi::with('stasiun.kota')
             ->verified()
-            ->withCount([
-                'ulasan as ulasan_7hari' => fn ($q) => $q->where('ulasan.created_at', '>=', $cutoff),
-                'bookmarks as bookmark_7hari' => fn ($q) => $q->where('bookmarks.created_at', '>=', $cutoff),
-                'kunjungan as kunjungan_7hari' => fn ($q) => $q->where('kunjungan.created_at', '>=', $cutoff),
-            ])
-            ->orderByRaw('(ulasan_7hari * 0.5 + bookmark_7hari * 0.3 + kunjungan_7hari * 0.2) DESC')
+            ->orderByRaw('(
+                (SELECT COUNT(*) FROM ulasan WHERE destinasi.id = ulasan.destinasi_id AND ulasan.created_at >= ?) * 0.5 +
+                (SELECT COUNT(*) FROM bookmarks WHERE destinasi.id = bookmarks.destinasi_id AND bookmarks.created_at >= ?) * 0.3 +
+                (SELECT COUNT(*) FROM kunjungan WHERE destinasi.id = kunjungan.destinasi_id AND kunjungan.created_at >= ?) * 0.2
+            ) DESC', [$cutoff, $cutoff, $cutoff])
             ->limit($jumlah)
             ->get();
     }
