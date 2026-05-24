@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfilRequest;
 use App\Services\FotoService;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -19,6 +20,7 @@ class ProfilController extends Controller
         $jumlah_ulasan = $pengguna->ulasan()->count();
         $rata_rata_rating = $pengguna->ulasan()->avg('rating');
         $jumlah_destinasi_diulas = $pengguna->ulasan()->distinct('destinasi_id')->count('destinasi_id');
+        $streak_ulasan = $this->hitungStreakUlasan($pengguna);
 
         $ulasan = $pengguna->ulasan()
             ->with('destinasi:id,nama,kategori,foto,stasiun_id')
@@ -77,11 +79,42 @@ class ProfilController extends Controller
             'jumlah_ulasan' => $jumlah_ulasan,
             'rata_rata_rating' => $rata_rata_rating ? round($rata_rata_rating, 1) : null,
             'jumlah_destinasi_diulas' => $jumlah_destinasi_diulas,
+            'streak_ulasan' => $streak_ulasan,
             'ulasan' => $ulasan,
             'bookmarks' => $bookmarks,
             'kunjungan' => $kunjungan,
             'ruteFavorit' => $ruteFavorit,
         ]);
+    }
+
+    private function hitungStreakUlasan(mixed $pengguna): int
+    {
+        $months = $pengguna->ulasan()
+            ->orderBy('created_at')
+            ->pluck('created_at')
+            ->map(fn ($d) => $d->format('Y-m'))
+            ->unique()
+            ->sort()
+            ->values();
+
+        if ($months->isEmpty()) {
+            return 0;
+        }
+
+        $latest = Carbon::createFromFormat('Y-m', $months->last())->startOfMonth();
+        $streak = 1;
+
+        for ($i = $months->count() - 2; $i >= 0; $i--) {
+            $month = Carbon::createFromFormat('Y-m', $months[$i])->startOfMonth();
+            if ($latest->diffInMonths($month) === 1) {
+                $streak++;
+                $latest = $month;
+            } else {
+                break;
+            }
+        }
+
+        return $streak;
     }
 
     public function edit(): Response

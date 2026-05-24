@@ -3,6 +3,7 @@ import {
     IconBookmark,
     IconBookmarkFilled,
     IconCheck,
+    IconFlame,
     IconLayoutDashboard,
     IconLoader2,
     IconMapPin,
@@ -49,6 +50,7 @@ interface Props {
     jumlah_ulasan?: number;
     rata_rata_rating?: number | null;
     jumlah_destinasi_diulas?: number;
+    streak_ulasan?: number;
     ulasan?: PaginatedData<UlasanProfil>;
     bookmarks?: PaginatedData<BookmarkProfil>;
     kunjungan?: PaginatedData<KunjunganProfil>;
@@ -337,6 +339,7 @@ export default function Tampilkan({
     jumlah_ulasan = 0,
     rata_rata_rating = null,
     jumlah_destinasi_diulas = 0,
+    streak_ulasan = 0,
     ulasan,
     bookmarks,
     kunjungan,
@@ -458,7 +461,7 @@ export default function Tampilkan({
                         </div>
 
                         {/* Stats row */}
-                        <div className="mt-6 grid grid-cols-2 gap-4 border-t border-stone-100 pt-6 sm:grid-cols-3">
+                        <div className="mt-6 grid grid-cols-2 gap-4 border-t border-stone-100 pt-6 sm:grid-cols-4">
                             <StatItem
                                 icon={<IconPencil size={18} />}
                                 value={jumlah_ulasan}
@@ -478,6 +481,20 @@ export default function Tampilkan({
                                 value={jumlah_destinasi_diulas}
                                 label="Destinasi diulas"
                             />
+                            <div className="flex items-center gap-3">
+                                <span className={`inline-flex h-10 w-10 items-center justify-center rounded-lg ${streak_ulasan >= 3 ? 'bg-orange-50 text-orange-600' : 'bg-emerald-50 text-emerald-700'}`}>
+                                    <IconFlame size={18} />
+                                </span>
+                                <div>
+                                    <div className="text-xl font-bold text-stone-900 tabular-nums">
+                                        {streak_ulasan}
+                                        <span className="ml-1 text-sm font-normal text-stone-400">bln</span>
+                                    </div>
+                                    <div className="text-xs text-stone-500">
+                                        {streak_ulasan >= 6 ? 'Streak luar biasa!' : streak_ulasan >= 3 ? 'Streak aktif' : 'Streak ulasan'}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
