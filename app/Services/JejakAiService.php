@@ -72,7 +72,7 @@ class JejakAiService
 
         while ($attempts < $maxAttempts) {
             try {
-                $response = Http::timeout(30)
+                $response = Http::timeout(15)
                     ->withToken($this->currentKey())
                     ->post($this->endpoint, [
                         'model' => $this->model,
