@@ -46,7 +46,7 @@ class UlasanService
             $pemilik->notify(new UlasanBaruNotification($ulasan));
         }
 
-        return $ulasan->fresh();
+        return $ulasan->fresh() ?? $ulasan;
     }
 
     public function perbaruiUlasan(Ulasan $ulasan, array $data, User $pengguna): Ulasan
